@@ -342,6 +342,7 @@ end
    workforce_proportion::Array{Float64,1} = [0.030, 0.127, 0.311, 0.532]
    workplace_size_mean::Array{Float64,1} = [6., 9., 11., 10.]
    workplace_size_sd::Array{Float64,1} = [14., 57., 122., 109. ]
+   workplace_size_gen_fn::Function = workplace_size_sampled_from_empirical_pmf
 end
 
 @with_kw mutable struct sim_outputs

@@ -4,7 +4,6 @@ Functions to produce the network layers
 
 - generate_workplaces_and_allocate_workers (Give workplace to each worker)
 - generate_contacts                        (Generate the networks)
-- CS_workplace_generation!                 (Covid-secure workplace generation)
 - configuration_model!                     (Network construction using configuration model)
 - ER_model!                                (Network construction using erdos-renyi)
 - generate_dynamic_worker_contacts         (Premake dynamic worker contacts,
@@ -25,7 +24,7 @@ function generate_workplaces_and_allocate_workers(cmax::Int64,
     rng = MersenneTwister(RNGseed)
 
     # Get workplace params based on number of work sectors in use
-    @unpack workertypes, workpercent, workforce_proportion, workplace_size_mean, workplace_size_sd = workplace_generation_parameters
+    @unpack workertypes, workpercent, workforce_proportion, workplace_size_mean, workplace_size_sd, workplace_size_gen_fn = workplace_generation_parameters
 
     # total number of workers in each worker type
     worker_numbers = [round(Int64,cmax*workforce_proportion[i]) for i=1:length(workforce_proportion)]
@@ -67,8 +66,9 @@ function generate_workplaces_and_allocate_workers(cmax::Int64,
             # Update workplace number counter
             workplace_count += 1
 
-            # generate workplace of random size and add to array
-            push!(workplace_sizes[worker_grp_idx], ceil(Int64,abs(randn(rng)*workplace_size_sd[worker_grp_idx]+workplace_size_mean[worker_grp_idx])))
+            # generate workplace sizes and add to array
+            # For workplace_size_gen_fn options, see "include_files_network_model/workplace_size_generation_fns.jl"
+            push!(workplace_sizes[worker_grp_idx], workplace_size_gen_fn(rng,worker_grp_idx,workplace_generation_parameters))
             append!(workplace_ids[worker_grp_idx], repeat([workplace_count], workplace_sizes[worker_grp_idx][end]))
 
             # Add empty workplace to nodes_by_workplace array
@@ -1616,89 +1616,6 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
     return workday_social_contacts_by_day::Array{Array{Int64,1},2},
             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
 end
-
-
-
-# # Premake dynamic worker contacts,
-# # to be loaded in ahead of simulation
-# function generate_social_contacts_each_day(rng::MersenneTwister,
-#                                             RNGseed::Int64,
-#                                             cmax::Int64,
-#                                             endtime::Int64,
-#                                             social_contacts::Array{Array{Int64,1},1},
-#                                             social_contacts_per_node::Array{Int64,1},
-#                                             social_workday_dd::Distribution,
-#                                             social_nonworkday_dd::Distribution)
-# # Inputs:
-# # RNGseed - Seed the random number generator
-# # cmax - Number of nodes in the system
-# # endtime - Number of timesteps simulation will run for
-# # social_contacts - array of arrays containing all possible social contacts for each individual
-# # social_contacts_per_node - Total amount of social contacts each individual has (entry per individual)
-# # n_social_mean_workday, n_social_mean_nonworkday - Distribution properties (mean value of Poisson) for social worker contacts
-#
-# # Outputs:
-# # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
-# #       - Per node, a record of social contacts made on each day
-#
-#     """
-#     Set the RNG
-#     """
-#     rng = MersenneTwister(RNGseed)
-#
-#     """
-#     Initialise vector of vectors storing IDs of contacts for each node
-#     """
-#     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
-#     nonworkday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
-#
-#     """
-#     Iterate over all nodes
-#     For those potentially have social contacts,
-#     assign a sample of those contacts for each timestep
-#     """
-#     for node_itr = 1:cmax
-#
-#         # Add in social contacts if possible
-#         if social_contacts_per_node[node_itr] > 0
-#
-#             # Social contacts may differ each day
-#             for time_itr = 1:endtime
-#
-#                 # Draw random number of social links to be made today, limited to whole friend group
-#                 n_social_workday = min(round(Int64, Distributions.rand(rng, social_workday_dd)), social_contacts_per_node[node_itr])
-#                 n_social_nonworkday = min(round(Int64, Distributions.rand(rng, social_nonworkday_dd)), social_contacts_per_node[node_itr])
-#
-#                 if n_social_workday >0
-#                     workday_social_contacts_by_day[time_itr,node_itr] = zeros(n_social_workday)
-#
-#                     for wd_social_it = 1:n_social_workday
-#                         wd_contact_idx = ceil(Int64, rand(rng)*social_contacts_per_node[node_itr])
-#                         workday_social_contacts_by_day[time_itr,node_itr][wd_social_it] = social_contacts[node_itr][wd_contact_idx]
-#                     end
-#                 else
-#                     workday_social_contacts_by_day[time_itr,node_itr] = Int64[]
-#                 end
-#
-#                 if n_social_nonworkday >0
-#                     nonworkday_social_contacts_by_day[time_itr,node_itr] = zeros(n_social_nonworkday)
-#
-#                     for nwd_social_it = 1:n_social_nonworkday
-#                         nwd_contact_idx = ceil(Int64, rand(rng)*social_contacts_per_node[node_itr])
-#                         nonworkday_social_contacts_by_day[time_itr,node_itr][nwd_social_it] = social_contacts[node_itr][nwd_contact_idx]
-#                     end
-#                 else
-#                     nonworkday_social_contacts_by_day[time_itr,node_itr] = Int64[]
-#                 end
-#             end
-#
-#         end
-#     end
-#
-#     return workday_social_contacts_by_day::Array{Array{Int64,1},2},
-#             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
-# end
-
 
 """
 Functions for use with Erdos-Renyi network construction

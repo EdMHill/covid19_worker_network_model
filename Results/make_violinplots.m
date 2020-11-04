@@ -19,6 +19,11 @@ workpercent_data = load('worker_model_output_workpercent_intervention_combined.m
 % Backwards CT
 backwards_CT_data = load('worker_model_output_amount_backwards_CT_intervention_combined.mat');
 
+% Synchronised
+synch_data = load('worker_model_output_synchronised_changedays_intervention_combined.mat');
+
+% Non-synchronised
+asynch_data = load('worker_model_output_variable_changedays_intervention_combined.mat');
 
 %% Specify global params
 
@@ -32,35 +37,49 @@ if strcmp(variablename,'final_size')
     adherence_final_size = squeeze(adherence_data.numinf_combined(end,:,:) - adherence_data.numinf_combined(offset_idx,:,:));
     workpercent_final_size = squeeze(workpercent_data.numinf_combined(end,:,:) - workpercent_data.numinf_combined(offset_idx,:,:));
     backwards_CT_final_size = squeeze(backwards_CT_data.numinf_combined(end,:,:) - backwards_CT_data.numinf_combined(offset_idx,:,:));
+    synch_final_size = squeeze(synch_data.numinf_combined(end,:,:) - synch_data.numinf_combined(offset_idx,:,:));
+    asynch_final_size = squeeze(asynch_data.numinf_combined(end,:,:) - asynch_data.numinf_combined(offset_idx,:,:));
     
     % Proportion of infections from day 30 onwards (i.e. timestep 31)
     adherence_input_data = adherence_final_size/cmax;
     workpercent_input_data = workpercent_final_size/cmax;
     backwards_CT_input_data = backwards_CT_final_size/cmax;
+    synch_input_data = synch_final_size/cmax;
+    asynch_input_data = asynch_final_size/cmax;
 elseif strcmp(variablename,'peak_inf')
     % Peak proportion new infections
     adherence_input_data = squeeze(max(adherence_data.newinf_combined))/cmax;
     workpercent_input_data = squeeze(max(workpercent_data.newinf_combined))/cmax;
     backwards_CT_input_data = squeeze(max(backwards_CT_data.newinf_combined))/cmax;
+    synch_input_data = squeeze(max(synch_data.newinf_combined))/cmax;
+    asynch_input_data = squeeze(max(asynch_data.newinf_combined))/cmax;
 elseif strcmp(variablename,'total_isolation')
     % total number of isolation-days from day 30 onwards (i.e. timestep 31)
     offset_idx = 31;
     adherence_input_data = squeeze(sum(adherence_data.num_isolating_combined(offset_idx:end,:,:)));
     workpercent_input_data = squeeze(sum(workpercent_data.num_isolating_combined(offset_idx:end,:,:)));
     backwards_CT_input_data = squeeze(sum(backwards_CT_data.num_isolating_combined(offset_idx:end,:,:)));
+    synch_input_data = squeeze(sum(synch_data.num_isolating_combined(offset_idx:end,:,:)));
+    asynch_input_data = squeeze(sum(asynch_data.num_isolating_combined(offset_idx:end,:,:)));
 elseif strcmp(variablename,'peak_isolation')
     % peak number isolating
     adherence_input_data = squeeze(max(adherence_data.num_isolating_combined))/cmax;
     workpercent_input_data = squeeze(max(workpercent_data.num_isolating_combined))/cmax;
     backwards_CT_input_data = squeeze(max(backwards_CT_data.num_isolating_combined))/cmax;
+    synch_input_data = squeeze(max(synch_data.num_isolating_combined))/cmax;
+    asynch_input_data = squeeze(max(asynch_data.num_isolating_combined))/cmax;
 elseif strcmp(variablename,'duration')
     % outbreak duration
     adherence_data.prev = adherence_data.prevpresymp_combined + adherence_data.prevasymp_combined + adherence_data.prevsymp_combined;
     workpercent_data.prev = workpercent_data.prevpresymp_combined + workpercent_data.prevasymp_combined + workpercent_data.prevsymp_combined;
     backwards_CT_data.prev = backwards_CT_data.prevpresymp_combined + backwards_CT_data.prevasymp_combined + backwards_CT_data.prevsymp_combined;
+    synch_data.prev = synch_data.prevpresymp_combined + synch_data.prevasymp_combined + synch_data.prevsymp_combined;
+    asynch_data.prev = asynch_data.prevpresymp_combined + asynch_data.prevasymp_combined + asynch_data.prevsymp_combined;
     adherence_input_data = zeros(size(squeeze(adherence_data.prev(1,:,:))));
     workpercent_input_data = zeros(size(squeeze(workpercent_data.prev(1,:,:))));
     backwards_CT_input_data = zeros(size(squeeze(backwards_CT_data.prev(1,:,:))));
+    synch_input_data = zeros(size(squeeze(synch_data.prev(1,:,:))));
+    asynch_input_data = zeros(size(squeeze(asynch_data.prev(1,:,:))));
     for i = 1:length(adherence_data.numinf_combined(1,:,1))
         for j = 1:length(adherence_data.numinf_combined(1,1,:))
 %             adherence_input_data(i,j) = find(adherence_data.numinf_combined(:,i,j)>0,1,'last');
@@ -75,7 +94,12 @@ elseif strcmp(variablename,'duration')
             workpercent_input_data(i,j) = find(workpercent_data.prev(:,i,j)>0,1,'last');
         end
     end
-    
+    for i = 1:length(synch_data.numinf_combined(1,:,1))
+        for j = 1:length(synch_data.numinf_combined(1,1,:))
+            synch_input_data(i,j) = find(synch_data.prev(:,i,j)>0,1,'last');
+            asynch_input_data(i,j) = find(asynch_data.prev(:,i,j)>0,1,'last');
+        end
+    end
 end
 
 %% Adherence sensitivity
@@ -156,8 +180,54 @@ elseif strcmp(dataset,'workpercent_and_backwardsCT')==1
     propn_plot_type = false;
     
     % Set legend variables
-    display_legend = true;
+    if strcmp(variablename,'final_size')
+        display_legend = true;
+    else
+        display_legend = false;
+    end
     legend_label = {'Working from home','Backward contact tracing: Infector identified'};
+elseif strcmp(dataset,'worker_patterns')==1
+    %% Synch & asynch worker pattern comparison
+    
+    % Specify input data
+    input_data = {synch_input_data,asynch_input_data};
+    
+    % Set plot style
+    plot_style = 'violin';
+    %plot_style = 'boxplot';
+    
+    % Set colour for violin plots
+    colour_vec = [0.4 0 0;
+        0.2 0.8 0.8
+        ];
+    
+    % Set x-axis label
+    xaxis_label = 'Days per week at the workplace';
+    
+    % Set up xticks
+    xticks_vals = 0:1:5;
+    xticks_labels = {'0','1','2','3','4','5'};
+    
+    % Set up xaxis limits
+    xlim_vals = [-0.5 5.5];
+    ylim_vals = [0 max(input_data{1}(:))*1.05];
+    
+    % Set filename prefix
+    save_filename_initial = ['worker_pattern_plots/worker_model_sens_worker_patterns_',variablename];
+    
+    % Set plot fontsize
+    plot_fontsize = 26;
+    
+    % Call function to produce plots
+    propn_plot_type = false;
+    
+    % Set legend variables
+    if strcmp(variablename,'final_size')
+        display_legend = true;
+    else
+        display_legend = false;
+    end
+    legend_label = {'Synchronised','Asynchronised'};
 end
 
 % Set up y-axis labels per statistic.
@@ -209,7 +279,8 @@ generate_sensitivity_plot(input_data,...
         display_legend,...
         legend_label,...
         save_filename_initial,...
-        plot_fontsize)
+        plot_fontsize,...
+        dataset)
 end
 
 %% Function to generate the violin/boxplots plots
@@ -226,7 +297,8 @@ function generate_sensitivity_plot(input_data,...
         display_legend,...
         legend_label,...
         save_filename_prefix,...
-        plot_fontsize)
+        plot_fontsize,....
+        dataset)
     
     if ispc==1
         scale = 1/0.75;
@@ -249,7 +321,14 @@ function generate_sensitivity_plot(input_data,...
     for inf_itr = 1:n_input_data_batches
         
         % Set violin plotting properties
-        if n_input_data_batches == 2
+        if (n_input_data_batches == 2) && (strcmp(dataset,'worker_patterns')==1)
+            if inf_itr == 1
+                x_offset = -0.15;
+            else
+                x_offset = 0.15;
+            end
+            violin_width = 0.1;
+        elseif (n_input_data_batches == 2) && (strcmp(dataset,'workpercent_and_backwardsCT')==1)
             if inf_itr == 1
                 x_offset = -0.2;
             else
@@ -340,9 +419,13 @@ function generate_sensitivity_plot(input_data,...
             H(data_itr) = fill(NaN,NaN,colour_vec(data_itr,:),...
                                 'DisplayName',legend_label{data_itr});
         end
-        legend(H,...
+        leg = legend(H,...
                 'LineWidth',1.5,...
-                'FontSize',floor(plot_fontsize))
+                'FontSize',floor(plot_fontsize));
+        
+            if (strcmp(dataset,'worker_patterns')==1)
+                set(leg,'Location','northwest')
+            end
     end
     
     

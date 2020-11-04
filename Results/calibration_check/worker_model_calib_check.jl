@@ -8,7 +8,7 @@ cd(dirname(@__FILE__))
 
 #Load environment
 using Pkg
-Pkg.activate("../../")
+Pkg.activate("../../../")
 
 using Plots, MAT, LinearAlgebra, Statistics
 
@@ -40,13 +40,13 @@ for svty_itr = 1:length(svty_variables)
     # Load sensitivity output file
     if (variable_name == "RNGseed") || (variable_name == "mawidth")
         #file=matopen("../uni_model_infection_output_run_no_interventions.mat","r")
-        file=matopen("../worker_model_output_RNGseed_svty_#1.mat","r")
+        file=matopen("../worker_model_output_RNGseed_svty_#2.mat","r")
     elseif (variable_name == "trans_risk_no_interv")
         file=matopen("../worker_model_output_run_one_run_#1.mat","r")
     elseif (variable_name =="suscep_scale_no_interv")
         file=matopen("../worker_model_output_transscaling_svty_#1.mat","r")
     elseif (variable_name == "baseline_no_interv")
-        file=matopen("../worker_model_output_run_one_run_#2.mat","r")
+        file=matopen("../worker_model_output_run_one_run_#1.mat","r")
     end
     Rt_unfiltered = read(file,"Rt_save")
     GT_init = read(file,"mean_init_generation_time_save")
@@ -323,7 +323,9 @@ for svty_itr = 1:length(svty_variables)
             p5 = histogram(outbreak_duration,
                             legend=false,
                             xlabel="Duration",
-                            normed=true)
+                            normalize = :probability,
+                            widen=false,
+                            framestyle = :box)
 
             # New infections in each transmission setting over time
             p6 = plot(0:n_timesteps-1,mean(transmission_setting[:,:,:,:,var_itr],dims=2)[1:n_timesteps,1,1,:],

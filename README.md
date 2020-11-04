@@ -9,6 +9,9 @@ Julia makes use of environments, allowing bespoke package lists for separate pro
 
 Please find below an explainer of the directory structure within this repository.
 
+## Data
+Directory containing workplace size data
+
 ## Results
 Directory to store simulation outputs and plot scripts.
 
@@ -80,3 +83,6 @@ Houses function files to be used when running the uni model.
 
 - **parametertypes.jl**  
     Defines the parameter types used with the network model for workers. Fields accessible with dot notation. Example using type worker_params, with a variable named worker_nodes. worker_nodes.sector_ID accesses the value in the sector_ID field.    
+
+- **workplace_size_generation_fns.jl**  
+    Functions to generate workplace sizes for a given number of work sectors

@@ -30,6 +30,7 @@ Load supporting files
 include("include_files_network_model/parametertypes.jl")
 include("include_files_network_model/contact_tracing_fns.jl")
 include("include_files_network_model/network_generation_fns.jl")
+include("include_files_network_model/workplace_size_generation_fns.jl")
 include("include_files_network_model/additional_fns.jl")
 include("include_files_network_model/intervention_condition_affect_fns.jl")
 include("include_files_network_model/seed_initial_states_fns.jl")

@@ -73,6 +73,15 @@ end
 % Set up plot colours
 grey_colour_vec = [0.5 0.5 0.5];
 
+% Set y-axis values
+if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))
+    ytick_vals = [0,0.05,0.10,0.15];
+elseif (strcmp(variablename,'isol_prevalence')) && (strcmp(dataset,'COVID_secure'))
+    ytick_vals = [0 0.0002 0.0004  0.0006 0.0008 0.001];
+elseif (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure_no_isol'))
+    ytick_vals = [0,0.05,0.10,0.15];
+end
+
 % Set up plot
 position = [10, 10, 3.5*550, 4.5*450];
 set(0, 'DefaultFigurePosition', position);
@@ -101,7 +110,7 @@ for row_itr = 1:plot_nRows
         fill([x_vals(1:x_cutoff) x_vals(x_cutoff:-1:1)], [CS_temporal_data_prctiles(1:x_cutoff,2,array_idx); CS_temporal_data_prctiles(x_cutoff:-1:1,3,array_idx)],'r','FaceColor',1-0.7*(1-grey_colour_vec),'EdgeColor','none');
 
         % Plot traces up to day x_cutoff
-        plot(1:1:x_cutoff,CS_temporal_data_median(1:x_cutoff,array_idx),'Linewidth',1.5,'Color',grey_colour_vec)
+        plot(x_vals(1:x_cutoff),CS_temporal_data_median(1:x_cutoff,array_idx),'Linewidth',1.5,'Color',grey_colour_vec)
 
         % Fill the prediction intervals after day x_cutoff
         % 99%. 90% & 50%
@@ -115,6 +124,9 @@ for row_itr = 1:plot_nRows
         %Specify axes properties
         xlim(xlim_vals)
         ylim(ylim_vals)
+        
+         % Set y-axis ticks
+         yticks(ytick_vals)
 
         % Set axes labels
 %         if row_itr == plot_nRows
@@ -141,50 +153,54 @@ for row_itr = 1:plot_nRows
     end
 end
 
-if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))         
+% Set headers and yticks
+if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))
+ 
     % Set up column headers
-    text(-480,0.65,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
-    text(-218,0.65,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
-    text(40,0.65,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
-
-    % Set up row headers
-    text(268,0.50,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.60,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.43,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.25,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.08,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-
-    % Set up axis labels
-    text(-566,0.205,yaxis_label,'FontSize',plot_fontsize,'FontWeight','bold','Rotation',90)
-    text(-193,-0.05,'Time (Days)','FontSize',plot_fontsize,'FontWeight','bold')
-elseif (strcmp(variablename,'isol_prevalence')) && (strcmp(dataset,'COVID_secure'))   
-    % Set up column headers
-    text(-480,0.0058,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
-    text(-218,0.0058,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
-    text(40,0.0058,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
-
-    % Set up row headers
-    text(268,0.0045,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.00525,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.00375,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.00225,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.0006,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-
-    % Set up axis labels
-    text(-560,0.00205,yaxis_label,'FontSize',plot_fontsize,'FontWeight','bold','Rotation',90)
-    text(-193,-0.0004,'Time (Days)','FontSize',plot_fontsize,'FontWeight','bold')
-elseif (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure_no_isol'))         
-    % Set up column headers
-    text(-480,0.8,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
-    text(-218,0.8,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
-    text(40,0.8,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
+    text(-480,0.82,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
+    text(-218,0.82,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
+    text(40,0.82,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
 
     % Set up row headers
     text(268,0.65,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
     text(228,0.75,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.525,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.3,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
-    text(228,0.1,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.53,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.32,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.10,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+
+    % Set up axis labels
+    text(-566,0.3,yaxis_label,'FontSize',plot_fontsize,'FontWeight','bold','Rotation',90)
+    text(-193,-0.05,'Time (Days)','FontSize',plot_fontsize,'FontWeight','bold')
+elseif (strcmp(variablename,'isol_prevalence')) && (strcmp(dataset,'COVID_secure'))      
+    
+    % Set up column headers
+    text(-480,0.0062,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
+    text(-218,0.0062,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
+    text(40,0.0062,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
+
+    % Set up row headers
+    text(268,0.0048,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.0057,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.0041,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.0024,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.00068,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+
+    % Set up axis labels
+    text(-560,0.00205,yaxis_label,'FontSize',plot_fontsize,'FontWeight','bold','Rotation',90)
+    text(-193,-0.0004,'Time (Days)','FontSize',plot_fontsize,'FontWeight','bold')
+elseif (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure_no_isol'))             
+    
+    % Set up column headers
+    text(-480,0.95,'Work team size: 2','FontSize',plot_fontsize,'FontWeight','bold')
+    text(-218,0.95,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','bold')
+    text(40,0.95,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
+
+    % Set up row headers
+    text(268,0.75,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.86,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.62,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.37,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+    text(228,0.12,'1.00','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
 
     % Set up axis labels
     text(-566,0.28,yaxis_label,'FontSize',plot_fontsize,'FontWeight','bold','Rotation',90)
