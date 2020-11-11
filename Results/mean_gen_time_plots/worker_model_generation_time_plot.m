@@ -7,7 +7,7 @@ clear variables
 
 %% Load data
 
-load('../worker_model_output_RNGseed_svty_#2.mat','mean_init_generation_time_save')
+load('../worker_model_output_RNGseed_svty_#1.mat','mean_init_generation_time_save')
 
 % Put into 2D array. Row by replicate, column by RNGseed
 mean_init_gen_time_data = squeeze(mean_init_generation_time_save);
@@ -65,13 +65,13 @@ for config_itr = 1:n_configs
     
     % Add a text box with value of median line
     txt = num2str(med_val,'%.2f');
-    text(med_val+0.5,19,txt,'Color',[0.8 0. 0.],'Fontsize',20)
+    text(med_val+0.5,24,txt,'Color',[0.8 0. 0.],'Fontsize',26)
     
     % Set y limit
-    ylim([0 20])
+    ylim([0 25])
 
     %Specify general axis properties
-    set(gca,'FontSize',20)
+    set(gca,'FontSize',26)
     set(gca,'LineWidth',1)
     box on
 end

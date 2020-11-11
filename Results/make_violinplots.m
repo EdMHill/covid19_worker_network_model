@@ -1,5 +1,5 @@
 % PURPOSE:
-% Make violin plots/box plots for number of infection post day 30
+% Make violin plots
 %--------------------------------------------------------------------------
 
 % clear variables
@@ -32,15 +32,15 @@ cmax = 10000;
 
 %% Compute desired summary statistics
 if strcmp(variablename,'final_size')
-    % Number of infections from day 30 onwards (i.e. timestep 31)
-    offset_idx = 31;
+    % Number of infections from day 15 onwards (i.e. timestep 16)
+    offset_idx = 16;
     adherence_final_size = squeeze(adherence_data.numinf_combined(end,:,:) - adherence_data.numinf_combined(offset_idx,:,:));
     workpercent_final_size = squeeze(workpercent_data.numinf_combined(end,:,:) - workpercent_data.numinf_combined(offset_idx,:,:));
     backwards_CT_final_size = squeeze(backwards_CT_data.numinf_combined(end,:,:) - backwards_CT_data.numinf_combined(offset_idx,:,:));
     synch_final_size = squeeze(synch_data.numinf_combined(end,:,:) - synch_data.numinf_combined(offset_idx,:,:));
     asynch_final_size = squeeze(asynch_data.numinf_combined(end,:,:) - asynch_data.numinf_combined(offset_idx,:,:));
     
-    % Proportion of infections from day 30 onwards (i.e. timestep 31)
+    % Proportion of infections from day 15 onwards (i.e. timestep 16)
     adherence_input_data = adherence_final_size/cmax;
     workpercent_input_data = workpercent_final_size/cmax;
     backwards_CT_input_data = backwards_CT_final_size/cmax;
@@ -54,8 +54,8 @@ elseif strcmp(variablename,'peak_inf')
     synch_input_data = squeeze(max(synch_data.newinf_combined))/cmax;
     asynch_input_data = squeeze(max(asynch_data.newinf_combined))/cmax;
 elseif strcmp(variablename,'total_isolation')
-    % total number of isolation-days from day 30 onwards (i.e. timestep 31)
-    offset_idx = 31;
+    % total number of isolation-days from day 15 onwards (i.e. timestep 16)
+    offset_idx = 16;
     adherence_input_data = squeeze(sum(adherence_data.num_isolating_combined(offset_idx:end,:,:)));
     workpercent_input_data = squeeze(sum(workpercent_data.num_isolating_combined(offset_idx:end,:,:)));
     backwards_CT_input_data = squeeze(sum(backwards_CT_data.num_isolating_combined(offset_idx:end,:,:)));
@@ -140,7 +140,42 @@ if strcmp(dataset,'adherence')==1
     % Do not display a legend
     display_legend = false;
     legend_label = {};
+elseif strcmp(dataset,'workpercent')==1
+    % Set the scenario name
+    scen_name = "workpercent";
     
+    % Specify input data
+    input_data = {workpercent_input_data};
+    
+    % Set plot style
+    plot_style = 'violin';
+    
+    % Set colour for violin plots
+    colour_vec = [1 0.7 0.7];
+    
+    % Set x-axis label
+    xaxis_label = 'Proportion';
+    
+    % Set up xticks
+    xticks_vals = 0:1:11;
+    xticks_labels = {'0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','N-U'};
+    
+    % Set up xaxis limits
+    xlim_vals = [-0.5 11.5];
+    ylim_vals = [0 max(input_data{1}(:))*1.05];
+    
+    % Set filename prefix
+    save_filename_initial = ['workpercent_plots/worker_model_sens_workpercent_',variablename];
+    
+    % Set plot fontsize
+    plot_fontsize = 26;
+    
+    % Call function to produce plots
+    propn_plot_type = false;
+    
+    % Do not display a legend
+    display_legend = false;
+    legend_label = {};
 elseif strcmp(dataset,'workpercent_and_backwardsCT')==1
     %% Workpercent and backwards CT comparison
     

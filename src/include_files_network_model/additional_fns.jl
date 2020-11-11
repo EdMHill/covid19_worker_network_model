@@ -246,13 +246,14 @@ iso_trans_scaling = 1.
 CT_engagement = 1.
 
 # Set defaults for sensitivity configs
-trans_scaling = [0.4,0.4,0.4,0.4,0.4]
+trans_scaling = [0.8,0.8,0.8,0.8,0.8]
 adherence = 0.
 clustering = [0.05, 0.5]
 CS_team_size = 2
 
 # Initialise empty intervention list
 intervention_list = intervention_struct[]
+
 
 # If sameday=0, all workers are at work on the same set of consecutive days.
 # If sameday=1, workers go to work on a random set of consecutive days.
@@ -287,7 +288,13 @@ elseif runset=="amount_backwards_CT"
     prob_backwards_CT_config = [0:0.05:0.5;]
     n_configs = length(prob_backwards_CT_config)
 elseif runset=="run_one_run"
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    adherence = 0.
     n_configs = 1
+    transiso_config = ones(Float64, n_configs)
 elseif runset=="workplace_CT_threshold"
     workplace_CT_threshold_config = [0:0.05:0.5;]
     n_configs = length(workplace_CT_threshold_config)
@@ -302,7 +309,7 @@ elseif runset=="synchronised_changedays_intervention"
     toff_intervention_options = [-1:4;]
     n_int_sets = length(toff_intervention_options)
     intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
-                                            start_time = 30,
+                                            start_time = 15,
                                             sameday = 0,
                                             toff = toff_intervention_options[i],
                                             ton = 0,
@@ -316,7 +323,7 @@ elseif runset=="variable_changedays_intervention"
     toff_intervention_options = [-1:4;]
     n_int_sets = length(toff_intervention_options)
     intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
-                                            start_time = 30,
+                                            start_time = 15,
                                             sameday = 2,
                                             toff = toff_intervention_options[i],
                                             ton = 0,
@@ -344,16 +351,16 @@ elseif runset=="workpercent_intervention"
     workpercent_intervention_options = [1:-0.1:0;]
     n_int_sets = length(workpercent_intervention_options)
     intervention_list_config = [[intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
-                                            start_time = 30,
+                                            start_time = 15,
                                             workpercent = workpercent_intervention_options[i]*ones(workertypes),
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))
                                             ] for i = 1:n_int_sets]
 
     # Add scenario where proportion of each type of worker returning to work is not constant across all sectors
-    work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
+    work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
     intervention_config2 = intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
-                                            start_time = 30,
+                                            start_time = 15,
                                             workpercent = work_percent_config_segment2,
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))
@@ -367,7 +374,7 @@ elseif runset=="amount_backwards_CT_intervention"
     prob_backwards_CT_intervention_options = [0:0.1:1.0;]
     n_int_sets = length(prob_backwards_CT_intervention_options)
     intervention_list_config = [[intervention_struct(effects = ["contact_tracing","adherence"],
-                                                    start_time = 30,
+                                                    start_time = 15,
                                                     CT_parameters = CT_params(contact_tracing_active=true,
                                                                         prob_backwards_CT=prob_backwards_CT_intervention_options[i],
                                                                         CT_engagement=CT_engagement,
@@ -381,7 +388,7 @@ elseif runset=="adherence_intervention"
     adherence_intervention_options = [0:0.1:1;]
     n_int_sets = length(adherence_intervention_options)
     intervention_list_config = [[intervention_struct(effects = ["adherence","contact_tracing"],
-                                            start_time = 30,
+                                            start_time = 15,
                                             adherence = adherence_intervention_options[i],
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))]
@@ -407,7 +414,7 @@ elseif runset=="CS_intervention"
 
             # Set up intervention list
             intervention_list_config[set_idx] = [intervention_struct(effects = ["COVID_secure","adherence","contact_tracing"],
-                                                    start_time = 30,
+                                                    start_time = 15,
                                                     CS_scale_transrisk_scalar = CS_scale,
                                                     CS_team_size_intervention = CS_team_size_interv,
                                                     CT_parameters = CT_params(contact_tracing_active=true,
@@ -438,7 +445,7 @@ elseif runset=="CS_intervention_no_isol"
 
             # Set up intervention list
             intervention_list_config[set_idx] = [intervention_struct(effects = ["COVID_secure"],
-                                                    start_time = 30,
+                                                    start_time = 15,
                                                     CS_scale_transrisk_scalar = CS_scale,
                                                     CS_team_size_intervention = CS_team_size_interv)]
 
@@ -462,12 +469,9 @@ elseif runset=="transscaling_svty"
     ton = 1
     toff = 0
     work_percent = 1.0
-    variable_ops = [[0.3 0.3 0.3 0.3], [0.4 0.4 0.4 0.4], [0.5 0.5 0.5 0.5],
-                    [0.6 0.6 0.6 0.6], [0.7 0.7 0.7 0.7], [0.8 0.8 0.8 0.8],
-                    [0.9 0.9 0.9 0.9], [1 1 1 1 1], [1.1 1.1 1.1 1.1],
-                    [1.2 1.2 1.2 1.2], [1.3 1.3 1.3 1.3], [1.4 1.4 1.4 1.4],
-                    [1.5 1.5 1.5 1.5], [1.6 1.6 1.6 1.6], [1.7 1.7 1.7 1.7],
-                    [1.8 1.8 1.8 1.8], [1.9 1.9 1.9 1.9], [2 2 2 2]]
+    adherence = 0.
+    variable_ops = [[0.6 0.6 0.6 0.6 0.6], [0.7 0.7 0.7 0.7 0.7], [0.8 0.8 0.8 0.8 0.8],
+                    [0.9 0.9 0.9 0.9 0.9], [1 1 1 1 1]]
     n_configs = length(variable_ops)
     transiso_config = ones(Float64, n_configs)
     trans_scaling_config = variable_ops
@@ -645,7 +649,6 @@ end
 if @isdefined(trans_scaling_config)==false
     trans_scaling_config = [trans_scaling for i=1:n_configs]
 end
-
 if @isdefined(adherence_config)==false
     adherence_config = adherence*ones(Int64,n_configs)
 end
@@ -847,7 +850,8 @@ function transmit_over!(transmission_risk::Float64,
 
                 # adjust Rt(t) = mean number of infections generated by nodes that were infected at time t
                 if states.acquired_infection[infecting_by]>0
-                    output.Rt[states.acquired_infection[infecting_by],count,intervention_set_itr] += 1
+                    # Offset time to array indexing. Row 1 of output.Rt is for day 0, Row 2 is for day 1 etc
+                    output.Rt[(states.acquired_infection[infecting_by]+1),count,intervention_set_itr] += 1
                 end
 
                 # if this was from an initial infection, modify the generation time
@@ -946,7 +950,8 @@ function transmit_over_other_workplace!(transmission_risk::Float64,
 
                 # adjust Rt(t) = mean number of infections generated by nodes that were infected at time t
                 if states.acquired_infection[infecting_by]>0
-                    output.Rt[states.acquired_infection[infecting_by],count,intervention_set_itr] += 1
+                    # Offset time to array indexing. Row 1 of output.Rt is for day 0, Row 2 is for day 1 etc
+                    output.Rt[(states.acquired_infection[infecting_by]+1),count,intervention_set_itr] += 1
                 end
 
                 # if this was from an initial infection, modify the generation time

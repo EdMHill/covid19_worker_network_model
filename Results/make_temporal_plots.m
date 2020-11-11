@@ -39,13 +39,13 @@ for i=1:length(data)
         % Isolation prevalence
         temporal_data{i} = (data{i}.num_isolating_combined)/cmax;
     elseif strcmp(variablename,'Rt')
-        % Rt
-        temporal_data{i} = movmean(data{i}.Rt_save_combined,7);
+        % Rt window size
+        Rt_window_size = 7;
+       
+        % Get data
+        Rt_data = data{i}.Rt_save_combined;
+        temporal_data{i} = movmean(Rt_data,Rt_window_size,'omitnan','Endpoints','discard');
     end
-    
-    % remove Inf values
-    temporal_data{i}(isinf(temporal_data{i}))=NaN;
-%     temporal_data{i}(isnan(temporal_data{i}))=1;
     
     % Get quantiles at each timestep across the profiles
     % Entry breakdown: 1 - median, 2&3 - 50% PI, 4&5 - 90% PI, 6&7 - 95%,
@@ -67,7 +67,15 @@ end
 
 % Set up xticks
 x_vals = 0:365;
-x_cutoff = 31;
+x_cutoff = 16;
+if strcmp(variablename,'Rt')
+    if mod(Rt_window_size,2) == 0
+        x_vals_Rt = (floor(Rt_window_size/2)):(365 - floor(Rt_window_size/2)+1);
+    else
+        x_vals_Rt = (floor(Rt_window_size/2)):(365 - floor(Rt_window_size/2));
+    end
+    x_cutoff_Rt = x_cutoff - floor(Rt_window_size/2);
+end
 
 % Set up xaxis limits
 xlim_vals = [0 365];
@@ -97,10 +105,10 @@ for i=1:length(data)
         % Work percent
         % create a default color map ranging from base colour to much
         % lighter
-        num_lines{i} = 8;
+        num_lines{i} = 11;
         basecolour = [0.6 0 0.8];
         white = [1 1 1];
-        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+3)', linspace(basecolour(2),white(2),num_lines{i}+3)', linspace(basecolour(3),white(3),num_lines{i}+3)'];
+        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+2)', linspace(basecolour(2),white(2),num_lines{i}+2)', linspace(basecolour(3),white(3),num_lines{i}+2)'];
         colour_vec{i} = colors_p(1:num_lines{i},:);
     elseif strcmp(dataset{i},'backwards_CT')
         % Backwards contact tracing
@@ -118,7 +126,7 @@ for i=1:length(data)
         num_lines{i} = 6;
         basecolour = [0.4 0 0];
         white = [1 1 1];
-        colors_p = [linspace(basecolour(1),white(1),num_lines{i})', linspace(basecolour(2),white(2),num_lines{i})', linspace(basecolour(3),white(3),num_lines{i})'];
+        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+2)', linspace(basecolour(2),white(2),num_lines{i}+2)', linspace(basecolour(3),white(3),num_lines{i}+2)'];
         colour_vec{i} = colors_p(1:num_lines{i},:);
     elseif strcmp(dataset{i},'asynch')
         % Asynchronised worker pattern
@@ -127,7 +135,7 @@ for i=1:length(data)
         num_lines{i} = 6;
         basecolour = [0.2 0.8 0.8];
         white = [1 1 1];
-        colors_p = [linspace(basecolour(1),white(1),num_lines{i})', linspace(basecolour(2),white(2),num_lines{i})', linspace(basecolour(3),white(3),num_lines{i})'];
+        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+2)', linspace(basecolour(2),white(2),num_lines{i}+2)', linspace(basecolour(3),white(3),num_lines{i}+2)'];
         colour_vec{i} = colors_p(1:num_lines{i},:);    
     end
 end
@@ -148,20 +156,48 @@ if make_subplot~=1
     hold on
 end
 
-% Fill the 50% prediction intervals up to day x_cutoff
-fill([x_vals(1:x_cutoff) x_vals(x_cutoff:-1:1)], [temporal_data_prctiles{i}(1:x_cutoff,2,1); temporal_data_prctiles{i}(x_cutoff:-1:1,3,1)],'r','FaceColor',1-0.7*(1-grey_colour_vec),'EdgeColor','none');
+% Construct plots. For Rt need to use different x-values to plot against
+if strcmp(variablename,'Rt')
+%     % Fill the 50% prediction intervals up to day x_cutoff
+%     fill([x_vals_Rt(1:end) x_vals_Rt(x_cutoff_Rt:-1:1)], [temporal_data_prctiles{i}(1:x_cutoff_Rt,2,1); temporal_data_prctiles{i}(x_cutoff_Rt:-1:1,3,1)],'r','FaceColor',1-0.7*(1-grey_colour_vec),'EdgeColor','none');
+% 
+%     % Plot traces up to day x_cutoff
+%     plot(x_vals_Rt(1:x_cutoff_Rt),temporal_data_median{i}(1:x_cutoff_Rt,1),'Linewidth',1.5,'Color',grey_colour_vec)
 
-% Plot traces up to day x_cutoff
-plot(x_vals(1:x_cutoff),temporal_data_median{i}(1:x_cutoff,1),'Linewidth',1.5,'Color',grey_colour_vec)
+    for i=1:length(data)
 
-for i=1:length(data)
-    
-    for array_idx = num_lines{i}:-1:1
-        % Fill the 50% prediction intervals after day x_cutoff
-        fill([x_vals(x_cutoff:end) x_vals(end:-1:x_cutoff)], [temporal_data_prctiles{i}(x_cutoff:end,2,array_idx); temporal_data_prctiles{i}(end:-1:x_cutoff,3,array_idx)],'r','FaceColor',1-0.7*(1-colour_vec{i}(array_idx,:)),'EdgeColor','none');
-        
-        % Plot traces after day x_cutoff
-        plot(x_vals(x_cutoff:end),temporal_data_median{i}(x_cutoff:end,array_idx),'Linewidth',1.5,'Color',colour_vec{i}(array_idx,:))
+        for array_idx = num_lines{i}:-1:1
+
+%             % Fill the 50% prediction intervals after day x_cutoff
+%             fill([x_vals_Rt(1:end) x_vals_Rt(end:-1:1)], [temporal_data_prctiles{i}(1:end,2,array_idx); temporal_data_prctiles{i}(end:-1:1,3,array_idx)],'r','FaceColor',1-0.7*(1-colour_vec{i}(array_idx,:)),'EdgeColor','none');
+
+            % Plot traces after day x_cutoff
+            plot(x_vals_Rt(1:end),temporal_data_median{i}(1:end,array_idx),'Linewidth',1.5,'Color',colour_vec{i}(array_idx,:))
+%             
+%             % Fill the 50% prediction intervals after day x_cutoff
+%             fill([x_vals_Rt(x_cutoff_Rt:end) x_vals_Rt(end:-1:x_cutoff_Rt)], [temporal_data_prctiles{i}(x_cutoff_Rt:end,2,array_idx); temporal_data_prctiles{i}(end:-1:x_cutoff_Rt,3,array_idx)],'r','FaceColor',1-0.7*(1-colour_vec{i}(array_idx,:)),'EdgeColor','none');
+% 
+%             % Plot traces after day x_cutoff
+%             plot(x_vals_Rt(x_cutoff_Rt:end),temporal_data_median{i}(x_cutoff_Rt:end,array_idx),'Linewidth',1.5,'Color',colour_vec{i}(array_idx,:))
+        end
+    end
+else
+
+    % Fill the 50% prediction intervals up to day x_cutoff
+    fill([x_vals(1:x_cutoff) x_vals(x_cutoff:-1:1)], [temporal_data_prctiles{i}(1:x_cutoff,2,1); temporal_data_prctiles{i}(x_cutoff:-1:1,3,1)],'r','FaceColor',1-0.7*(1-grey_colour_vec),'EdgeColor','none');
+
+    % Plot traces up to day x_cutoff
+    plot(x_vals(1:x_cutoff),temporal_data_median{i}(1:x_cutoff,1),'Linewidth',1.5,'Color',grey_colour_vec)
+
+    for i=1:length(data)
+
+        for array_idx = num_lines{i}:-1:1
+            % Fill the 50% prediction intervals after day x_cutoff
+            fill([x_vals(x_cutoff:end) x_vals(end:-1:x_cutoff)], [temporal_data_prctiles{i}(x_cutoff:end,2,array_idx); temporal_data_prctiles{i}(end:-1:x_cutoff,3,array_idx)],'r','FaceColor',1-0.7*(1-colour_vec{i}(array_idx,:)),'EdgeColor','none');
+
+            % Plot traces after day x_cutoff
+            plot(x_vals(x_cutoff:end),temporal_data_median{i}(x_cutoff:end,array_idx),'Linewidth',1.5,'Color',colour_vec{i}(array_idx,:))
+        end
     end
 end
 

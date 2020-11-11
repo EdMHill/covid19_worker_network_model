@@ -1295,8 +1295,13 @@ function worker_pattern_network_run(RNGseed::Int64,
 
             # divide number of infections by number of infectors to find Rt
             for time=1:(endtime+1)
-                # divide by the number of nodes that were infected at time
-                output.Rt[time,count,intervention_set_itr] = output.Rt[time,count,intervention_set_itr] / output.newinf[time,count,intervention_set_itr]
+                # divide by the number of nodes that were infected (entered the latent state)
+                # at time
+                if time == 1
+                    output.Rt[time,count,intervention_set_itr] = output.Rt[time,count,intervention_set_itr] / output.numlat[time,count,intervention_set_itr]
+                else
+                    output.Rt[time,count,intervention_set_itr] = output.Rt[time,count,intervention_set_itr] / (output.numlat[time,count,intervention_set_itr]-output.numlat[time-1,count,intervention_set_itr])
+                end
             end
 
             # Print to screen info on run just completed

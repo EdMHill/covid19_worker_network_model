@@ -49,13 +49,13 @@ if sum(strcmp(variable_names,'final_size') == 1)
     final_size_propn = final_size_absolute/cmax;
 
     % Check against the threshold criteria and store
-    heatmap_vals = sum(final_size_propn>0.2)/n_simns;
+    heatmap_vals = sum(final_size_propn>0.5)/n_simns;
 
     % Reorder into a 2D array. Row by transrisk, column by worker group size
     heatmap_array = reshape(heatmap_vals,4,3);
     
     % Call plot function
-    panel_title = 'Cumulative infectious case proportion > 0.2';
+    panel_title = 'Cumulative infectious case proportion > 0.5';
     add_colourbar = false;
     save_filename = ['covid_secure_plots/final_size_heatmap',save_file_addon];
     plot_heatmap(heatmap_array,yaxis_label,xaxis_label,panel_title,...

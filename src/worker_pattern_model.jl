@@ -53,13 +53,13 @@ args = ARGS
 # args[7] seed_initial_states_fn
 # args[8] runsets: Scenarios to run
 if length(ARGS)==0
-    args = [ "1", "100", "10", "365", "1000", "41", "seed_states_with_uncertainty", "[\"run_one_run\"]"]
+    args = [ "1", "100", "100", "365", "10000", "41", "seed_states_with_uncertainty", "[\"run_one_run\"]"]
 end
 
 # To run from command line, example:
 # julia worker_pattern_model.jl 1 100 10 365 10000 41 set_ten_initial_infected '["run_one_run"]'
 
-# Example runset options (see laod_configs in "include_files_network_model/additional_fns.jl"):
+# Example runset options (see load_configs in "include_files_network_model/additional_fns.jl"):
 #["synchronised_changedays", "variable_changedays",
 #"groups_off", "weeks_on", "amount_backwards_CT",
 #"workplace_CT_threshold", "CT_engagement",
@@ -76,7 +76,11 @@ end
 # "workplace_clustering_svty_workplace_static_only",
 # "workplace_clustering_svty_workplace_static_and_social",
 # "workplace_clustering_svty_workplace_static_and_household",
-# "work_percent_svty"]
+# "work_percent_svty",
+# "synchronised_changedays_intervention","variable_changedays_intervention",
+# "weeks_on_intervention","workpercent_intervention",
+# "amount_backwards_CT_intervention", "adherence_intervention"
+# "CS_intervention","CS_intervention_no_isol"]
 
 # Set identifier for job
 job_ID = parse(Int64, args[1])
@@ -340,7 +344,7 @@ for run_it = 1:length(runsets)
         if runset∈["adherence_svty","synchronised_changedays_intervention",
                     "variable_changedays_intervention","workpercent_intervention",
                     "amount_backwards_CT_intervention","adherence_intervention",
-                    "CS_intervention","CS_intervention_no_isol"]
+                    "CS_intervention","CS_intervention_no_isol","run_one_run"]
             infection_parameters.adherence = adherence
         end
 
@@ -395,58 +399,61 @@ for run_it = 1:length(runsets)
 
         ########################################################################
 
-        # Call function (located in include_files_network_model\main_function.jl)
         @time  output = worker_pattern_network_run(RNGseed,
-                                                cmax,
-                                                ton,toff,
-                                                infection_parameters,
-                                                sameday,
-                                                seed_initial_states_fn,
-                                                countfinal,
-                                                endtime,
-                                                contact_tracing_active,
-                                                CT_parameters,
-                                                network_parameters,
-                                                workplace_generation_parameters,
-                                                workplace_closure_active,
-                                                intervention_list_config,
-                                                assign_household_transrisk_fn = assign_household_transrisk_fn_alt
-                                                )
-            @unpack numlat, numinf, numrep,
-                    prevlat, prevsymp, prevasymp, prevpresymp, prevrec,
-                    newinf, newasymp, workersinf, workersasymp, infected_by,
-                    num_isolating, num_household_isolating, num_symp_isolating, num_isolating_CTcause,
-                    num_CT, num_infected, dynamic_infection_count,
-                    var_num_infected, num_init_infected, mean_init_generation_time,
-                    Rt, transmission_setting, tests_performed, test_outcomes = output
+        cmax,
+        ton,toff,
+        infection_parameters,
+        sameday,
+        seed_initial_states_fn,
+        countfinal,
+        endtime,
+        contact_tracing_active,
+        CT_parameters,
+        network_parameters,
+        workplace_generation_parameters,
+        workplace_closure_active,
+        intervention_list_config,
+        assign_household_transrisk_fn = assign_household_transrisk_fn_alt
+        )
 
-            # For this iteration's network config, write results to output storage arrays
-            numlat_save[:,:,:,it] = numlat
-            numinf_save[:,:,:,it] = numinf
-            numrep_save[:,:,:,it] = numrep
-            prevlat_save[:,:,:,it] = prevlat
-            prevsymp_save[:,:,:,it] = prevsymp
-            prevasymp_save[:,:,:,it] = prevasymp
-            prevpresymp_save[:,:,:,it] = prevpresymp
-            prevrec_save[:,:,:,it] = prevrec
-            newinf_save[:,:,:,it] = newinf
-            workersinf_save[:,:,:,it] = workersinf
-            workersasymp_save[:,:,:,it] = workersasymp
-            newasymp_save[:,:,:,it] = newasymp
-            num_isolating_save[:,:,:,it] = num_isolating
-            num_symp_isolating_save[:,:,:,it] = num_symp_isolating
-            num_household_isolating_save[:,:,:,it] = num_household_isolating
-            num_CT_save[:,:,:,it] = num_CT
-            num_infected_save[it][:,:,:] = num_infected
-            dynamic_infection_count_save[:,:,:,it] = dynamic_infection_count
-            var_num_infected_save[1,:,:,it] = var_num_infected
-            num_init_infected_save[it] = num_init_infected
-            mean_init_generation_time_save[1,:,:,it] = mean_init_generation_time
-            Rt_save[:,:,:,it] = Rt
-            transmission_setting_save[:,:,:,:,it] = transmission_setting
-            tests_performed_save[:,:,:,it] = tests_performed
-            test_outcomes_save[:,:,:,:,it] = test_outcomes
-            num_isolating_CTcause_save[:,:,:,it] = num_isolating_CTcause
+        @unpack numlat, numinf, numrep,
+        prevlat, prevsymp, prevasymp, prevpresymp, prevrec,
+        newinf, newasymp, workersinf, workersasymp, infected_by,
+        num_isolating, num_household_isolating, num_symp_isolating, num_isolating_CTcause,
+        num_CT, num_infected, dynamic_infection_count,
+        var_num_infected, num_init_infected, mean_init_generation_time,
+        Rt, transmission_setting, tests_performed, test_outcomes = output
+
+        # For this iteration's network config, write results to output storage arrays
+        numlat_save[:,:,:,it] = numlat
+        numinf_save[:,:,:,it] = numinf
+        numrep_save[:,:,:,it] = numrep
+        prevlat_save[:,:,:,it] = prevlat
+        prevsymp_save[:,:,:,it] = prevsymp
+        prevasymp_save[:,:,:,it] = prevasymp
+        prevpresymp_save[:,:,:,it] = prevpresymp
+        prevrec_save[:,:,:,it] = prevrec
+        newinf_save[:,:,:,it] = newinf
+        workersinf_save[:,:,:,it] = workersinf
+        workersasymp_save[:,:,:,it] = workersasymp
+        newasymp_save[:,:,:,it] = newasymp
+        num_isolating_save[:,:,:,it] = num_isolating
+        num_symp_isolating_save[:,:,:,it] = num_symp_isolating
+        num_household_isolating_save[:,:,:,it] = num_household_isolating
+        num_CT_save[:,:,:,it] = num_CT
+        num_infected_save[it][:,:,:] = num_infected
+        dynamic_infection_count_save[:,:,:,it] = dynamic_infection_count
+        var_num_infected_save[1,:,:,it] = var_num_infected
+        num_init_infected_save[it] = num_init_infected
+        mean_init_generation_time_save[1,:,:,it] = mean_init_generation_time
+        Rt_save[:,:,:,it] = Rt
+        transmission_setting_save[:,:,:,:,it] = transmission_setting
+        tests_performed_save[:,:,:,it] = tests_performed
+        test_outcomes_save[:,:,:,:,it] = test_outcomes
+
+        # if contact_tracing_active==true
+        num_isolating_CTcause_save[:,:,:,it] = num_isolating_CTcause
+        # end
     end
 
     # Save outputs to file
