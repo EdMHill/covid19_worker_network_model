@@ -56,7 +56,7 @@ if sum(strcmp(variable_names,'final_size') == 1)
     
     % Call plot function
     panel_title = 'Cumulative infectious case proportion > 0.5';
-    add_colourbar = false;
+    add_colourbar = true;
     save_filename = ['covid_secure_plots/final_size_heatmap',save_file_addon];
     plot_heatmap(heatmap_array,yaxis_label,xaxis_label,panel_title,...
                             add_colourbar,plot_fontsize,save_filename)
@@ -75,7 +75,7 @@ if sum(strcmp(variable_names,'peak_inf') == 1)
     
     % Call plot function
     panel_title = 'Peak in infectious prevalence > 0.01';
-    add_colourbar = false;
+    add_colourbar = true;
     save_filename = ['covid_secure_plots/peak_inf_heatmap',save_file_addon];
     plot_heatmap(heatmap_array,yaxis_label,xaxis_label,panel_title,...
                             add_colourbar,plot_fontsize,save_filename)
@@ -95,7 +95,7 @@ if sum(strcmp(variable_names,'avg_isolation') == 1)
     
     % Call plot function
     panel_title = 'Proportion of time in isolation > 0.01';
-    add_colourbar = false;
+    add_colourbar = true;
     save_filename = ['covid_secure_plots/avg_isol_heatmap',save_file_addon];
     plot_heatmap(heatmap_array,yaxis_label,xaxis_label,panel_title,...
                             add_colourbar,plot_fontsize,save_filename)
@@ -114,7 +114,7 @@ if sum(strcmp(variable_names,'peak_isolation') == 1)
 
     % Call plot function
     panel_title = 'Peak in proportion isolated > 0.05';
-    add_colourbar = false;
+    add_colourbar = true;
     save_filename = ['covid_secure_plots/peak_isol_heatmap',save_file_addon];
     plot_heatmap(heatmap_array,yaxis_label,xaxis_label,panel_title,...
                             add_colourbar,plot_fontsize,save_filename)

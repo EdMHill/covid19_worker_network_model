@@ -262,7 +262,7 @@ elseif strcmp(dataset,'worker_patterns')==1
     else
         display_legend = false;
     end
-    legend_label = {'Synchronised','Asynchronised'};
+    legend_label = {'Synchronous','Asynchronous'};
 end
 
 % Set up y-axis labels per statistic.

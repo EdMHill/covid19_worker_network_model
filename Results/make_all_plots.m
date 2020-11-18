@@ -6,28 +6,28 @@ make_violinplots('workpercent','final_size')
 make_violinplots('worker_patterns','final_size')
 
 %% make peak infections plots
-%make_violinplots('adherence','peak_inf')
+make_violinplots('adherence','peak_inf')
 make_violinplots('workpercent','peak_inf')
 %make_violinplots('workpercent_and_backwardsCT','peak_inf')
 make_violinplots('worker_patterns','peak_inf')
 
 %% total self-isolating days
-%make_violinplots('adherence','total_isolation')
+make_violinplots('adherence','total_isolation')
 make_violinplots('workpercent','total_isolation')
 %make_violinplots('workpercent_and_backwardsCT','total_isolation')
-%make_violinplots('worker_patterns','total_isolation')
+make_violinplots('worker_patterns','total_isolation')
 
 %% peak fraction self-isolating
-%make_violinplots('adherence','peak_isolation')
+make_violinplots('adherence','peak_isolation')
 make_violinplots('workpercent','peak_isolation')
 %make_violinplots('workpercent_and_backwardsCT','peak_isolation')
-%make_violinplots('worker_patterns','peak_isolation')
+make_violinplots('worker_patterns','peak_isolation')
 
 %% outbreak duration
-%make_violinplots('adherence','duration')
+make_violinplots('adherence','duration')
 make_violinplots('workpercent','duration')
 %make_violinplots('workpercent_and_backwardsCT','duration')
-%make_violinplots('worker_patterns','duration')
+make_violinplots('worker_patterns','duration')
 
 %% Threshold event plots: Adherence
 variable_names = {'final_size','peak_inf','avg_isolation','duration','peak_isolation'};
@@ -73,9 +73,9 @@ set(fig,'Color', [1 1 1])
 fontsize=26;
 subplot(3,3,1); hold on; maxy(1) = make_temporal_plots({'workpercent'},'inf_prevalence',1); ylabel('Propn infectious'); title('Working from home'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15])
-subplot(3,3,2); hold on; maxy(2) = make_temporal_plots({'synch'},'inf_prevalence',1); title('Synchronised'); set(gca,'FontSize',fontsize); xlim([0,200]);
+subplot(3,3,2); hold on; maxy(2) = make_temporal_plots({'synch'},'inf_prevalence',1); title('Synchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15])
-subplot(3,3,3); hold on; maxy(3) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronised'); set(gca,'FontSize',fontsize); xlim([0,200]);
+subplot(3,3,3); hold on; maxy(3) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15])
 subplot(3,3,1); ylim([0,max(maxy)]); subplot(3,3,2); ylim([0,max(maxy)]); subplot(3,3,3); ylim([0,max(maxy)]);
 
@@ -94,7 +94,7 @@ yticks([0 1 2 3 4])
 subplot(3,3,9); hold on; maxy(3) = make_temporal_plots({'asynch'},'Rt',1); xlabel('Time (days)'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
 yticks([0 1 2 3 4])
 subplot(3,3,7); ylim([0,4]); subplot(3,3,8); ylim([0,4]); subplot(3,3,9); ylim([0,4]); 
-export_fig('worker_pattern_plots/worker_pattern_temporal_plots','-pdf','-r600')
+%export_fig('worker_pattern_plots/worker_pattern_temporal_plots','-pdf','-r600')
 
 % num_lines = 6;
 % basecolour = [0 0 0];
@@ -200,9 +200,9 @@ export_fig('adherence_sens_plots/adherence_temporal_plots','-pdf','-r600')
 % clf;
 % set(fig,'Color', [1 1 1])
 % fontsize=26;
-% subplot(3,2,1); hold on; maxy(1) = make_temporal_plots({'synch'},'inf_prevalence',1); ylabel('Propn infectious'); title('Synchronised'); set(gca,'FontSize',fontsize); xlim([0,200]);
+% subplot(3,2,1); hold on; maxy(1) = make_temporal_plots({'synch'},'inf_prevalence',1); ylabel('Propn infectious'); title('Synchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20])
-% subplot(3,2,2); hold on; maxy(2) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronised'); set(gca,'FontSize',fontsize); xlim([0,200]);
+% subplot(3,2,2); hold on; maxy(2) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20])
 % subplot(3,2,1); ylim([0,max(maxy)]); subplot(3,2,2); ylim([0,max(maxy)]);
 % 

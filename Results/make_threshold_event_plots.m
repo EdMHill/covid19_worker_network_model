@@ -61,7 +61,7 @@ elseif strcmp(dataset,'worker_patterns')==1
     multi_panel_plot_flag = true;
     
     % Set up panel titles
-    panel_title = {'Synchronised','Asynchronised'};
+    panel_title = {'Synchronous','Asynchronous'};
 end
 
 %% Specify global params

@@ -126,7 +126,7 @@ for i=1:length(data)
         num_lines{i} = 6;
         basecolour = [0.4 0 0];
         white = [1 1 1];
-        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+2)', linspace(basecolour(2),white(2),num_lines{i}+2)', linspace(basecolour(3),white(3),num_lines{i}+2)'];
+        colors_p = [linspace(white(1),basecolour(1),num_lines{i}+2)', linspace(white(2),basecolour(2),num_lines{i}+2)', linspace(white(3),basecolour(3),num_lines{i}+2)'];
         colour_vec{i} = colors_p(1:num_lines{i},:);
     elseif strcmp(dataset{i},'asynch')
         % Asynchronised worker pattern
@@ -135,7 +135,7 @@ for i=1:length(data)
         num_lines{i} = 6;
         basecolour = [0.2 0.8 0.8];
         white = [1 1 1];
-        colors_p = [linspace(basecolour(1),white(1),num_lines{i}+2)', linspace(basecolour(2),white(2),num_lines{i}+2)', linspace(basecolour(3),white(3),num_lines{i}+2)'];
+        colors_p = [linspace(white(1),basecolour(1),num_lines{i}+2)', linspace(white(2),basecolour(2),num_lines{i}+2)', linspace(white(3),basecolour(3),num_lines{i}+2)'];
         colour_vec{i} = colors_p(1:num_lines{i},:);    
     end
 end
