@@ -24,11 +24,11 @@ CS_data_no_isol = load('worker_model_output_CS_intervention_no_isol_combined.mat
 
 %% Threshold event plots
 format bank
-adherence_array = threshold_event_vals(adherence_data,cmax,n_simns)
-workpercent_array = threshold_event_vals(workpercent_data,cmax,n_simns)
-backwards_CT_array = threshold_event_vals(backwards_CT_data,cmax,n_simns)
-synch_array = threshold_event_vals(synch_data,cmax,n_simns)
-asynch_array = threshold_event_vals(asynch_data,cmax,n_simns)
+[adherence_array,adherence_CI_lb,adherence_CI_ub] = threshold_event_vals(adherence_data,cmax,n_simns);
+[workpercent_array,workpercent_CI_lb,workpercent_CI_ub] = threshold_event_vals(workpercent_data,cmax,n_simns);
+[backwards_CT_array,backwards_CI_lb,backwards_CI_ub] = threshold_event_vals(backwards_CT_data,cmax,n_simns);
+[synch_array,synch_CI_lb,synch_CI_ub] = threshold_event_vals(synch_data,cmax,n_simns);
+[asynch_array,asynch_CI_lb,asynch_CI_ub] = threshold_event_vals(asynch_data,cmax,n_simns);
 
 %% Violin plots
 format long
@@ -40,16 +40,22 @@ asynch_violins_array = violin_vals(asynch_data,cmax,n_simns)
 
 %% Heatmaps
 format bank
-CS_data_no_isol_final_size = heatmap_table_vals(CS_data_no_isol,'final_size',cmax,n_simns)
-CS_data_no_isol_duration = heatmap_table_vals(CS_data_no_isol,'duration',cmax,n_simns)
-CS_data_final_size = heatmap_table_vals(CS_data,'final_size',cmax,n_simns)
-CS_data_duration = heatmap_table_vals(CS_data,'duration',cmax,n_simns)
-CS_data_isol = heatmap_table_vals(CS_data,'avg_isolation',cmax,n_simns)
-CS_data_peak_isol = heatmap_table_vals(CS_data,'peak_isolation',cmax,n_simns)
+[CS_data_no_isol_final_size,CS_data_no_isol_final_size_CI_lb,...
+    CS_data_no_isol_final_size_CI_ub] = heatmap_table_vals(CS_data_no_isol,'final_size',cmax,n_simns);
+[CS_data_no_isol_duration,CS_data_no_isol_duration_CI_lb,...
+    CS_data_no_isol_duration_CI_ub] = heatmap_table_vals(CS_data_no_isol,'duration',cmax,n_simns);
+[CS_data_final_size,CS_data_final_size_CI_lb,...
+    CS_data_final_size_CI_ub] = heatmap_table_vals(CS_data,'final_size',cmax,n_simns);
+[CS_data_duration,CS_data_duration_CI_lb,...
+    CS_data_duration_CI_ub] = heatmap_table_vals(CS_data,'duration',cmax,n_simns);
+[CS_data_isol,CS_data_isol_CI_lb,...
+    CS_data_isol_CI_ub] = heatmap_table_vals(CS_data,'avg_isolation',cmax,n_simns);
+[CS_data_peak_isol,CS_data_peak_isol_CI_lb,...
+    CS_data_peak_isol_CI_ub] = heatmap_table_vals(CS_data,'peak_isolation',cmax,n_simns);
 
 %% Functions to compute desired summary statistics
 
-function output_array = threshold_event_vals(input_data,cmax,n_simns)
+function [output_array,jeffreys_CI_lb,jeffreys_CI_ub] = threshold_event_vals(input_data,cmax,n_simns)
 
     % Number of infections over duration of outbreak
     final_size_absolute = squeeze(input_data.numinf_combined(end,:,:));
@@ -89,10 +95,21 @@ function output_array = threshold_event_vals(input_data,cmax,n_simns)
     
     % Check against the threshold criteria and store
     duration_vals = sum(duration_data>150)/n_simns;
+    
 
-
-    % Put into output array
+    % Put proportions satisfying criteria into output array
     output_array = [final_size_vals;peak_inf_vals;total_isol_vals;duration_vals;peak_isol_vals];
+    
+    % Get 95% credible intervals using Jeffreys interval
+    % The Jeffreys prior for this problem is a Beta distribution with parameters
+    % (1/2, 1/2), it is a conjugate prior. 
+    % After observing x successes in n trials, the posterior distribution for p 
+    % is a Beta distribution with parameters (x + 1/2, n – x + 1/2).
+    success_trials = output_array*n_simns;
+    A = 0.5 + success_trials;
+    B = n_simns - success_trials + 0.5;
+    jeffreys_CI_lb = betainv(0.025,A,B);
+    jeffreys_CI_ub = betainv(0.975,A,B);
 end
 
 function output_array = violin_vals(input_data,cmax,n_simns)
@@ -164,7 +181,7 @@ function output_array = violin_vals(input_data,cmax,n_simns)
     end
 end
 
-function heatmap_array = heatmap_table_vals(CS_data,variable_name,cmax,n_simns)
+function [heatmap_array,jeffreys_CI_lb,jeffreys_CI_ub] = heatmap_table_vals(CS_data,variable_name,cmax,n_simns)
 if strcmp(variable_name,'final_size')
 
     % Number of infections over duration of outbreak
@@ -234,6 +251,17 @@ if sum(strcmp(variable_name,'duration') == 1)
     % Reorder into a 2D array. Row by transrisk, column by worker group size
     heatmap_array = reshape(heatmap_vals,4,3);
 end
+
+% Get 95% credible intervals using Jeffreys interval
+% The Jeffreys prior for this problem is a Beta distribution with parameters
+% (1/2, 1/2), it is a conjugate prior.
+% After observing x successes in n trials, the posterior distribution for p
+% is a Beta distribution with parameters (x + 1/2, n – x + 1/2).
+success_trials = heatmap_array*n_simns;
+A = 0.5 + success_trials;
+B = n_simns - success_trials + 0.5;
+jeffreys_CI_lb = betainv(0.025,A,B);
+jeffreys_CI_ub = betainv(0.975,A,B);
 
 end
 
