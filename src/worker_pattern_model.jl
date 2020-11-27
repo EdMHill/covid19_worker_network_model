@@ -108,7 +108,7 @@ runsets = eval(Meta.parse(args[8]))
 recov_propn = 0.
 
 """
-Set up latent & infectivity distributions
+Set up incubation & infectivity distributions
 """
 
 # If needed, set up a different latent period distribution
