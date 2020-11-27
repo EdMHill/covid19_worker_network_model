@@ -1406,7 +1406,6 @@ function set_infection_related_times!(time_to_symps::Array{Int64,1},states::node
     d_incub::Distribution,cmax::Int64,rng::MersenneTwister)
 
     time_to_symps .= ceil.(rand(rng,d_incub,cmax)) # time to symptoms
-    # assume that infectiousness starts 2 days before and ends 7 days after symptoms
     # (for asymptomatics, the same from a silent start of "symptoms")
 
     ## uncomment below to change default times
