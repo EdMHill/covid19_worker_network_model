@@ -407,7 +407,7 @@ end
    timesymp::Array{Int64,1} = zeros(Int64,cmax) # time currently spent in symptomatic state
    lattime::Array{Int64,1} = zeros(Int64,cmax) # time to spend in latent state
    inftime::Int64 = 4 # time to spend in infectious, pre-symptomatic state
-   symptime::Int64 = 7 # time to spend in symptomatic state
+   symptime::Int64 = 10 # time to spend in symptomatic state
    asymp::Array{Int64,1} = zeros(Int64,cmax) # whether the node will be asymptomatic
    timeisol::Array{Int64,1} = zeros(Int64,cmax) # time currently spent in isolation due to housemate symptoms
    symp_timeisol::Array{Int64,1} = zeros(Int64,cmax) # time currently spent isolating due to symptoms
