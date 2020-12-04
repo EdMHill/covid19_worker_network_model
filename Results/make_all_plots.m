@@ -71,36 +71,42 @@ fig = figure();
 clf;
 set(fig,'Color', [1 1 1])
 fontsize=26;
+max_y = 0.2;
 subplot(3,3,1); hold on; maxy(1) = make_temporal_plots({'workpercent'},'inf_prevalence',1); ylabel('Propn infectious'); title('Working from home'); set(gca,'FontSize',fontsize); xlim([0,200]);
-yticks([0 0.05 0.10 0.15])
+yticks([0 0.05 0.10 0.15 0.2])
+ytickformat('%.2f')
 subplot(3,3,2); hold on; maxy(2) = make_temporal_plots({'synch'},'inf_prevalence',1); title('Synchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
-yticks([0 0.05 0.10 0.15])
+yticks([0 0.05 0.10 0.15 0.2])
+ytickformat('%.2f')
 subplot(3,3,3); hold on; maxy(3) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
-yticks([0 0.05 0.10 0.15])
-subplot(3,3,1); ylim([0,max(maxy)]); subplot(3,3,2); ylim([0,max(maxy)]); subplot(3,3,3); ylim([0,max(maxy)]);
+yticks([0 0.05 0.10 0.15 0.2])
+ytickformat('%.2f')
+subplot(3,3,1); ylim([0,max_y]); subplot(3,3,2); ylim([0,max_y]); subplot(3,3,3); ylim([0,max_y]);
 
 subplot(3,3,4); hold on; maxy(1) = make_temporal_plots({'workpercent'},'isol_prevalence',1); ylabel('Propn isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25])
+ytickformat('%.2f')
 subplot(3,3,5); hold on; maxy(2) = make_temporal_plots({'synch'},'isol_prevalence',1); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25])
+ytickformat('%.2f')
 subplot(3,3,6); hold on; maxy(3) = make_temporal_plots({'asynch'},'isol_prevalence',1); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25])
-subplot(3,3,4); ylim([0,max(maxy)]); subplot(3,3,5); ylim([0,max(maxy)]); subplot(3,3,6); ylim([0,max(maxy)]); 
+ytickformat('%.2f')
+subplot(3,3,4); ylim([0,max(maxy)]); subplot(3,3,5); ylim([0,max(maxy)]); subplot(3,3,6); ylim([0,max(maxy)]);
 
-subplot(3,3,7); hold on; maxy(1) = make_temporal_plots({'workpercent'},'Rt',1); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
+subplot(3,3,7); hold on; maxy(1) = make_temporal_plots({'workpercent'},'Rt',1); xlabel('Time (days)'); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
 yticks([0 1 2 3 4])
-subplot(3,3,8); hold on; maxy(2) = make_temporal_plots({'synch'},'Rt',1); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
+subplot(3,3,8); hold on; maxy(2) = make_temporal_plots({'synch'},'Rt',1); xlabel('Time (days)'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
 yticks([0 1 2 3 4])
 subplot(3,3,9); hold on; maxy(3) = make_temporal_plots({'asynch'},'Rt',1); xlabel('Time (days)'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5]);
 yticks([0 1 2 3 4])
-subplot(3,3,7); ylim([0,4]); subplot(3,3,8); ylim([0,4]); subplot(3,3,9); ylim([0,4]); 
-%export_fig('worker_pattern_plots/worker_pattern_temporal_plots','-pdf','-r600')
+subplot(3,3,7); ylim([0,4]); subplot(3,3,8); ylim([0,4]); subplot(3,3,9); ylim([0,4]);
+export_fig('worker_pattern_plots/worker_pattern_temporal_plots','-pdf','-r600')
 
 % num_lines = 6;
 % basecolour = [0 0 0];
 % light = [0.8 0.8 0.8];
 % colour_vec = [linspace(light(1),basecolour(1),num_lines)', linspace(light(2),basecolour(2),num_lines)', linspace(light(3),basecolour(3),num_lines)'];
-% 
 % legend_label = {'0 days','1 day','2 days','3 days','4 days','5 days'};
 % H = gobjects(num_lines,1);
 % for line_itr = 1:num_lines
@@ -129,8 +135,10 @@ set(fig,'Color', [1 1 1])
 fontsize=26;
 subplot(1,3,1); hold on; maxy(1) = make_temporal_plots({'adherence'},'inf_prevalence',1); xlabel('Time (days)'); ylabel('Propn infectious'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40])
+ytickformat('%.2f')
 subplot(1,3,2); hold on; maxy(2) = make_temporal_plots({'adherence'},'isol_prevalence',1); xlabel('Time (days)'); ylabel('Propn isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25 0.30])
+ytickformat('%.2f')
 subplot(1,3,3); hold on; maxy(3) = make_temporal_plots({'adherence'},'Rt',1); xlabel('Time (days)'); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 yticks([0 1 2 3 4])
 subplot(1,3,1); ylim([0,maxy(1)]); subplot(1,3,2); ylim([0,maxy(2)]); subplot(1,3,3); ylim([0,maxy(3)]);
@@ -167,22 +175,22 @@ export_fig('adherence_sens_plots/adherence_temporal_plots','-pdf','-r600')
 % subplot(3,3,3); hold on; maxy(3) = make_temporal_plots({'workpercent'},'inf_prevalence',1); title('Work percentage'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40])
 % subplot(3,3,1); ylim([0,max(maxy)]); subplot(3,3,2); ylim([0,max(maxy)]); subplot(3,3,3); ylim([0,max(maxy)]);
-% 
+%
 % subplot(3,3,4); hold on; maxy(1) = make_temporal_plots({'adherence'},'isol_prevalence',1); ylabel('Propn isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20 0.25 0.30])
 % subplot(3,3,5); hold on; maxy(2) = make_temporal_plots({'backwards_CT'},'isol_prevalence',1); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20 0.25 0.30])
 % subplot(3,3,6); hold on; maxy(3) = make_temporal_plots({'workpercent'},'isol_prevalence',1); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20 0.25 0.30])
-% subplot(3,3,4); ylim([0,max(maxy)]); subplot(3,3,5); ylim([0,max(maxy)]); subplot(3,3,6); ylim([0,max(maxy)]); 
-% 
+% subplot(3,3,4); ylim([0,max(maxy)]); subplot(3,3,5); ylim([0,max(maxy)]); subplot(3,3,6); ylim([0,max(maxy)]);
+%
 % subplot(3,3,7); hold on; maxy(1) = make_temporal_plots({'adherence'},'Rt',1); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 % yticks([0 1 2 3 4])
 % subplot(3,3,8); hold on; maxy(2) = make_temporal_plots({'backwards_CT'},'Rt',1); xlabel('Time(days)'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 % yticks([0 1 2 3 4])
 % subplot(3,3,9); hold on; maxy(3) = make_temporal_plots({'workpercent'},'Rt',1); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 % yticks([0 1 2 3 4])
-% subplot(3,3,7); ylim([0,4]); subplot(3,3,8); ylim([0,4]); subplot(3,3,9); ylim([0,4]); 
+% subplot(3,3,7); ylim([0,4]); subplot(3,3,8); ylim([0,4]); subplot(3,3,9); ylim([0,4]);
 % export_fig('misc_plots/temporal_plots','-pdf','-r600')
 
 % %% temporal plots (worker patterns)
@@ -205,24 +213,24 @@ export_fig('adherence_sens_plots/adherence_temporal_plots','-pdf','-r600')
 % subplot(3,2,2); hold on; maxy(2) = make_temporal_plots({'asynch'},'inf_prevalence',1); title('Asynchronous'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20])
 % subplot(3,2,1); ylim([0,max(maxy)]); subplot(3,2,2); ylim([0,max(maxy)]);
-% 
+%
 % subplot(3,2,3); hold on; maxy(1) = make_temporal_plots({'synch'},'isol_prevalence',1); ylabel('Propn isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20])
 % subplot(3,2,4); hold on; maxy(2) = make_temporal_plots({'asynch'},'isol_prevalence',1); set(gca,'FontSize',fontsize); xlim([0,200]);
 % yticks([0 0.05 0.10 0.15 0.20])
-% subplot(3,2,3); ylim([0,max(maxy)]); subplot(3,2,4); ylim([0,max(maxy)]); 
-% 
+% subplot(3,2,3); ylim([0,max(maxy)]); subplot(3,2,4); ylim([0,max(maxy)]);
+%
 % subplot(3,2,5); hold on; maxy(1) = make_temporal_plots({'synch'},'Rt',1); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 % yticks([0 1 2 3 4])
 % subplot(3,2,6); hold on; maxy(2) = make_temporal_plots({'asynch'},'Rt',1); xlabel('Time(days)'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 % yticks([0 1 2 3 4])
 % subplot(3,2,5); ylim([0,4]); subplot(3,2,6); ylim([0,4]);
-% 
+%
 % num_lines = 6;
 % basecolour = [0 0 0];
 % light = [0.8 0.8 0.8];
 % colour_vec = [linspace(light(1),basecolour(1),num_lines)', linspace(light(2),basecolour(2),num_lines)', linspace(light(3),basecolour(3),num_lines)'];
-% 
+%
 % legend_label = {'0 days','1 day','2 days','3 days','4 days','5 days'};
 % H = gobjects(num_lines,1);
 % for line_itr = 1:num_lines

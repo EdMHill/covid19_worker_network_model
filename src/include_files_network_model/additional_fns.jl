@@ -12,13 +12,8 @@ Transmission functions contained within this file include:
 - transmit_over!                    (infection event check over list of contacts, though not used for other workplace contacts)
 - transmit_over_other_workplace!    (infection event check over list of other workplace contacts)
 
-Functions to set up transmission rates within different settings for each individual
+Functions to set up transmission rates within household for each individual
 - assign_household_transmit_onegroup!  (use if everyone has the same household transmission risk)
-- assign_household_transmit_household_size! (household transmission risk based on household size)
-- assign_workplace_static_transmit!
-- assign_workplace_dynamic_transmit!
-- assign_social_transmit!
-- assign_random_transmit!
 
 Functions to reinitialise states at start of each run
 - reinitialise_node_states!         (multiply time series vectors by 0)
@@ -301,6 +296,85 @@ elseif runset=="workplace_CT_threshold"
 elseif runset=="CT_engagement"
     CT_engagement_config = [0:0.1:1;]
     n_configs = length(CT_engagement_config)
+elseif runset=="dynamic_social_timeframe"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 0.5
+    dynamic_time_frame_config = [1,2,3,5,7,10,14]
+    n_configs = length(dynamic_time_frame_config)
+elseif runset=="dynamic_social_timeframe_groups"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 0.5
+    dynamic_time_frame_config = [1,2,3,5,7,10,14]
+    n_configs = length(dynamic_time_frame_config)
+elseif runset=="social_group_size"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    max_contacts_social_config = [3,6,12,24,48,100]
+    n_configs = length(max_contacts_social_config)
+elseif runset=="rule_of_n"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    group_limit_config = [2,3,4,6,12]
+    n_configs = length(group_limit_config)
+elseif runset=="rule_of_n_weekly"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    group_limit_config = [2,3,4,6,12]
+    n_configs = length(group_limit_config)
+elseif runset=="rule_of_n_monthly"
+    # everyone works mon-fri
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    group_limit_config = [2,3,4,6,12]
+    n_configs = length(group_limit_config)
+elseif runset=="lockdown_adherence"
+elseif runset=="change_cmax"
+    cmax_config = [10000:10000:50000;]
+    n_configs = length(cmax_config)
+elseif runset=="test_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    intervention1 = intervention_struct(effects = ["workpercent"],
+                                        start_time=30,
+                                        workpercent=zeros(workertypes))
+    push!(intervention_list, intervention1)
+    intervention2 = intervention_struct(effects = ["workpercent"],
+                                        start_time = 130,
+                                        workpercent=ones(workertypes))
+    push!(intervention_list, intervention2)
+elseif runset=="lockdown_duration_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    duration_intervention_options = [20:20:80;]
+    n_int_sets = length(duration_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["workpercent"],
+                                        start_time=30,
+                                        workpercent=zeros(workertypes)),
+                            intervention_struct(effects = ["workpercent"],
+                                        start_time = 30+duration_intervention_options[i],
+                                        workpercent=ones(workertypes))] for i = 1:n_int_sets]
+
 elseif runset=="synchronised_changedays_intervention"
     n_configs = 1
     sameday = 3
@@ -358,6 +432,7 @@ elseif runset=="workpercent_intervention"
                                             ] for i = 1:n_int_sets]
 
     # Add scenario where proportion of each type of worker returning to work is not constant across all sectors
+    # work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
     work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
     intervention_config2 = intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
                                             start_time = 15,
@@ -453,6 +528,368 @@ elseif runset=="CS_intervention_no_isol"
             set_idx += 1
         end
     end
+elseif runset=="CS_workplace_no_control"
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    variable_ops = [2, 5, 10, 15, 25, 50, 100, 1000]
+    n_configs = length(variable_ops)
+    transiso_config = ones(Float64, n_configs)
+    CS_team_size_config = variable_ops
+elseif runset=="workplace_CT_threshold_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workplace_CT_threshold_intervention_options = [0:0.05:0.4;]
+    n_int_sets = length(workplace_CT_threshold_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["contact_tracing"],
+                                                    start_time = 30,
+                                                    CT_parameters = CT_params(contact_tracing_active=true,
+                                                                        workplace_CT_threshold=workplace_CT_threshold_intervention_options[i],
+                                                                        CT_engagement=CT_engagement,
+                                                                        workplace_closure_active=true))]
+                                                                        for i = 1:n_int_sets]
+elseif runset=="hardfast_vs_weakslow_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [0.2:0.2:0.8;]
+    intervention_length_options = [40:40:160;]
+    n_int_sets = length(workpercent_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["workpercent"],
+                                            start_time = 30,
+                                            workpercent = workpercent_intervention_options[i]*ones(workertypes)),
+                                intervention_struct(effects = ["workpercent"],
+                                                    start_time = 30+intervention_length_options[i],
+                                                    workpercent = ones(workertypes))] for i = 1:n_int_sets]
+elseif runset=="adaptive_workplace_closures"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    max_lockdown_weeks = 4
+    workpercent_intervention_options = [0, 0.5, 0.75]
+    n_blocks_intervention_options = [1, 2, 4]
+    block_gap_weeks_options = [1, 2, 4]          # weeks between lockdowns
+    n_int_sets = length(workpercent_intervention_options)*length(n_blocks_intervention_options)*length(block_gap_weeks_options)
+    intervention_list_config = Array{Array{intervention_struct,1},1}(undef, n_int_sets)
+    workpercent_op_count = 1
+    n_block_count = 1
+    block_gap_count = 1
+    for int_set_itr = 1:n_int_sets
+        workpercent = workpercent_intervention_options[workpercent_op_count]
+        n_blocks = n_blocks_intervention_options[n_block_count]
+        block_gap = block_gap_weeks_options[block_gap_count]*7
+
+        block_length = Int64((max_lockdown_weeks/(1-workpercent))/n_blocks)*7
+
+        intervention_list = [intervention_struct(effects = ["workpercent"],
+                                            start_time = 30,
+                                            workpercent = workpercent*ones(workertypes)),
+                            intervention_struct(effects = ["workpercent"],
+                                            start_time = 30+block_length,
+                                            workpercent = ones(workertypes))]
+
+        for block_itr = 1:(n_blocks-1)
+            push!(intervention_list, intervention_struct(effects = ["workpercent"],
+                                                start_time = 30+block_itr*(block_length+block_gap),
+                                                workpercent = workpercent*ones(workertypes)))
+            push!(intervention_list, intervention_struct(effects = ["workpercent"],
+                                                start_time = 30+block_itr*(block_length+block_gap)+block_length,
+                                                workpercent = ones(workertypes)))
+        end
+        intervention_list_config[int_set_itr] = intervention_list
+
+        block_gap_count += 1
+        if block_gap_count > length(block_gap_weeks_options)
+            block_gap_count = 1
+            n_block_count += 1
+        end
+        if n_block_count > length(n_blocks_intervention_options)
+            n_block_count = 1
+            workpercent_op_count += 1
+        end
+    end
+
+elseif runset=="multiphase_lockdown"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    start_intervention_options = [30, 60, 90, 120]
+    length_intervention_options = [1, 2, 4, 8, 12, 16]
+    n_blocks_intervention_options = [1, 2, 4, 6]
+    block_gap_weeks_options = [1, 2, 4, 8, 12]          # weeks between lockdowns
+    n_int_sets = length(workpercent_intervention_options)*length(start_intervention_options)*length(length_intervention_options)*length(n_blocks_intervention_options)*length(block_gap_weeks_options)
+    intervention_list_config = Array{Array{intervention_struct,1},1}(undef, n_int_sets)
+    workpercent_op_count = 1
+    start_op_count = 1
+    length_op_count = 1
+    n_block_count = 1
+    block_gap_count = 1
+    for int_set_itr = 1:n_int_sets
+        workpercent = workpercent_intervention_options[workpercent_op_count]
+        start_time = start_intervention_options[start_op_count]
+        total_length = length_intervention_options[length_op_count]
+        n_blocks = n_blocks_intervention_options[n_block_count]
+        block_gap = block_gap_weeks_options[block_gap_count]*7
+
+        block_length = floor(Int64, (total_length*7)/n_blocks)
+
+        intervention_list = [intervention_struct(effects = ["workpercent","transrisk"],
+                                            start_time = start_time,
+                                            workpercent = workpercent*ones(workertypes),
+                                            scaling_social = workpercent,
+                                            scaling_random = workpercent),
+                            intervention_struct(effects = ["workpercent","transrisk"],
+                                            start_time = start_time+block_length,
+                                            workpercent = ones(workertypes))]
+
+        for block_itr = 1:(n_blocks-1)
+            push!(intervention_list, intervention_struct(effects = ["workpercent","transrisk"],
+                                                start_time = start_time+block_itr*(block_length+block_gap),
+                                                workpercent = workpercent*ones(workertypes),
+                                                scaling_social = workpercent,
+                                                scaling_random = workpercent))
+            push!(intervention_list, intervention_struct(effects = ["workpercent","transrisk"],
+                                                start_time = start_time+block_itr*(block_length+block_gap)+block_length,
+                                                workpercent = ones(workertypes)))
+        end
+        intervention_list_config[int_set_itr] = intervention_list
+
+        block_gap_count += 1
+        if block_gap_count > length(block_gap_weeks_options)
+            block_gap_count = 1
+            n_block_count += 1
+        end
+        if n_block_count > length(n_blocks_intervention_options)
+            n_block_count = 1
+            length_op_count += 1
+        end
+        if length_op_count > length(length_intervention_options)
+            length_op_count = 1
+            start_op_count += 1
+        end
+        if start_op_count > length(start_intervention_options)
+            start_op_count = 1
+            workpercent_op_count += 1
+        end
+    end
+
+elseif runset=="multiphase_lockdown_contact_struct"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
+    start_intervention_options = [30, 60, 90, 120]
+    length_intervention_options = [1, 2, 4, 8, 12, 16]
+    n_blocks_intervention_options = [1, 2, 4, 6]
+    block_gap_weeks_options = [1, 2, 4, 8, 12]          # weeks between lockdowns
+    n_int_sets = length(workpercent_intervention_options)*length(start_intervention_options)*length(length_intervention_options)*length(n_blocks_intervention_options)*length(block_gap_weeks_options)
+    intervention_list_config = Array{Array{intervention_struct,1},1}(undef, n_int_sets)
+    workpercent_op_count = 1
+    start_op_count = 1
+    length_op_count = 1
+    n_block_count = 1
+    block_gap_count = 1
+    for int_set_itr = 1:n_int_sets
+        workpercent = workpercent_intervention_options[workpercent_op_count]
+        start_time = start_intervention_options[start_op_count]
+        total_length = length_intervention_options[length_op_count]
+        n_blocks = n_blocks_intervention_options[n_block_count]
+        block_gap = block_gap_weeks_options[block_gap_count]*7
+
+        block_length = floor(Int64, (total_length*7)/n_blocks)
+
+        intervention_list = [intervention_struct(effects = ["workpercent","contact_structure"],
+                                            start_time = start_time,
+                                            workpercent = workpercent*ones(workertypes),
+                                            social_contact_scaling = workpercent,
+                                            random_contact_scaling = workpercent),
+                            intervention_struct(effects = ["workpercent","contact_structure"],
+                                            start_time = start_time+block_length,
+                                            workpercent = ones(workertypes))]
+
+        for block_itr = 1:(n_blocks-1)
+            push!(intervention_list, intervention_struct(effects = ["workpercent","contact_structure"],
+                                                start_time = start_time+block_itr*(block_length+block_gap),
+                                                workpercent = workpercent*ones(workertypes),
+                                                social_contact_scaling = workpercent,
+                                                random_contact_scaling = workpercent))
+            push!(intervention_list, intervention_struct(effects = ["workpercent","contact_structure"],
+                                                start_time = start_time+block_itr*(block_length+block_gap)+block_length,
+                                                workpercent = ones(workertypes)))
+        end
+        intervention_list_config[int_set_itr] = intervention_list
+
+        block_gap_count += 1
+        if block_gap_count > length(block_gap_weeks_options)
+            block_gap_count = 1
+            n_block_count += 1
+        end
+        if n_block_count > length(n_blocks_intervention_options)
+            n_block_count = 1
+            length_op_count += 1
+        end
+        if length_op_count > length(length_intervention_options)
+            length_op_count = 1
+            start_op_count += 1
+        end
+        if start_op_count > length(start_intervention_options)
+            start_op_count = 1
+            workpercent_op_count += 1
+        end
+    end
+elseif runset=="transrisk_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    scaling_intervention_options = [0:0.2:1;]
+    n_int_sets = length(scaling_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["transrisk"],
+                                            start_time = 30,
+                                            scaling_work_static = scaling_intervention_options[i],
+                                            scaling_work_dynamic = scaling_intervention_options[i],
+                                            scaling_social = scaling_intervention_options[i],
+                                            scaling_random = scaling_intervention_options[i]),
+                                intervention_struct(effects = ["transrisk"],
+                                            start_time = 80)
+                                            ] for i = 1:n_int_sets]
+
+elseif runset=="CT_engagement_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    CT_engagement_intervention_options = [0:0.2:1;]
+    n_int_sets = length(CT_engagement_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["contact_tracing"],
+                                                    start_time = 30,
+                                                    CT_parameters = CT_params(contact_tracing_active=true,
+                                                                            CT_engagement=CT_engagement_intervention_options[i]))]
+                                                                            for i = 1:n_int_sets]
+elseif runset=="contact_structure_intervention"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    contact_scaling_intervention_options = [0:0.2:1;]
+    n_int_sets = length(contact_scaling_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["contact_structure"],
+                                            start_time = 30,
+                                            social_contact_scaling = contact_scaling_intervention_options[i],
+                                            random_contact_scaling = contact_scaling_intervention_options[i]),
+                                intervention_struct(effects = ["contact_structure"],
+                                            start_time = 80)
+                                            ] for i = 1:n_int_sets]
+
+elseif runset=="adaptive_lockdown_adherence"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [0, 0.5, 1.0]
+    start_intervention_options = [30, 60, 90]
+    length_intervention_options = [1, 2, 4, 8]
+    n_blocks_intervention_options = [1, 2]
+    block_gap_weeks_options = [1, 2, 4]          # weeks between lockdowns
+    n_int_sets = length(workpercent_intervention_options)*length(start_intervention_options)*length(length_intervention_options)*length(n_blocks_intervention_options)*length(block_gap_weeks_options)
+    intervention_list_config = Array{Array{intervention_struct,1},1}(undef, n_int_sets)
+
+    adherence_period = 28   # time scale (days) at which adherence naturally decreases
+    n_adherence_periods = ceil(Int64, endtime/adherence_period)
+    adherence_period_decrease = 0.05
+
+    workpercent_op_count = 1
+    start_op_count = 1
+    length_op_count = 1
+    n_block_count = 1
+    block_gap_count = 1
+    for int_set_itr = 1:n_int_sets
+        workpercent = workpercent_intervention_options[workpercent_op_count]
+        start_time = start_intervention_options[start_op_count]
+        total_length = length_intervention_options[length_op_count]
+        n_blocks = n_blocks_intervention_options[n_block_count]
+        block_gap = block_gap_weeks_options[block_gap_count]*7
+
+        block_length = floor(Int64, (total_length*7)/n_blocks)
+
+        policy_change_times = zeros(Int64, n_blocks*2)
+        lockdown_active_array = zeros(Int64, endtime)
+        for block_itr = 1:n_blocks
+            policy_change_times[(2*(block_itr-1)+1)] = start_time+(block_itr-1)*(block_length+block_gap)
+            policy_change_times[(2*block_itr)] = start_time+(block_itr-1)*(block_length+block_gap)+block_length
+            lockdown_active_array[(start_time+(block_itr-1)*(block_length+block_gap)):(start_time+(block_itr-1)*(block_length+block_gap)+block_length)] .= 1
+        end
+
+        cumulative_lockdown_days = cumsum(lockdown_active_array)
+        cumulative_lockdown_periods = floor.(Int64, cumulative_lockdown_days./adherence_period)
+
+        adherence_over_time = ones(Float64, endtime).*adherence
+        for time_itr = 1:endtime
+            adherence_over_time[time_itr] = adherence*(1-adherence_period_decrease)^cumulative_lockdown_periods[time_itr]
+        end
+
+        intervention_list = intervention_struct[]
+
+        time_itr = adherence_period + 1
+        while time_itr <= endtime
+
+            if (time_itr+adherence_period-1) <= endtime
+                current_time_period = [time_itr:(time_itr+adherence_period-1);]
+            else
+                current_time_period = [time_itr:endtime;]
+            end
+
+            # Find policy changes in current time period
+            policy_change_ids = findall((policy_change_times.>=current_time_period[1]).*(policy_change_times.<=current_time_period[end]).==1)
+            n_policy_change = length(policy_change_ids)
+
+            if adherence_over_time[time_itr] != adherence_over_time[time_itr-adherence_period]
+                push!(intervention_list, intervention_struct(effects = ["adherence"],
+                                                start_time = time_itr,
+                                                adherence = adherence_over_time[time_itr]))
+            end
+            if n_policy_change > 0
+                for policy_change_itr = 1:n_policy_change
+                    push!(intervention_list, intervention_struct(effects = ["workpercent","contact_structure"],
+                                                    start_time = policy_change_times[policy_change_ids[policy_change_itr]],
+                                                    workpercent = workpercent*ones(workertypes),
+                                                    social_contact_scaling = workpercent,
+                                                    random_contact_scaling = workpercent))
+                end
+
+            end
+            time_itr += adherence_period
+        end
+
+        intervention_list_config[int_set_itr] = intervention_list
+
+        block_gap_count += 1
+        if block_gap_count > length(block_gap_weeks_options)
+            block_gap_count = 1
+            n_block_count += 1
+        end
+        if n_block_count > length(n_blocks_intervention_options)
+            n_block_count = 1
+            length_op_count += 1
+        end
+        if length_op_count > length(length_intervention_options)
+            length_op_count = 1
+            start_op_count += 1
+        end
+        if start_op_count > length(start_intervention_options)
+            start_op_count = 1
+            workpercent_op_count += 1
+        end
+    end
+
 #### Sensitivity configs, assuming no intervention or isolation ####
 elseif runset=="RNGseed_svty"
     sameday = 3
@@ -464,6 +901,15 @@ elseif runset=="RNGseed_svty"
     transiso_config = ones(Float64, n_configs)
     rng_config = variable_ops
     adherence = 0.
+# elseif runset=="initinfected_svty"
+#     sameday = 3
+#     ton = 1
+#     toff = 0
+#     work_percent = 1.0
+#     variable_ops = [1, 5, 10, 50]
+#     n_configs = length(variable_ops)
+#     transiso_config = ones(Float64, n_configs)
+#     init_infected_config = variable_ops
 elseif runset=="transscaling_svty"
     sameday = 3
     ton = 1
@@ -472,6 +918,11 @@ elseif runset=="transscaling_svty"
     adherence = 0.
     variable_ops = [[0.6 0.6 0.6 0.6 0.6], [0.7 0.7 0.7 0.7 0.7], [0.8 0.8 0.8 0.8 0.8],
                     [0.9 0.9 0.9 0.9 0.9], [1 1 1 1 1]]
+    # variable_ops = [[0 1 1 1], [0.25 1 1 1], [0.5 1 1 1], [0.75 1 1 1],
+    #                 [1 0 1 1], [1 0.25 1 1], [1 0.5 1 1], [1 0.75 1 1],
+    #                 [1 1 0 1], [1 1 0.25 1], [1 1 0.5 1], [1 1 0.75 1],
+    #                 [1 1 1 0], [1 1 1 0.25], [1 1 1 0.5], [1 1 1 0.75],
+    #                 [0.3 0.3 0.3 0.3], [0.4 0.4 0.4 0.4], [0.5 0.5 0.5 0.5], [0.6 0.6 0.6 0.6], [0.7 0.7 0.7 0.7], [0.8 0.8 0.8 0.8], [0.9 0.9 0.9 0.9], [1 1 1 1 1], [1.1 1.1 1.1 1.1], [1.2 1.2 1.2 1.2], [1.3 1.3 1.3 1.3], [1.4 1.4 1.4 1.4], [1.5 1.5 1.5 1.5], [1.6 1.6 1.6 1.6], [1.7 1.7 1.7 1.7], [1.8 1.8 1.8 1.8], [1.9 1.9 1.9 1.9], [2 2 2 2]]
     n_configs = length(variable_ops)
     transiso_config = ones(Float64, n_configs)
     trans_scaling_config = variable_ops
@@ -637,6 +1088,9 @@ end
 if @isdefined(CT_engagement_config)==false
     CT_engagement_config = CT_engagement*ones(n_configs)
 end
+# if @isdefined(transasymp_config)==false
+#     transasymp_config = asymp_trans_scaling*ones(n_configs)
+# end
 if @isdefined(transiso_config)==false
     transiso_config = iso_trans_scaling*ones(n_configs)
 end
@@ -649,6 +1103,10 @@ end
 if @isdefined(trans_scaling_config)==false
     trans_scaling_config = [trans_scaling for i=1:n_configs]
 end
+# if @isdefined(init_infected_config)==false
+#     # Specify number of symptomatic infecteds
+#     init_infected_config = n_initial_infecteds[3]*ones(Int64,n_configs)
+# end
 if @isdefined(adherence_config)==false
     adherence_config = adherence*ones(Int64,n_configs)
 end
@@ -671,13 +1129,15 @@ if @isdefined(max_contacts_social_config)==false
     max_contacts_social_config = []
 end
 
+#### NEW CONFIGS ADDED HERE
+
     return sameday_config, ton_config, toff_config, work_percent_config,
     n_configs, workplace_CT_threshold_config, prob_backwards_CT_config,
     infector_engage_with_CT_prob_config, CT_engagement_config,
     transiso_config, cmax_config,
     rng_config, trans_scaling_config, adherence_config,
     clustering_config, CS_team_size_config, intervention_list_config,
-    dynamic_time_frame_config, group_limit_config, max_contacts_social_config
+    dynamic_time_frame_config, group_limit_config, max_contacts_social_config   #### NEW CONFIGS ADDED HERE
 end
 
 function find_network_parameters(workertypes;workpercent::Array{Float64,1}=Array{Float64,1}[])
@@ -1408,10 +1868,6 @@ function set_infection_related_times!(time_to_symps::Array{Int64,1},states::node
     time_to_symps .= ceil.(rand(rng,d_incub,cmax)) # time to symptoms
     # (for asymptomatics, the same from a silent start of "symptoms")
 
-    ## uncomment below to change default times
-    # states.inftime = 2 # inftime is the time from infectiousness to symptoms (the same for everyone)
-    # states.symptime = 7 # symptime is the time from symptoms to not infectious
-
     # iterate over nodes to set lattime and hh_isolation
     for node_itr = 1:cmax
         # lattime is the time from infection to infectiousness
@@ -1438,3 +1894,150 @@ function set_infection_related_times!(time_to_symps::Array{Int64,1},states::node
 
     end
 end
+
+# function increment_infection_process!(states::node_states,
+#     output::sim_outputs, worker_nodes::Array{worker_params,1},
+#     workplace_closure_active,
+#     infected_by,
+#     probasymp::Float64,
+#     rng::MersenneTwister,
+#     time::Int64,
+#     count::Int64,
+#     household_contacts::Array{Array{Int64,1},1},
+#     household_contacts_per_node::Array{Int64,1},
+#     contact_tracing_active,
+#     CT_vars::contact_tracing_vars,
+#     workplace_memory,
+#     temp::temp_struct,
+#     undefined_array::Array{Int64,2})
+#
+#     # If come to the end of latent time, move to infectious time etc
+#     for node_itr = 1:cmax
+#         # if the node has reached the end of latent infection
+#         if states.timelat[node_itr]>states.lattime[node_itr]
+#             # move to being infectious
+#             states.timelat[node_itr] = -1
+#             states.timeinf[node_itr] = 1
+#
+#             # Increment time series counts
+#             output.numinf[time,count] += 1
+#             output.newinf[time,count] += 1
+#
+#             # check if new infected will be asymptomatic
+#             if states.asymp[node_itr] > 0
+#                 output.newasymp[time,count] += 1
+#             end
+#
+#             # check if it is worker that is newly infected
+#             if worker_nodes[node_itr].returned_to_work==1
+#                 output.workersinf[time,count] += 1
+#
+#                 # Count workers that are asymptomatically infected
+#                 if states.asymp[node_itr] > 0
+#                     output.workersasymp[time,count] += 1
+#                 elseif workplace_closure_active==true
+#                     # if the newly infected worker is symptomatic, add to
+#                     # the workplace memory
+#                     temp.workertype_ID = worker_nodes[node_itr].sector_ID
+#                     temp.workplace_ID = worker_nodes[node_itr].workplace_ID
+#                     workplace_memory[temp.workertype_ID][temp.workplace_ID,WP_memory_slot] += 1
+#                 end
+#             end
+#
+#             # infect rest of household
+#             # transmit over household_contacts[node_itr]
+#             # checking that contacts are susceptible
+#             transmit_over!(1.,states.timelat,infected_by,output,probasymp,
+#                     states.asymp,rng,time,count,
+#                     infecting_by=node_itr,
+#                     contacts_to_check=household_contacts[node_itr],
+#                     inisol=undefined_array,
+#                     atwork=undefined_array)
+#         end
+    #     # Update node disease state time vectors
+    #     if states.timeinf[node_itr]>states.inftime
+    #         # the node becomes symptomatic (if they develop symptoms)
+    #         states.timeinf[node_itr] = -1
+    #         states.timesymp[node_itr] = 1
+    #
+    #         # Increment time series counts
+    #         output.numrep[time,count] += 1
+    #
+    #         # Check if index case are symptomatic & would have zero adherence delay
+    #         if (states.asymp[node_itr] == 0) && (states.delay_adherence[node_itr]==0)
+    #             # Check if infected will isolate
+    #             if (states.hh_isolation[node_itr]==1)
+    #                 states.symp_timeisol[node_itr] = 1
+    #
+    #                 # Set that the unit has reported infection this timestep
+    #                 states.rep_inf_this_timestep[node_itr] = 1
+    #             end
+    #
+    #             # Irrespective of whether index case self-isolates,
+    #             # adherent members of their household may also isolate.
+    #             for hh = 1:household_contacts_per_node[node_itr]
+    #                 temp.contact_ID = household_contacts[node_itr][hh]
+    #                 if (states.hh_isolation[temp.contact_ID]==1) && (states.symp_timeisol[temp.contact_ID]==0) # Individual not already symptomatic themselves
+    #                     states.timeisol[temp.contact_ID] = 1
+    #                 end
+    #             end
+    #         end
+    #
+    #         # If contact tracing active, increase number of symptomatic infections
+    #         # in household by one
+    #         if contact_tracing_active == true
+    #             if (states.asymp[node_itr] == 0) # Check case is symptomatic
+    #                 current_node_household_ID = worker_nodes[node_itr].household_ID
+    #                 CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] += 1
+    #             end
+    #         end
+    #     end
+    #
+    #     # Check if node, if having a delayed adherence, begins adherence on current day
+    #     if (states.timesymp[node_itr] > 1)&&((states.timesymp[node_itr]-1)==states.delay_adherence[node_itr]) # Condition for node beginning adherence on current day & has been symptomatic for at least one day
+    #         if states.asymp[node_itr] == 0 # Check node is symptomatic and will adhere
+    #             if states.hh_isolation[node_itr]==1 # Check node will adhere
+    #                 states.symp_timeisol[node_itr] = 1 + states.delay_adherence[node_itr]
+    #
+    #                 # Set that the unit has reported infection this timestep
+    #                 states.rep_inf_this_timestep[node_itr] = 1
+    #             end
+    #
+    #             # Household members now aware of index case having symptoms.
+    #             # Adherent members of their household may also now isolate,
+    #             # assuming infected displays symptoms
+    #             # Note they are delayed in isolating, in line with delay
+    #             # of the index case
+    #             for hh = 1:household_contacts_per_node[node_itr]
+    #                 temp.contact_ID = household_contacts[node_itr][hh]
+    #                 if (states.hh_isolation[temp.contact_ID]==1) && (states.symp_timeisol[temp.contact_ID]==0) # Individual not already symptomatic themselves
+    #                         # Individual shortens isolation by length of time since
+    #                         # unwell individual began displaying symptoms
+    #                     states.timeisol[temp.contact_ID] = 1 + states.delay_adherence[node_itr]
+    #                 end
+    #             end
+    #         end
+    #     end
+    #
+    #     # Check if node has reached end of symptom period
+    #     if states.timesymp[node_itr]>states.symptime
+    #         states.timesymp[node_itr] = -1
+    #
+    #         # If contact tracing active and case was symptomatic,
+    #         # decrease number of symptomatic infections in household by one
+    #         if contact_tracing_active == true
+    #             # Check case is symptomatic & not returned a false negative (if false negative, has already been subtracted)
+    #             if (states.asymp[node_itr] == 0) && (CT_vars.Test_result_false_negative[node_itr] == false)
+    #                 current_node_household_ID = worker_nodes[node_itr].household_ID
+    #                 CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] -= 1
+    #
+    #                 # Error check
+    #                 if CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] < 0
+    #                     error("CT_vars.Symp_cases_per_household_pos_or_unknown contains a negative entry. Terminate programme.")
+    #                 end
+    #
+    #             end
+    #         end
+    #     end
+    # end
+# end

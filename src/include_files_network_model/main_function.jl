@@ -79,7 +79,7 @@ function worker_pattern_network_run(RNGseed::Int64,
      Unpack required variables
      """
     # if contact_tracing_active==true
-        @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_false_negative_vec,
+        @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_detection_prob_vec,
             CT_caused_isol_limit, dynamic_contacts_recalled_propn, social_contacts_recalled_propn, prob_backwards_CT,
             perform_CT_from_infector, infector_engage_with_CT_prob, contact_tracing_active, workplace_closure_active = CT_parameters
     # end
@@ -497,7 +497,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                 infection_parameters = deepcopy(infection_parameters_preintervention)
                 network_parameters = deepcopy(network_parameters_preintervention)
 
-                @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_false_negative_vec,
+                @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_detection_prob_vec,
                     CT_caused_isol_limit, dynamic_contacts_recalled_propn, social_contacts_recalled_propn, prob_backwards_CT,
                     perform_CT_from_infector, infector_engage_with_CT_prob, contact_tracing_active, workplace_closure_active = CT_parameters
 
@@ -639,7 +639,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                                            assign_random_transrisk_fn)
 
                         if "contact_tracing" ∈ intervention_list[intervention_id].effects
-                            @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_false_negative_vec,
+                            @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_detection_prob_vec,
                                 CT_caused_isol_limit, dynamic_contacts_recalled_propn, social_contacts_recalled_propn, prob_backwards_CT,
                                 perform_CT_from_infector, infector_engage_with_CT_prob, contact_tracing_active, workplace_closure_active = CT_parameters
                         end
@@ -844,13 +844,13 @@ function worker_pattern_network_run(RNGseed::Int64,
 
                         # find the total time infectious
                         if states.timeinf[node_itr]>0
-                            tot_time_inf = states.timeinf[node_itr]
+                            tot_time_infectious = states.timeinf[node_itr]
                         else
-                            tot_time_inf = states.timesymp[node_itr]+states.inftime
+                            tot_time_infectious = states.timesymp[node_itr]+states.inftime
                         end
 
                         # find the infectiousness
-                        infectiousness = dist_infectivity[tot_time_inf]
+                        infectiousness = dist_infectivity[tot_time_infectious]
                         current_worker = worker_nodes[node_itr]
                         if states.asymp[node_itr]>0 # Asymptomatic
                             transtemp_household = current_worker.transrisk_household*infectiousness*asymp_trans_scaling
@@ -1029,15 +1029,24 @@ function worker_pattern_network_run(RNGseed::Int64,
                                 # Determine whether test result will return a negative outcome
                                 # - Get time since node_itr became infected
                                 # - Given time since infected, look up probability case will return negative test result
-                                if states.timeinf[node_itr]>0
-                                    tot_time_inf = states.timeinf[node_itr]
+                                # if states.timeinf[node_itr]>0
+                                #     tot_time_inf = states.timeinf[node_itr]
+                                # else
+                                #     tot_time_inf = states.timesymp[node_itr]+states.inftime
+                                # end
+                                if states.timelat[node_itr]>0
+                                    tot_time_inf = states.timelat[node_itr]
+                                elseif states.timeinf[node_itr]>0
+                                    tot_time_inf = states.timeinf[node_itr] + states.lattime[node_itr]
                                 else
-                                    tot_time_inf = states.timesymp[node_itr]+states.inftime
+                                    tot_time_inf = states.timesymp[node_itr]+ states.inftime + states.lattime[node_itr]
                                 end
-                                test_false_negative_prob = test_false_negative_vec[tot_time_inf]
+
+                                # Get relevant sensitivity value based on time since infection
+                                test_detection_prob = test_detection_prob_vec[tot_time_inf]
 
                                 # Bernoulli trial to determine if false negative returned
-                                if rand(rng) < test_false_negative_prob
+                                if rand(rng) < (1 - test_detection_prob)
                                     CT_vars.Test_result_false_negative[node_itr] = true
                                 end
 
@@ -1309,6 +1318,12 @@ function worker_pattern_network_run(RNGseed::Int64,
         end
 
     end
+
+    # Compute variance in number of infected per node
+    # var_num_infected = zeros(countfinal)
+    # for count=1:countfinal
+    #     var_num_infected[count] = var(output.num_infected[:,count,intervention_set_itr])
+    # end
 
     # Specify what is output from the function
     return output

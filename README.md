@@ -4,6 +4,8 @@ This repository contains files for performing computational simulations of a net
 
 The code was developed for the analysis presented in the scientific paper "A network modelling approach to assess nonpharmaceutical disease controls in a worker population: An application to SARS-CoV-2" by Edward M. Hill, Benjamin D. Atkins, Matt J. Keeling, Louise Dyson and Michael J. Tildesley.
 
+Preprint details: Hill et al. (2020) A network modelling approach to assess non-pharmaceutical disease controls in a worker population: An application to SARS-CoV-2. *medRxiv* doi: 10.1101/2020.11.18.20230649. URL: https://doi.org/10.1101/2020.11.18.20230649.
+
 Model simulations are performed using the programming language Julia.
 Julia makes use of environments, allowing bespoke package lists for separate projects. Documentation on working with environments and installing packages in the same state that is given by the project manifest: https://julialang.github.io/Pkg.jl/v1.5/environments/#Using-someone-else's-project-1
 

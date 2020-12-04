@@ -75,11 +75,11 @@ grey_colour_vec = [0.5 0.5 0.5];
 
 % Set y-axis values
 if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))
-    ytick_vals = [0,0.05,0.10,0.15];
+    ytick_vals = [0,0.05,0.10,0.15,0.20,0.25];
 elseif (strcmp(variablename,'isol_prevalence')) && (strcmp(dataset,'COVID_secure'))
     ytick_vals = [0 0.0002 0.0004  0.0006 0.0008 0.001];
 elseif (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure_no_isol'))
-    ytick_vals = [0,0.10,0.20,0.30,0.40];
+    ytick_vals = [0,0.10,0.20,0.30,0.40,0.50];
 end
 
 % Set up plot
@@ -127,6 +127,14 @@ for row_itr = 1:plot_nRows
         
          % Set y-axis ticks
          yticks(ytick_vals)
+         
+         % Set tick format
+         if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))
+            ytickformat('%.2f')
+         else
+            ytickformat('%.1f')
+         end
+
 
         % Set axes labels
 %         if row_itr == plot_nRows
@@ -158,11 +166,11 @@ end
 % Set up y-position reference value. Positions of other labels made
 % relative to column headers
 if (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure'))
-    y_ref_val = 1.00;
+    y_ref_val = 1.31;
 elseif (strcmp(variablename,'isol_prevalence')) && (strcmp(dataset,'COVID_secure'))
-    y_ref_val = 0.0063;
+    y_ref_val = 0.0062;
 elseif (strcmp(variablename,'inf_prevalence')) && (strcmp(dataset,'COVID_secure_no_isol'))
-    y_ref_val = 2.25;
+    y_ref_val = 2.72;
 end
 
 % Set up column headers
@@ -171,7 +179,7 @@ text(-218,y_ref_val,'Work team size: 5','FontSize',plot_fontsize,'FontWeight','b
 text(40,y_ref_val,'Work team size: 10','FontSize',plot_fontsize,'FontWeight','bold')
 
 % Set up row headers
-text(268,y_ref_val*0.75,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
+text(268,y_ref_val*0.725,'COVID-secure transmission risk scaling','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
 text(228,y_ref_val*0.91,'0.25','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
 text(228,y_ref_val*0.64,'0.50','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
 text(228,y_ref_val*0.38,'0.75','FontSize',plot_fontsize,'FontWeight','bold','Rotation',270)
@@ -188,8 +196,8 @@ p2 = fill(NaN,NaN,'r','FaceColor',1-0.7*(1-colour_vec),'EdgeColor','none','Displ
 p3 = fill(NaN,NaN,'r','FaceColor',1-0.45*(1-colour_vec),'EdgeColor','none','DisplayName','90% prediction interval');
 p4 = fill(NaN,NaN,'r','FaceColor',1-0.2*(1-colour_vec),'EdgeColor','none','DisplayName','99% prediction interval');
 legend([p1;p2;p3;p4],...
-    'FontSize',22,...
-    'Position',[0.78 0.86 0.09 0.04]);
+    'FontSize',20,...
+    'Position',[0.795 0.86 0.08 0.03]);
 
 % Save file
 if strcmp(dataset,'COVID_secure')

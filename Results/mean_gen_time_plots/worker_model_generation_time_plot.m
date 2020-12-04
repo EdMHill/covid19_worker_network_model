@@ -35,7 +35,7 @@ set(fig,'Color', [1 1 1])
 hold on
 
 % Specify bin edges
-edges = 3.5:0.5:10.5;
+edges = 4.0:0.5:10.5;
 
 % Generate the histogram
 for config_itr = 1:n_configs

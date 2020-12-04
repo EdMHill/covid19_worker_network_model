@@ -441,6 +441,7 @@ if multi_panel_plot_flag == true
 
     % Set axis ticks
     yticks(0:0.1:1)
+    ytickformat('%.2f')
     xticks(xticks_vals)
     xticklabels(xticks_labels)
     
@@ -636,6 +637,7 @@ else
 
     % Set axis ticks
     yticks(0:0.1:1)
+    ytickformat('%.2f')
     xticks(xticks_vals)
     xticklabels(xticks_labels)
 

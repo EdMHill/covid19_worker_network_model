@@ -186,6 +186,7 @@ function plot_heatmap(heatmap_data,yaxis_label,xaxis_label,panel_title,...
         c.Label.String = 'Fraction of simulations satisfying the criteria';
         c.LineWidth = 1.5;
         c.FontSize = floor(plot_fontsize);
+        set(c,'YTickLabel',{'0.0';'0.1';'0.2';'0.3';'0.4';'0.5';'0.6';'0.7';'0.8';'0.9';'1.0'})
     end
 
     % Specify general axis properties

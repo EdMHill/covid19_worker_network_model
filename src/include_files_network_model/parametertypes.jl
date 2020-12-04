@@ -56,7 +56,9 @@ end
 
    # Propotions of tests returning a false negative outcome
    # Entry per day since infected
-   test_false_negative_vec::Array{Float64,1} = 0.13*ones(20)
+   test_detection_prob_vec::Array{Float64,1} = [0.,0.11,0.59,0.785,0.83,0.845,0.84,0.82,0.79,0.76,  # Days 1-10
+                                                0.72,0.68,0.64,0.59,0.54,0.485,0.445,0.405,0.37,0.335, # Days 11-20
+                                                0.30,0.27,0.24,0.22,0.20,0.18,0.16,0.15,0.14,0.13] # Days 21-30
 
    # Amount of time spent in isolation if contact traced
    CT_caused_isol_limit::Int64 = 14
@@ -218,7 +220,7 @@ end
    n_social_mean_workday::Int64 = 1
    n_social_mean_nonworkday::Int64 = 5
 
-   # Distribution of latent period
+   # Distribution of incubation period
    d_incub::Distribution = Erlang(6,0.88)
 
    # Distribution of infectiousness
