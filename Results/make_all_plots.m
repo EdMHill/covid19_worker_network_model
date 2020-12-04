@@ -6,7 +6,7 @@ make_violinplots('workpercent','final_size')
 make_violinplots('worker_patterns','final_size')
 
 %% make peak infections plots
-make_violinplots('adherence','peak_inf')
+%make_violinplots('adherence','peak_inf')
 make_violinplots('workpercent','peak_inf')
 %make_violinplots('workpercent_and_backwardsCT','peak_inf')
 make_violinplots('worker_patterns','peak_inf')

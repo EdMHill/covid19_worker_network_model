@@ -32,15 +32,15 @@ cmax = 10000;
 
 %% Compute desired summary statistics
 if strcmp(variablename,'final_size')
-    % Number of infections from day 15 onwards (i.e. timestep 16)
-    offset_idx = 16;
+    % Number of infections from day 15 onwards (i.e. after day 14, which is timestep 15)
+    offset_idx = 15;
     adherence_final_size = squeeze(adherence_data.numinf_combined(end,:,:) - adherence_data.numinf_combined(offset_idx,:,:));
     workpercent_final_size = squeeze(workpercent_data.numinf_combined(end,:,:) - workpercent_data.numinf_combined(offset_idx,:,:));
     backwards_CT_final_size = squeeze(backwards_CT_data.numinf_combined(end,:,:) - backwards_CT_data.numinf_combined(offset_idx,:,:));
     synch_final_size = squeeze(synch_data.numinf_combined(end,:,:) - synch_data.numinf_combined(offset_idx,:,:));
     asynch_final_size = squeeze(asynch_data.numinf_combined(end,:,:) - asynch_data.numinf_combined(offset_idx,:,:));
     
-    % Proportion of infections from day 15 onwards (i.e. timestep 16)
+    % Proportion of infections from day 15 onwards
     adherence_input_data = adherence_final_size/cmax;
     workpercent_input_data = workpercent_final_size/cmax;
     backwards_CT_input_data = backwards_CT_final_size/cmax;
@@ -54,8 +54,8 @@ elseif strcmp(variablename,'peak_inf')
     synch_input_data = squeeze(max(synch_data.newinf_combined))/cmax;
     asynch_input_data = squeeze(max(asynch_data.newinf_combined))/cmax;
 elseif strcmp(variablename,'total_isolation')
-    % total number of isolation-days from day 15 onwards (i.e. timestep 16)
-    offset_idx = 16;
+    % total number of isolation-days from day 15 onwards
+    offset_idx = 15;
     adherence_input_data = squeeze(sum(adherence_data.num_isolating_combined(offset_idx:end,:,:)));
     workpercent_input_data = squeeze(sum(workpercent_data.num_isolating_combined(offset_idx:end,:,:)));
     backwards_CT_input_data = squeeze(sum(backwards_CT_data.num_isolating_combined(offset_idx:end,:,:)));
@@ -85,19 +85,19 @@ elseif strcmp(variablename,'duration')
 %             adherence_input_data(i,j) = find(adherence_data.numinf_combined(:,i,j)>0,1,'last');
 %             workpercent_input_data(i,j) = find(workpercent_data.numinf_combined(:,i,j)>0,1,'last');
 %             backwards_CT_input_data(i,j) = find(backwards_CT_data.numinf_combined(:,i,j)>0,1,'last');
-            adherence_input_data(i,j) = find(adherence_data.prev(:,i,j)>0,1,'last');
-            backwards_CT_input_data(i,j) = find(backwards_CT_data.prev(:,i,j)>0,1,'last');
+            adherence_input_data(i,j) = find(adherence_data.prev(:,i,j)>0,1,'last') - 1;
+            backwards_CT_input_data(i,j) = find(backwards_CT_data.prev(:,i,j)>0,1,'last') - 1;
         end
     end
     for i = 1:length(workpercent_data.numinf_combined(1,:,1))
         for j = 1:length(workpercent_data.numinf_combined(1,1,:))
-            workpercent_input_data(i,j) = find(workpercent_data.prev(:,i,j)>0,1,'last');
+            workpercent_input_data(i,j) = find(workpercent_data.prev(:,i,j)>0,1,'last') - 1;
         end
     end
     for i = 1:length(synch_data.numinf_combined(1,:,1))
         for j = 1:length(synch_data.numinf_combined(1,1,:))
-            synch_input_data(i,j) = find(synch_data.prev(:,i,j)>0,1,'last');
-            asynch_input_data(i,j) = find(asynch_data.prev(:,i,j)>0,1,'last');
+            synch_input_data(i,j) = find(synch_data.prev(:,i,j)>0,1,'last') - 1;
+            asynch_input_data(i,j) = find(asynch_data.prev(:,i,j)>0,1,'last') - 1;
         end
     end
 end
@@ -438,8 +438,10 @@ function generate_sensitivity_plot(input_data,...
     ylabel(yaxis_label)
     if strcmp(variablename,'final_size')
         ytickformat('%.1f')
-    elseif strcmp(variablename,'peak_inf')
+    elseif (strcmp(variablename,'peak_inf')) && (strcmp(dataset,'adherence'))
         ytickformat('%.2f')
+    elseif (strcmp(variablename,'peak_inf'))
+        ytickformat('%.3f')
     elseif strcmp(variablename,'peak_isolation')
         ytickformat('%.2f')
     elseif (strcmp(variablename,'total_isolation')) && (strcmp(dataset,'adherence'))

@@ -231,7 +231,7 @@ if sum(strcmp(variable_names,'duration') == 1)
     duration_data = zeros(size(squeeze(prev_data(1,:,:))));
     for i = 1:length(input_data.numinf_combined(1,:,1))
         for j = 1:length(input_data.numinf_combined(1,1,:))
-            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last');        
+            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last') - 1;        
         end
     end
     

@@ -26,9 +26,41 @@ CS_data_no_isol = load('worker_model_output_CS_intervention_no_isol_combined.mat
 format bank
 [adherence_array,adherence_CI_lb,adherence_CI_ub] = threshold_event_vals(adherence_data,cmax,n_simns);
 [workpercent_array,workpercent_CI_lb,workpercent_CI_ub] = threshold_event_vals(workpercent_data,cmax,n_simns);
-[backwards_CT_array,backwards_CI_lb,backwards_CI_ub] = threshold_event_vals(backwards_CT_data,cmax,n_simns);
+%[backwards_CT_array,backwards_CI_lb,backwards_CI_ub] = threshold_event_vals(backwards_CT_data,cmax,n_simns);
 [synch_array,synch_CI_lb,synch_CI_ub] = threshold_event_vals(synch_data,cmax,n_simns);
 [asynch_array,asynch_CI_lb,asynch_CI_ub] = threshold_event_vals(asynch_data,cmax,n_simns);
+
+% % Put into string format
+% central_vals = {synch_array,asynch_array};
+% lb_vals = {synch_CI_lb,asynch_CI_lb};
+% ub_vals = {synch_CI_ub,asynch_CI_ub};
+% n_cols = 6;
+
+% central_vals = {adherence_array};
+% lb_vals = {adherence_CI_lb};
+% ub_vals = {adherence_CI_ub};
+% n_cols = 11;
+
+central_vals = {workpercent_array};
+lb_vals = {workpercent_CI_lb};
+ub_vals = {workpercent_CI_ub};
+n_cols = 12;
+
+n_stats = numel(central_vals);
+n_rows = 5;
+event_prob_table_output = cell(n_rows,n_cols,n_stats);
+formatSpec = '%.2f(%.2f,%.2f)';
+for stat_itr = 1:n_stats
+    for col_idx = 1:n_cols
+        for row_idx = 1:n_rows
+            cell_itr = ((col_idx - 1)*n_rows) + row_idx;
+            A1 = central_vals{stat_itr}(row_idx,col_idx);
+            A2 = lb_vals{stat_itr}(row_idx,col_idx);
+            A3 = ub_vals{stat_itr}(row_idx,col_idx);
+            event_prob_table_output{row_idx,col_idx,stat_itr} = sprintf(formatSpec,A1,A2,A3);
+        end
+    end
+end
 
 %% Violin plots
 format long
@@ -52,6 +84,31 @@ format bank
     CS_data_isol_CI_ub] = heatmap_table_vals(CS_data,'avg_isolation',cmax,n_simns);
 [CS_data_peak_isol,CS_data_peak_isol_CI_lb,...
     CS_data_peak_isol_CI_ub] = heatmap_table_vals(CS_data,'peak_isolation',cmax,n_simns);
+
+% Put into string format
+central_vals = {CS_data_no_isol_final_size,CS_data_no_isol_duration,CS_data_final_size,...
+    CS_data_duration,CS_data_isol,CS_data_peak_isol};
+lb_vals = {CS_data_no_isol_final_size_CI_lb,CS_data_no_isol_duration_CI_lb,CS_data_final_size_CI_lb,...
+    CS_data_duration_CI_lb,CS_data_isol_CI_lb,CS_data_peak_isol_CI_lb};
+ub_vals = {CS_data_no_isol_final_size_CI_ub,CS_data_no_isol_duration_CI_ub,CS_data_final_size_CI_ub,...
+    CS_data_duration_CI_ub,CS_data_isol_CI_ub,CS_data_peak_isol_CI_ub};
+
+n_stats = numel(central_vals);
+n_rows = 4;
+n_cols = 3;
+table_output = cell(n_rows,n_cols,n_stats);
+formatSpec = '%.2f(%.2f,%.2f)';
+for stat_itr = 1:n_stats
+    for col_idx = 1:n_cols
+        for row_idx = 1:n_rows
+            cell_itr = ((col_idx - 1)*n_rows) + row_idx;
+            A1 = central_vals{stat_itr}(row_idx,col_idx);
+            A2 = lb_vals{stat_itr}(row_idx,col_idx);
+            A3 = ub_vals{stat_itr}(row_idx,col_idx);
+            table_output{row_idx,col_idx,stat_itr} = sprintf(formatSpec,A1,A2,A3);
+        end
+    end
+end
 
 %% Functions to compute desired summary statistics
 
@@ -89,7 +146,7 @@ function [output_array,jeffreys_CI_lb,jeffreys_CI_ub] = threshold_event_vals(inp
     duration_data = zeros(size(squeeze(prev_data(1,:,:))));
     for i = 1:length(input_data.numinf_combined(1,:,1))
         for j = 1:length(input_data.numinf_combined(1,1,:))
-            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last');        
+            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last') - 1;        
         end
     end
     
@@ -115,7 +172,7 @@ end
 function output_array = violin_vals(input_data,cmax,n_simns)
 
     % Number of infections over duration of outbreak
-    final_size_absolute = squeeze(input_data.numinf_combined(end,:,:));
+    final_size_absolute = squeeze(input_data.numinf_combined(end,:,:) - input_data.numinf_combined(15,:,:));
 
     % Propn of infections over duration of outbreak
     final_size_propn = final_size_absolute/cmax;
@@ -134,7 +191,7 @@ function output_array = violin_vals(input_data,cmax,n_simns)
     duration_data = zeros(size(squeeze(prev_data(1,:,:))));
     for i = 1:length(input_data.numinf_combined(1,:,1))
         for j = 1:length(input_data.numinf_combined(1,1,:))
-            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last');        
+            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last') - 1;        
         end
     end
     
@@ -241,7 +298,7 @@ if sum(strcmp(variable_name,'duration') == 1)
     duration_data = zeros(size(squeeze(prev_data(1,:,:))));
     for i = 1:length(CS_data.numinf_combined(1,:,1))
         for j = 1:length(CS_data.numinf_combined(1,1,:))
-            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last');        
+            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last') - 1;        
         end
     end
     
