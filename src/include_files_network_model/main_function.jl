@@ -1029,21 +1029,14 @@ function worker_pattern_network_run(RNGseed::Int64,
                                 # Determine whether test result will return a negative outcome
                                 # - Get time since node_itr became infected
                                 # - Given time since infected, look up probability case will return negative test result
-                                # if states.timeinf[node_itr]>0
-                                #     tot_time_inf = states.timeinf[node_itr]
-                                # else
-                                #     tot_time_inf = states.timesymp[node_itr]+states.inftime
-                                # end
-                                if states.timelat[node_itr]>0
-                                    tot_time_inf = states.timelat[node_itr]
-                                elseif states.timeinf[node_itr]>0
-                                    tot_time_inf = states.timeinf[node_itr] + states.lattime[node_itr]
-                                else
-                                    tot_time_inf = states.timesymp[node_itr]+ states.inftime + states.lattime[node_itr]
-                                end
+                                tot_time_inf = time - states.acquired_infection[node_itr]
 
-                                # Get relevant sensitivity value based on time since infection
-                                test_detection_prob = test_detection_prob_vec[tot_time_inf]
+                                # Get relevant test sensitivity value based on time since infection
+                                if tot_time_inf == 0
+                                    test_detection_prob = 0.
+                                else
+                                    test_detection_prob = test_detection_prob_vec[tot_time_inf]
+                                end
 
                                 # Bernoulli trial to determine if false negative returned
                                 if rand(rng) < (1 - test_detection_prob)
