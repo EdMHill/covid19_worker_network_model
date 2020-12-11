@@ -17,7 +17,8 @@ function worker_pattern_network_run(RNGseed::Int64,
                                         network_parameters::network_params,
                                         workplace_generation_parameters::workplace_generation_params,
                                         workplace_closure_active::Bool,
-                                        intervention_list_configs::Array{Array{intervention_struct,1},1};
+                                        intervention_list_configs::Array{Array{intervention_struct,1},1},
+                                        runset::String;
                                         intervention_fns::Array{Function} = Array{Function}(undef),
                                         assign_household_transrisk_fn::Function = assign_household_transmit_onegroup!,
                                         assign_workplace_static_transrisk_fn::Function = assign_workplace_static_transmit!,
@@ -44,7 +45,8 @@ function worker_pattern_network_run(RNGseed::Int64,
 # network_parameters::network_params - Parameter structure for network params
 # workplace_generation_parameters::workplace_generation_params - Parameter structure for workplace generation params
 # workplace_closure_active::Bool - Whether workplace closures are in operation or not
-# intervention_fns - Specify use of any additional, trigger interventions
+# intervention_list_configs - Specify use of any additional, trigger interventions
+# runset::String - Name of the scenario being run. Used to bring interventions into effect for specified scenarios.
 # assign_household_transrisk_fn - Specify assignment of individuals to household groups with differing household transmission risk
 
 # For parameters within the parameter structures, see "include_files_network_model/parametertypes.jl"
@@ -650,6 +652,80 @@ function worker_pattern_network_run(RNGseed::Int64,
                             @unpack CS_active_flag, workplace_info, worker_nodes = network_parameters
                             @unpack CS_scale_transrisk = infection_parameters
                         end
+
+                        # For specified runsets, with intervention including introduction of isolation guidance
+                        # Check symptomatic status of all individuals
+                        # Iterate over each symptomatic.
+                        # - If they adhere, they isolate
+                        # - Check household members. If they adhere (and not symptomatic themselves),
+                        #       they enter household isolation tracker.
+                        if runset ∈ ["synchronised_changedays_intervention","variable_changedays_intervention","workpercent_intervention",
+                                    "CS_intervention","CS_intervention_no_isol","adherence_intervention"]
+                            for node_itr = 1:cmax
+                                # Check symptomatic status of all individuals
+                                # Two conditions: Not asymptomatic AND is in symptomatic phase of infeciton (if symptoms displayed)
+                                if (states.asymp[node_itr] == 0) && (states.timesymp[node_itr] > 0)
+                                    # For each symptomatic.
+                                    # - If the person adheres to new guidance, they now enter symptomatic isolation
+                                    # - Check household members. If they adhere (and not symptomatic themselves),
+                                    #       they enter household isolation tracker.
+
+                                    # Index case isolation check
+                                    if states.hh_isolation[node_itr] == 1
+
+                                        # Isolation due to presence of symptoms
+                                        # Set tracker to match time elapsed since symptom onset
+                                        states.symp_timeisol[node_itr] = states.timesymp[node_itr]
+
+                                        # Check current isolation time does not already exceed the specified
+                                        # duration of symptomatic isolation
+                                        # If it does, then individual does not enter isolation
+                                        if states.symp_timeisol[node_itr] > infection_parameters.symp_isoltime
+                                            states.symp_timeisol[node_itr] = 0
+                                        else
+                                            # Individual DOES enter symptomatic isolation.
+                                            # Supercedes household isolation. Reset that counter
+                                            states.timeisol[node_itr] = 0
+                                        end
+                                    end
+
+                                    # Irrespective of whether index case self-isolates,
+                                    # adherent members of their household may also isolate.
+                                    for hh = 1:household_contacts_per_node[node_itr]
+                                        contact_ID = household_contacts[node_itr][hh]
+                                        if (states.hh_isolation[contact_ID]==1) && (states.symp_timeisol[contact_ID]==0) # Individual not already symptomatic themselves
+                                            # Household member enters household isolation
+                                            # Get time since index case first displayed symptoms
+                                            index_case_timesymp = states.timesymp[node_itr]
+
+                                            # Account for situation of multiple symptomatics in household
+                                            # Want to set household isolation tracker based on the MOST RECENT
+                                            # time a household member first displayed symptoms
+                                            if index_case_timesymp < states.timeisol[contact_ID]
+                                                states.timeisol[contact_ID] = index_case_timesymp
+                                            end
+
+                                            # Check current isolation time does not already exceed the specified
+                                            # duration of household isolation
+                                            # If it does, then individual does not enter isolation
+                                            if states.timeisol[contact_ID] > household_isoltime
+                                                states.timeisol[contact_ID] = 0
+                                            else
+                                                # Individual DOES enter household isolation.
+                                                # Adjust the time (as things stand) individual will be able to leave
+                                                # household isolation
+                                                timesteps_hh_isol_skipped = states.timeisol[contact_ID] - 1 # Subtract 1 as states.timeisol[contact_ID] = 1 is initial day of isolation. i.e. 0 timesteps skipped
+                                                CT_vars.hh_isolation_release_time[contact_ID] = time + household_isoltime - timesteps_hh_isol_skipped
+                                                    # E.g. Time = 15. household_isoltime = 14.
+                                                    # If starting full isolation window from day 15, will span days 15-28, with release time set as 29 (15+14)
+                                                    # With timesteps_hh_isol_skipped = t, isolation window will span
+                                                    # 15-(28-t), with release time set as (29-t)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
 
@@ -725,7 +801,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                         if (states.asymp[node_itr] == 0) && (states.delay_adherence[node_itr]==0)
                             # Check if infected will isolate
                             if (states.hh_isolation[node_itr]==1)
+                                # Isolation due to presence of symptoms
                                 states.symp_timeisol[node_itr] = 1
+
+                                # Supercedes household isolation. Reset that counter
+                                states.timeisol[node_itr] = 0
 
                                 # Set that the unit has reported infection this timestep
                                 states.rep_inf_this_timestep[node_itr] = 1
@@ -737,6 +817,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                                 contact_ID = household_contacts[node_itr][hh]
                                 if (states.hh_isolation[contact_ID]==1) && (states.symp_timeisol[contact_ID]==0) # Individual not already symptomatic themselves
                                     states.timeisol[contact_ID] = 1
+
+                                    # If no testing taking place, store time of expected household isolation release
+                                     if contact_tracing_active == false
+                                         CT_vars.hh_isolation_release_time[contact_ID] = time + household_isoltime
+                                     end
                                 end
                             end
                         end
@@ -755,7 +840,12 @@ function worker_pattern_network_run(RNGseed::Int64,
                     if (states.timesymp[node_itr] > 1)&&((states.timesymp[node_itr]-1)==states.delay_adherence[node_itr]) # Condition for node beginning adherence on current day & has been symptomatic for at least one day
                         if states.asymp[node_itr] == 0 # Check node is symptomatic and will adhere
                             if states.hh_isolation[node_itr]==1 # Check node will adhere
+
+                                # Isolation due to presence of symptoms
                                 states.symp_timeisol[node_itr] = 1 + states.delay_adherence[node_itr]
+
+                                # Supercedes household isolation. Reset that counter
+                                states.timeisol[node_itr] = 0
 
                                 # Set that the unit has reported infection this timestep
                                 states.rep_inf_this_timestep[node_itr] = 1
@@ -769,9 +859,17 @@ function worker_pattern_network_run(RNGseed::Int64,
                             for hh = 1:household_contacts_per_node[node_itr]
                                 contact_ID = household_contacts[node_itr][hh]
                                 if (states.hh_isolation[contact_ID]==1) && (states.symp_timeisol[contact_ID]==0) # Individual not already symptomatic themselves
-                                    states.timeisol[contact_ID] = 1 + states.delay_adherence[node_itr]
-                                        # Individual shortens isolation by length of time since
-                                        # unwell individual began displaying symptoms
+                                    set_hh_isol_time = 1 + states.delay_adherence[node_itr]
+                                     if (states.timeisol[contact_ID] > set_hh_isol_time)
+                                             states.timeisol[contact_ID] = set_hh_isol_time
+                                     end
+                                         # Individual shortens isolation by length of time since
+                                         # unwell individual began displaying symptoms
+
+                                     # If no testing taking place, store time of expected household isolation release
+                                     if contact_tracing_active == false
+                                         CT_vars.hh_isolation_release_time[contact_ID] = time + household_isoltime - states.delay_adherence[node_itr]
+                                     end
                                 end
                             end
                         end
@@ -1029,14 +1127,21 @@ function worker_pattern_network_run(RNGseed::Int64,
                                 # Determine whether test result will return a negative outcome
                                 # - Get time since node_itr became infected
                                 # - Given time since infected, look up probability case will return negative test result
-                                tot_time_inf = time - states.acquired_infection[node_itr]
-
-                                # Get relevant test sensitivity value based on time since infection
-                                if tot_time_inf == 0
-                                    test_detection_prob = 0.
+                                # if states.timeinf[node_itr]>0
+                                #     tot_time_inf = states.timeinf[node_itr]
+                                # else
+                                #     tot_time_inf = states.timesymp[node_itr]+states.inftime
+                                # end
+                                if states.timelat[node_itr]>0
+                                    tot_time_inf = states.timelat[node_itr]
+                                elseif states.timeinf[node_itr]>0
+                                    tot_time_inf = states.timeinf[node_itr] + states.lattime[node_itr]
                                 else
-                                    test_detection_prob = test_detection_prob_vec[tot_time_inf]
+                                    tot_time_inf = states.timesymp[node_itr]+ states.inftime + states.lattime[node_itr]
                                 end
+
+                                # Get relevant sensitivity value based on time since infection
+                                test_detection_prob = test_detection_prob_vec[tot_time_inf]
 
                                 # Bernoulli trial to determine if false negative returned
                                 if rand(rng) < (1 - test_detection_prob)
@@ -1092,21 +1197,97 @@ function worker_pattern_network_run(RNGseed::Int64,
                                         error("CT_vars.Symp_cases_per_household_pos_or_unknown contains a negative entry. Terminate programme.")
                                     end
 
-                                    # If returning a false negative, can release other household members from isolation
-                                    # Only release if no other household members are symptomatic
-                                    if CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] == 0
-                                        n_household_contacts = length(household_contacts[node_itr])
-                                        for household_contact_itr = 1:n_household_contacts
-                                            household_contact_ID = household_contacts[node_itr][household_contact_itr]
-                                            if states.timeisol_CTcause[household_contact_ID] == 0 # Check not also self isolating due to contact tracing
-                                                states.timeisol[household_contact_ID] = 0
-                                            end
-                                        end
-                                    end
+                                     # Negative result. Possible release from household isolation
+                                     # Procedure (iterating over each adhering individual in household):
+                                     # (i) Release individuals from household isolation (if previous confirmed hh isol release time less than current time)
+                                     # (ii) Check current hh isol time elapsed tracker. See if hh isol has been triggered by another hh member more recently.
+                                     # (iii) If no more recent events, reset household isolation tracker to previous values.
+                                     n_household_contacts = length(household_contacts[node_itr])
+                                     for household_contact_itr = 1:n_household_contacts
+                                         household_contact_ID = household_contacts[node_itr][household_contact_itr]
 
+                                         # Check individual would isolate
+                                         # AND not isolating due to positive test/symptomatic
+                                         # AND is currently in a valid hh isolation state
+                                         # (e.g. If household contact was at end of own symptomatic isolation on
+                                         # day index case took test, they would not have activated isolation counter then
+                                         # and should not be considered here)
+                                         if (states.hh_isolation[household_contact_ID]==1) &&
+                                                 (states.symp_timeisol[household_contact_ID]==0) && # Individual not already symptomatic themselves
+                                                 (states.timeisol[household_contact_ID] > 0)
+
+                                                 # Release individuals from household isolation (if previous confirmed hh isol release time less than current time)
+                                                 # Also caters for non-adhering individuals, as this condition is always satisfied for them.
+                                                 if (CT_vars.hh_isolation_release_time[household_contact_ID] <= time) &&
+                                                         (CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] == 0)
+
+                                                     states.timeisol[household_contact_ID] = 0
+                                                 end
+                                                  # Note: If confirmed time to hh isolation release less than current time,
+                                                  # but CT_vars.Symp_cases_per_household_pos_or_unknown[current_node_household_ID] > 0,
+                                                  # means still possibly other household members symptomatic & awaiting test result
+                                                  # Therefore, leave isolation tracker in current state.
+
+
+                                                  # Check current hh isol time elapsed tracker:
+                                                  # If elapsed time less than period spent in hh isolation due to the current index case receiving negative result,
+                                                  # then has been a more recent case that caused the tracker to reset
+                                                  # In that case, leave isolation tracker in current state.
+                                                  # If expected time passed matches, revise hh isol tracker time
+                                                  index_case_expected_hh_isol_time = 1 + (CT_vars.CT_delay_until_test_result[node_itr] + states.delay_adherence[node_itr])
+
+                                                  # Individuals still in hh isolation due to other infection events.
+                                                  if states.timeisol[household_contact_ID] == index_case_expected_hh_isol_time
+                                                          # Revise household isolation tracker to previous values
+                                                          if (CT_vars.hh_isolation_release_time[household_contact_ID] > time)
+                                                              # Reset household isolation tracker based on
+                                                              # previous confirmed hh isol release time
+                                                              time_left_in_hh_isol = CT_vars.hh_isolation_release_time[household_contact_ID] - time
+                                                              states.timeisol[household_contact_ID] = (household_isoltime - time_left_in_hh_isol) + 1
+                                                                      # Add 1 to index as states.timeisol[household_contact_ID] = states.household_isoltime corresponds to final day of hh isol
+                                                          end
+                                                  elseif states.timeisol[household_contact_ID] > index_case_expected_hh_isol_time
+                                                          # More than one household member returned negative test on current timestep
+                                                          println("household_contact_ID: $household_contact_ID. student_ID: $node_itr; More than one household member returned negative test on current timestep")
+
+                                                          # Revise household isolation tracker to previous values
+                                                          if (CT_vars.hh_isolation_release_time[household_contact_ID] > time)
+                                                                  # Check time left in isol. Only adjust if results in a smaller states.timeisol value
+                                                                  second_hh_isol_check_time_left = CT_vars.hh_isolation_release_time[household_contact_ID] - time
+                                                                  second_hh_isol_check_time_elapsed = (household_isoltime - second_hh_isol_check_time_left) + 1
+                                                                  println("states.timeisol[household_contact_ID]: $(states.timeisol[household_contact_ID]); second_hh_isol_check_time_elapsed: $second_hh_isol_check_time_elapsed")
+                                                                  if second_hh_isol_check_time_elapsed < states.timeisol[household_contact_ID]
+                                                                          states.timeisol[household_contact_ID] = second_hh_isol_check_time_elapsed
+                                                                  end
+                                                          end
+                                                  end
+                                          end
+                                      end
                                 else
                                     # Increment true positive counter
                                     output.test_outcomes[output_time_idx,count,intervention_set_itr,1] += 1
+
+                                     # For household members adhering to isolation guidance,
+                                     # update the current confirmed time of household isolation release
+                                     for hh = 1:household_contacts_per_node[node_itr]
+                                         contact_ID = household_contacts[node_itr][hh]
+                                         if (states.hh_isolation[contact_ID]==1) &&
+                                            (states.symp_timeisol[contact_ID]==0) && # Individual not already symptomatic themselves
+                                            (states.timeisol[contact_ID] > 0)  # Check individual was placed in household isolation at time of test (If not, states.timeisol[contact_ID] = 0)
+
+                                            # Get time to isolation release
+                                            potential_hh_release_time = (time + household_isoltime) -
+                                                                             states.delay_adherence[node_itr] -
+                                                                             CT_vars.CT_delay_until_test_result[node_itr]
+
+                                            # Check it exceeds current household release time. If yes, update.
+                                            # Aim to avoid situation of multiple cases on same day leading to different
+                                            # release times and a lower value out the collection being taken forward
+                                            if potential_hh_release_time > CT_vars.hh_isolation_release_time[contact_ID]
+                                                CT_vars.hh_isolation_release_time[contact_ID] = potential_hh_release_time
+                                            end
+                                         end
+                                     end
 
                                     # If test is positive, contacts told to isolate
                                     # Get number of recallable contacts

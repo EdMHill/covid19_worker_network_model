@@ -1772,6 +1772,9 @@ function reinitialise_CT_vars!(CT_vars::contact_tracing_vars,cmax::Int64, rng::M
     # Reset vector tracking symptomatic cases (positive confirmed or untested)
     lmul!(0,CT_vars.Symp_cases_per_household_pos_or_unknown)
 
+    # Reset vector tracking the latest isolation release time due to household member cases
+    lmul!(0,CT_vars.hh_isolation_release_time)
+
     # Variables for waiting for test results
     lmul!(0,CT_vars.Time_to_test_result)
     CT_vars.Time_to_test_result .-= 1 # Reset so all values are -1

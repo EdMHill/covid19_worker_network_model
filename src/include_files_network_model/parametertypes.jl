@@ -142,6 +142,9 @@ end
    # vector tracking symptomatic cases (positive confirmed or untested)
    Symp_cases_per_household_pos_or_unknown::Array{Int64,1} = zeros(Int64,n_households)
 
+   # Vector tracking the latest isolation release time due to household member cases
+   hh_isolation_release_time::Array{Int64,1} = zeros(Int64,cmax)
+
    # Variables for waiting for test results, set at -1 until activated
    Time_to_test_result::Array{Int64,1} = -1*ones(Int64,cmax)
 

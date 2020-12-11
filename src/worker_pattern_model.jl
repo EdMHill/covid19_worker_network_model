@@ -53,7 +53,7 @@ args = ARGS
 # args[7] seed_initial_states_fn
 # args[8] runsets: Scenarios to run
 if length(ARGS)==0
-    args = [ "1", "100", "100", "365", "10000", "41", "seed_states_with_uncertainty", "[\"run_one_run\"]"]
+    args = [ "1", "100", "2", "365", "10000", "41", "seed_states_with_uncertainty", "[\"adherence_intervention\"]"]
 end
 
 # To run from command line, example:
@@ -413,6 +413,7 @@ for run_it = 1:length(runsets)
         workplace_generation_parameters,
         workplace_closure_active,
         intervention_list_config,
+        runset,
         assign_household_transrisk_fn = assign_household_transrisk_fn_alt
         )
 
