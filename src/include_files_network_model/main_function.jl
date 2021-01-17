@@ -931,7 +931,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                                                                     symp_isoltime - states.delay_adherence[node_itr])
                                     else
                                        # Rest of symptomatic period spent in isolation
-                                       length_of_symp_isol = max(symp_isoltime - states.delay_adherence[node_itr])
+                                       length_of_symp_isol = max(0,symp_isoltime - states.delay_adherence[node_itr])
 
                                        # Result will return a positive.
                                        # Supercedes household isolation & contact traced isolation
