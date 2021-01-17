@@ -919,38 +919,38 @@ function worker_pattern_network_run(RNGseed::Int64,
                                     if r_symp_test[node_itr,time] < (1 - test_detection_prob)
                                         CT_vars.Test_result_false_negative[node_itr] = true
                                     end
+                                end
 
-                                    # If testing taking place, check if test result is positive or negative
-                                    # Set length of isolation.
-                                    # Individual shortens isolation by length of time since
-                                    # unwell individual began displaying symptoms.
-                                    if CT_vars.Test_result_false_negative[node_itr] == true
-                                        # Release from symptomatic isolation once test result received
-                                        # (if does not exceed remainder of symptomatic isolation period)
-                                        length_of_symp_isol = min(CT_vars.CT_delay_until_test_result[node_itr],
-                                                                    symp_isoltime - states.delay_adherence[node_itr])
-                                    else
-                                       # Rest of symptomatic period spent in isolation
-                                       length_of_symp_isol = max(0,symp_isoltime - states.delay_adherence[node_itr])
+                                # If testing taking place, check if test result is positive or negative
+                                # Set length of isolation.
+                                # Individual shortens isolation by length of time since
+                                # unwell individual began displaying symptoms.
+                                if CT_vars.Test_result_false_negative[node_itr] == true
+                                    # Release from symptomatic isolation once test result received
+                                    # (if does not exceed remainder of symptomatic isolation period)
+                                    length_of_symp_isol = min(CT_vars.CT_delay_until_test_result[node_itr],
+                                                                symp_isoltime - states.delay_adherence[node_itr])
+                                else
+                                   # Rest of symptomatic period spent in isolation
+                                   length_of_symp_isol = max(0,symp_isoltime - states.delay_adherence[node_itr])
 
-                                       # Result will return a positive.
-                                       # Supercedes household isolation & contact traced isolation
-                                       # Reset that status to zero for all remaining days
-                                       for time_idx = time:endtime
-                                           array_time_idx = time_idx + 1
-                                           states.hh_in_isolation_array[node_itr,array_time_idx] = 0
-                                           states.CT_isolation_array[node_itr,array_time_idx] = 0
-                                       end
-                                    end
+                                   # Result will return a positive.
+                                   # Supercedes household isolation & contact traced isolation
+                                   # Reset that status to zero for all remaining days
+                                   for time_idx = time:endtime
+                                       array_time_idx = time_idx + 1
+                                       states.hh_in_isolation_array[node_itr,array_time_idx] = 0
+                                       states.CT_isolation_array[node_itr,array_time_idx] = 0
+                                   end
+                                end
 
-                                    # Isolation due to presence of symptoms
-                                    for time_itr = 1:length_of_symp_isol
-                                            # Shorten the isolation period by time already elapsed since
-                                            # symptom onset
-                                        array_time_idx = time + time_itr
-                                        if array_time_idx <= (endtime + 1)
-                                            states.symp_isolation_array[node_itr,array_time_idx] = 1
-                                        end
+                                # Isolation due to presence of symptoms
+                                for time_itr = 1:length_of_symp_isol
+                                        # Shorten the isolation period by time already elapsed since
+                                        # symptom onset
+                                    array_time_idx = time + time_itr
+                                    if array_time_idx <= (endtime + 1)
+                                        states.symp_isolation_array[node_itr,array_time_idx] = 1
                                     end
                                 end
                             end
