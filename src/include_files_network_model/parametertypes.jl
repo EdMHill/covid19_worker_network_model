@@ -139,9 +139,6 @@ end
    # Vector of vectors for storing IDs of those to be contacted in CT
    Inds_to_be_contacted::Array{Array{Int64,1},1} = Array{Array{Int64,1},1}(undef,cmax)
 
-   # vector tracking symptomatic cases (positive confirmed or untested)
-   Symp_cases_per_household_pos_or_unknown::Array{Int64,1} = zeros(Int64,n_households)
-
    # Vector tracking the latest isolation release time due to household member cases
    hh_isolation_release_time::Array{Int64,1} = zeros(Int64,cmax)
 
@@ -414,14 +411,16 @@ end
    inftime::Int64 = 4 # time to spend in infectious, pre-symptomatic state
    symptime::Int64 = 10 # time to spend in symptomatic state
    asymp::Array{Int64,1} = zeros(Int64,cmax) # whether the node will be asymptomatic
-   timeisol::Array{Int64,1} = zeros(Int64,cmax) # time currently spent in isolation due to housemate symptoms
-   symp_timeisol::Array{Int64,1} = zeros(Int64,cmax) # time currently spent isolating due to symptoms
-   timeisol_CTcause::Array{Int64,1} = zeros(Int64,cmax) # time currently spent isolating due to being contact traced
    rep_inf_this_timestep::Array{Int64,1} = zeros(Int64,cmax) # whether the node reports symptoms this timestep
    atwork::Array{Int64,2} = zeros(Int64,cmax,endtime) # whether the node is at work on each day
    hh_isolation::Array{Int64,1} = zeros(Int64,cmax) # Whether individual adheres to isolation guidance. (1) Yes. (0) No.
    delay_adherence::Array{Int64,1} = zeros(Int64,cmax) # Individial may not report symptoms immediately.
    acquired_infection::Array{Int64,1} = zeros(Int64,cmax) # time node acquired infection
+
+   # Arrays to track isolation history
+   hh_in_isolation_array::Array{Int64,2} = zeros(Int64,cmax,endtime+1) # Household isolation. Daily record for each student
+   symp_isolation_array::Array{Int64,2} = zeros(Int64,cmax,endtime+1) # Symptomatic isolation. Daily record for each student
+   CT_isolation_array::Array{Int64,2} = zeros(Int64,cmax,endtime+1) # Isolation by contact tracing. Daily record for each student
 end
 
 @with_kw mutable struct intervention_struct

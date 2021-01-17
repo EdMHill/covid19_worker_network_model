@@ -155,12 +155,9 @@ cmax,endtime = size(atwork)
     return nothing
 end
 
-function increment_counters!(states::node_states,
-    household_isoltime::Int64, symp_isoltime::Int64,contact_tracing_active::Bool;
-    timeisol_CTcause::Array{Int64,1}=zeros(Int64,1),CT_caused_isol_limit::Int64=0)
+function increment_counters!(states::node_states)
 
-@unpack timelat, timeinf, timesymp, timeisol, symp_timeisol, lattime, inftime,
-symptime, asymp, timeisol, symp_timeisol = states
+@unpack timelat, timeinf, timesymp = states
 
 # Increments time counters
     cmax = length(timelat)
@@ -176,43 +173,9 @@ symptime, asymp, timeisol, symp_timeisol = states
         if timesymp[node_itr]>0
             timesymp[node_itr] += 1
         end
-
-        if timeisol[node_itr]>0
-            timeisol[node_itr] += 1
-        end
-
-        if timeisol[node_itr]>household_isoltime
-            timeisol[node_itr] = 0
-        end
-
-        if symp_timeisol[node_itr]>0
-            symp_timeisol[node_itr] += 1
-        end
-
-        if symp_timeisol[node_itr]>symp_isoltime
-            symp_timeisol[node_itr] = 0
-            timeisol[node_itr] = 0
-            if contact_tracing_active == true
-                timeisol_CTcause[node_itr] = 0
-            end
-        end
-
-        if contact_tracing_active == true
-
-            # Increment time in self-isolation, caused by Contact Tracing
-            if timeisol_CTcause[node_itr]>0
-                timeisol_CTcause[node_itr] += 1
-            end
-
-            # Reset contact tracing counter if limit is exceeded
-            if timeisol_CTcause[node_itr]>CT_caused_isol_limit
-                timeisol_CTcause[node_itr] = 0
-            end
-        end
     end
     return nothing
 end
-
 
 function load_configs(runset::String,workertypes::Int64,cmax::Int64,
                         RNGseed::Int64
@@ -1731,12 +1694,12 @@ function reinitialise_node_states!(states::node_states)
     lmul!(0,states.timesymp)
     lmul!(0,states.asymp)
     lmul!(0,states.lattime)
-    lmul!(0,states.timeisol)
-    lmul!(0,states.symp_timeisol)
-    lmul!(0,states.timeisol_CTcause)
     lmul!(0,states.hh_isolation)
     lmul!(0,states.delay_adherence)
     lmul!(0,states.acquired_infection)
+    lmul!(0,states.hh_in_isolation_array)
+    lmul!(0,states.symp_isolation_array)
+    lmul!(0,states.CT_isolation_array)
 end
 
 function reinitialise_daily_record_arrays!(contacts::contacts_struct)
@@ -1768,9 +1731,6 @@ function reinitialise_CT_vars!(CT_vars::contact_tracing_vars,cmax::Int64, rng::M
     csum_test_result_delay::Array{Float64,1},max_test_result_delay::Int64)
 
 @unpack CT_days_before_symptom_included, CT_engagement = CT_parameters
-
-    # Reset vector tracking symptomatic cases (positive confirmed or untested)
-    lmul!(0,CT_vars.Symp_cases_per_household_pos_or_unknown)
 
     # Reset vector tracking the latest isolation release time due to household member cases
     lmul!(0,CT_vars.hh_isolation_release_time)

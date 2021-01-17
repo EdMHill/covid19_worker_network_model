@@ -222,7 +222,6 @@ function forwardCT_from_infector!(infector_ID::Int64,
                                 time::Int64,
                                 count::Int64,
                                  hh_isolation::Array{Int64,1},
-                                timeisol_CTcause::Array{Int64,1},
                                 network_parameters::network_params,
                                 rng::MersenneTwister,
                                 infector_trace_count::Array{Int64,1})
