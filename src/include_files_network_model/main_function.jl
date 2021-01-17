@@ -807,26 +807,6 @@ function worker_pattern_network_run(RNGseed::Int64,
                             # Check if infected will isolate
                             if (states.hh_isolation[node_itr]==1)
 
-                                # Isolation due to presence of symptoms
-                                for time_itr = 1:symp_isoltime
-                                    array_time_idx = time + time_itr
-                                    if array_time_idx <= (endtime + 1)
-                                        states.symp_isolation_array[node_itr,array_time_idx] = 1
-                                    end
-                                        # Note, in isolation_array, col 1 corresponds to time 0,
-                                        #                           col 2 corresponds to time 1 etc
-                                        # So array_time_idx = time + 1, populates array
-                                        # in column corresponding to day value of "time"
-                                end
-
-                                # Supercedes household isolation & contact traced isolation
-                                # Reset that status to zero for all remaining days
-                                for time_idx = time:endtime
-                                    array_time_idx = time_idx + 1
-                                    states.hh_in_isolation_array[node_itr,array_time_idx] = 0
-                                    states.CT_isolation_array[node_itr,array_time_idx] = 0
-                                end
-
                                 # Set that the unit has reported infection this timestep
                                 states.rep_inf_this_timestep[node_itr] = 1
 
@@ -847,6 +827,38 @@ function worker_pattern_network_run(RNGseed::Int64,
                                         CT_vars.Test_result_false_negative[node_itr] = true
                                     end
                                 end
+
+                                # If testing taking place, check if test result is positive or negative
+                                # Set length of isolation
+                                if CT_vars.Test_result_false_negative[node_itr] == true
+                                   # Release from symptomatic isolation once test result received
+                                   # (if does not exceed usual symptomatic isolation period)
+                                   length_of_symp_isol = min(CT_vars.CT_delay_until_test_result[node_itr],symp_isoltime)
+                                else
+                                   # Full symptomatic period spent in isolation
+                                   length_of_symp_isol = symp_isoltime
+
+                                   # Result will return a positive.
+                                   # Supercedes household isolation & contact traced isolation
+                                   # Reset that status to zero for all remaining days
+                                   for time_idx = time:endtime
+                                       array_time_idx = time_idx + 1
+                                       states.hh_in_isolation_array[node_itr,array_time_idx] = 0
+                                       states.CT_isolation_array[node_itr,array_time_idx] = 0
+                                   end
+                                end
+
+                                # Isolation due to presence of symptoms
+                                for time_itr = 1:length_of_symp_isol
+                                    array_time_idx = time + time_itr
+                                    if array_time_idx <= (endtime + 1)
+                                        states.symp_isolation_array[node_itr,array_time_idx] = 1
+                                    end
+                                        # Note, in isolation_array, col 1 corresponds to time 0,
+                                        #                           col 2 corresponds to time 1 etc
+                                        # So array_time_idx = time + 1, populates array
+                                        # in column corresponding to day value of "time"
+                                end
                             end
 
                             # If testing taking place, check if test result is positive or negative
@@ -854,10 +866,10 @@ function worker_pattern_network_run(RNGseed::Int64,
                             if CT_vars.Test_result_false_negative[node_itr] == true
                                # Test result will be a negative. Set isolation length
                                # to be used by adherent hh members to result delay time
-                               length_of_isol = min(CT_vars.CT_delay_until_test_result[node_itr],household_isoltime)
+                               length_of_hh_isol = min(CT_vars.CT_delay_until_test_result[node_itr],household_isoltime)
                             else
                                # Household members to spend full time in isolation
-                               length_of_isol = household_isoltime
+                               length_of_hh_isol = household_isoltime
                             end
 
                             # Irrespective of whether index case self-isolates,
@@ -868,7 +880,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                                     (states.symp_isolation_array[contact_ID,output_time_idx]==0)  # Household member not already symptomatic themselves
 
                                     # Populate household isolation time tracker array
-                                    for time_itr = 1:length_of_isol
+                                    for time_itr = 1:length_of_hh_isol
                                         array_time_idx = time + time_itr
                                         if array_time_idx <= endtime+1
                                                 states.hh_in_isolation_array[contact_ID,array_time_idx] = 1
@@ -888,25 +900,6 @@ function worker_pattern_network_run(RNGseed::Int64,
                         if states.asymp[node_itr] == 0 # Check node is symptomatic and will adhere
                             if states.hh_isolation[node_itr]==1 # Check node will adhere
 
-                                # Isolation due to presence of symptoms
-                                length_of_isol = symp_isoltime - states.delay_adherence[node_itr]
-                                for time_itr = 1:length_of_isol
-                                        # Shorten the isolation period by time already elapsed since
-                                        # symptom onset
-                                    array_time_idx = time + time_itr
-                                    if array_time_idx <= (endtime + 1)
-                                        states.symp_isolation_array[node_itr,array_time_idx] = 1
-                                    end
-                                end
-
-                                # Supercedes household isolation & contact traced isolation
-                                # Reset that status to zero for all remaining days
-                                for time_idx = time:endtime
-                                    array_time_idx = time_idx + 1
-                                    states.hh_in_isolation_array[node_itr,array_time_idx] = 0
-                                    states.CT_isolation_array[node_itr,array_time_idx] = 0
-                                end
-
                                 # Set that the unit has reported infection this timestep
                                 states.rep_inf_this_timestep[node_itr] = 1
 
@@ -926,6 +919,39 @@ function worker_pattern_network_run(RNGseed::Int64,
                                     if r_symp_test[node_itr,time] < (1 - test_detection_prob)
                                         CT_vars.Test_result_false_negative[node_itr] = true
                                     end
+
+                                    # If testing taking place, check if test result is positive or negative
+                                    # Set length of isolation.
+                                    # Individual shortens isolation by length of time since
+                                    # unwell individual began displaying symptoms.
+                                    if CT_vars.Test_result_false_negative[node_itr] == true
+                                        # Release from symptomatic isolation once test result received
+                                        # (if does not exceed remainder of symptomatic isolation period)
+                                        length_of_symp_isol = min(CT_vars.CT_delay_until_test_result[node_itr],
+                                                                    symp_isoltime - states.delay_adherence[node_itr])
+                                    else
+                                       # Rest of symptomatic period spent in isolation
+                                       length_of_symp_isol = max(symp_isoltime - states.delay_adherence[node_itr])
+
+                                       # Result will return a positive.
+                                       # Supercedes household isolation & contact traced isolation
+                                       # Reset that status to zero for all remaining days
+                                       for time_idx = time:endtime
+                                           array_time_idx = time_idx + 1
+                                           states.hh_in_isolation_array[node_itr,array_time_idx] = 0
+                                           states.CT_isolation_array[node_itr,array_time_idx] = 0
+                                       end
+                                    end
+
+                                    # Isolation due to presence of symptoms
+                                    for time_itr = 1:length_of_symp_isol
+                                            # Shorten the isolation period by time already elapsed since
+                                            # symptom onset
+                                        array_time_idx = time + time_itr
+                                        if array_time_idx <= (endtime + 1)
+                                            states.symp_isolation_array[node_itr,array_time_idx] = 1
+                                        end
+                                    end
                                 end
                             end
 
@@ -936,12 +962,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                             if CT_vars.Test_result_false_negative[node_itr] == true
                                # Test result will be a negative. Set isolation length
                                # to be used by adherent hh members to result delay time
-                               length_of_isol = min(CT_vars.CT_delay_until_test_result[node_itr],
+                               length_of_hh_isol = min(CT_vars.CT_delay_until_test_result[node_itr],
                                                     household_isoltime - states.delay_adherence[node_itr])
-
                             else
                                # Household members to spend full time in isolation
-                               length_of_isol = max(0,household_isoltime - states.delay_adherence[node_itr])
+                               length_of_hh_isol = max(0,household_isoltime - states.delay_adherence[node_itr])
                             end
 
                             # Irrespective of whether index case self-isolates,
@@ -952,7 +977,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                                     (states.symp_isolation_array[contact_ID,output_time_idx]==0) # Household member not already symptomatic themselves
 
                                     # Populate household isolation time tracker array
-                                    for time_itr = 1:length_of_isol
+                                    for time_itr = 1:length_of_hh_isol
                                         array_time_idx = time + time_itr
                                         if array_time_idx <= (endtime + 1)
                                             states.hh_in_isolation_array[contact_ID,array_time_idx] = 1
