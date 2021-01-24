@@ -63,7 +63,7 @@ function recallable_dynamic_contacts(worker_ID::Int64,
                                         dynamic_contacts_recalled_propn::Array{Float64,1},
                                         daily_record_inisol::Array{Int64,2},
                                         daily_record_atworkplace::Array{Int64,2},
-                                        time::Int64,
+                                        time_to_check::Int64,
                                         prev_day_val::Int64,
                                         rng::MersenneTwister
                                         )
@@ -73,7 +73,7 @@ function recallable_dynamic_contacts(worker_ID::Int64,
 # dynamic_contacts_recalled_propn::Array{Float64,1} - Set up recall of dynamic contacts probability (Proportion of contacts remembered x days ago)
 # daily_record_inisol - For each node, records per timestep whether in isolation
 # daily_record_atworkplace - For each node, records per timestep whether at workplace
-# time - Current timestep of the simulation
+# time_to_check - Timestep of the simulation to be checked.
 # prev_day_val - Number of days previous to be looked at
 # rng - The random number generator in use
 
@@ -99,7 +99,7 @@ function recallable_dynamic_contacts(worker_ID::Int64,
         for contact_itr = 1:n_possible_dynamic_contacts
             # If not isolating, then contact did occur
             contact_ID = all_dynamic_contacts[contact_itr]
-            if daily_record_inisol[time,contact_ID]==false
+            if daily_record_inisol[time_to_check,contact_ID]==false
                 # Contact occurred
                 # Check if contact will be remembered
                 r = rand(rng)
@@ -135,7 +135,7 @@ function get_worker_contacts(worker_ID::Int64,
                                 possible_worker_contacts::Array{Int64,1},
                                 daily_record_inisol::Array{Int64,2},
                                 daily_record_atworkplace::Array{Int64,2},
-                                time::Int64,
+                                time_to_check::Int64,
                                 prev_day_val::Int64,
                                 rng::MersenneTwister,
                                 network_parameters::network_params;
@@ -146,7 +146,7 @@ function get_worker_contacts(worker_ID::Int64,
 # worker_contact_record - IDs of usual workplace contacts. Will check if actually occurred
 # daily_record_inisol - For each node, records per timestep whether in isolation
 # daily_record_atworkplace - For each node, records per timestep whether at workplace
-# time - Current timestep of the simulation
+# time_to_check - Timestep of the simulation to be checked.
 # prev_day_val - Number of days previous to be looked at
 # rng - The random number generator in use
 
@@ -168,8 +168,8 @@ function get_worker_contacts(worker_ID::Int64,
         # If contact not isolating and at workplace, then contact can occur in same workplace.
         # If contact in another workplace, also need to check CS status
         contact_ID = possible_worker_contacts[contact_itr]
-        if (daily_record_inisol[time,contact_ID]==false) &&
-            (daily_record_atworkplace[time,contact_ID]==true)
+        if (daily_record_inisol[time_to_check,contact_ID]==false) &&
+            (daily_record_atworkplace[time_to_check,contact_ID]==true)
 
             # Check if dealing with same workplace contact
             # or contact with other workplaces
@@ -286,7 +286,7 @@ function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
                                                             possible_same_workplace_contacts,
                                                             contacts.daily_record_inisol,
                                                             contacts.daily_record_atworkplace,
-                                                            time,
+                                                            time_to_check,
                                                             time_itr,
                                                             rng,
                                                             network_parameters)
@@ -305,7 +305,7 @@ function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
                                                                 possible_other_workplace_contacts,
                                                                 contacts.daily_record_inisol,
                                                                 contacts.daily_record_atworkplace,
-                                                                time,
+                                                                time_to_check,
                                                                 time_itr,
                                                                 rng,
                                                                 network_parameters,
@@ -327,7 +327,7 @@ function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
                                                                     CT_parameters.dynamic_contacts_recalled_propn,
                                                                     contacts.daily_record_inisol,
                                                                     contacts.daily_record_atworkplace,
-                                                                    time,
+                                                                    time_to_check,
                                                                     time_itr,
                                                                     rng) # in contact_tracing_fns.jl
 
@@ -350,7 +350,7 @@ function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
                                                                         CT_parameters.social_contacts_recalled_propn,
                                                                         contacts.daily_record_inisol,
                                                                         contacts.daily_record_atworkplace,
-                                                                        time,
+                                                                        time_to_check,
                                                                         time_itr,
                                                                         rng) # in contact_tracing_fns.jl
 
@@ -365,7 +365,7 @@ function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
                                                                     CT_parameters.social_contacts_recalled_propn,
                                                                     contacts.daily_record_inisol,
                                                                     contacts.daily_record_atworkplace,
-                                                                    time,
+                                                                    time_to_check,
                                                                     time_itr,
                                                                     rng) # in contact_tracing_fns.jl
 
