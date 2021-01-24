@@ -90,7 +90,7 @@ function recallable_dynamic_contacts(worker_ID::Int64,
         threshold = dynamic_contacts_recalled_propn[prev_day_val]
 
         # Get IDs of those dynamic contacts on required day
-        all_dynamic_contacts = dynamic_contact_record[time-prev_day_val,worker_ID]
+        all_dynamic_contacts = dynamic_contact_record[time_to_check,worker_ID]
 
         # Check if any dynamic contacts were isolating.
         # If so, will not be a recallable contact
