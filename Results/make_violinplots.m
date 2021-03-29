@@ -7,7 +7,7 @@
 function make_violinplots(dataset,variablename)
 
 %% ADD PATH DEPENDENCIES
-addpath('../../Matlab/Violinplot-Matlab')
+addpath('Violinplot-Matlab')
 
 %% Load data
 % Adherence
@@ -39,7 +39,7 @@ if strcmp(variablename,'final_size')
     backwards_CT_final_size = squeeze(backwards_CT_data.numinf_combined(end,:,:) - backwards_CT_data.numinf_combined(offset_idx,:,:));
     synch_final_size = squeeze(synch_data.numinf_combined(end,:,:) - synch_data.numinf_combined(offset_idx,:,:));
     asynch_final_size = squeeze(asynch_data.numinf_combined(end,:,:) - asynch_data.numinf_combined(offset_idx,:,:));
-    
+
     % Proportion of infections from day 15 onwards
     adherence_input_data = adherence_final_size/cmax;
     workpercent_input_data = workpercent_final_size/cmax;
@@ -106,114 +106,114 @@ end
 if strcmp(dataset,'adherence')==1
     % Set the scenario name
     scen_name = "sweep_adherence";
-    
+
     % Specify input data
     input_data = {adherence_input_data};
-    
+
     % Set plot style
     plot_style = 'violin';
     %plot_style = 'boxplot';
-    
+
     % Set colour for violin plots
     colour_vec = [0.8500    0.3250    0.0980];
-    
+
     % Set x-axis label
     xaxis_label = 'Adherence probability';
-    
+
     % Set up xticks
     xticks_vals = 0:1:10;
     xticks_labels = {'0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0'};
-    
+
     % Set up xaxis limits
     xlim_vals = [-0.5 10.5];
     ylim_vals = [0 max(input_data{1}(:))*1.05];
-    
+
     % Set filename prefix
     save_filename_initial = ['adherence_sens_plots/worker_model_sens_adherence_',variablename];
-    
+
     % Set plot fontsize
     plot_fontsize = 22;
-    
+
     % Call function to produce plots
     propn_plot_type = false;
-    
+
     % Do not display a legend
     display_legend = false;
     legend_label = {};
 elseif strcmp(dataset,'workpercent')==1
     % Set the scenario name
     scen_name = "workpercent";
-    
+
     % Specify input data
     input_data = {workpercent_input_data};
-    
+
     % Set plot style
     plot_style = 'violin';
-    
+
     % Set colour for violin plots
     colour_vec = [1 0.7 0.7];
-    
+
     % Set x-axis label
     xaxis_label = 'Proportion';
-    
+
     % Set up xticks
     xticks_vals = 0:1:11;
     xticks_labels = {'0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','N-U'};
-    
+
     % Set up xaxis limits
     xlim_vals = [-0.5 11.5];
     ylim_vals = [0 max(input_data{1}(:))*1.05];
-    
+
     % Set filename prefix
     save_filename_initial = ['workpercent_plots/worker_model_sens_workpercent_',variablename];
-    
+
     % Set plot fontsize
     plot_fontsize = 26;
-    
+
     % Call function to produce plots
     propn_plot_type = false;
-    
+
     % Do not display a legend
     display_legend = false;
     legend_label = {};
 elseif strcmp(dataset,'workpercent_and_backwardsCT')==1
     %% Workpercent and backwards CT comparison
-    
+
     % Set the scenario name
     scen_name = "workpercent_backwardsCT_compare";
-    
+
     % Specify input data
     input_data = {workpercent_input_data,backwards_CT_input_data};
-    
+
     % Set plot style
     plot_style = 'violin';
     %plot_style = 'boxplot';
-    
+
     % Set colour for violin plots
     colour_vec = [1    0.7    0.7;
         0.3 0.3 1
         ];
-    
+
     % Set x-axis label
     xaxis_label = 'Proportion';
-    
+
     % Set up xticks
     xticks_vals = 0:1:11;
     xticks_labels = {'0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0','N-U'};
-    
+
     % Set up xaxis limits
     xlim_vals = [-0.5 11.5];
     ylim_vals = [0 max(input_data{1}(:))*1.05];
-    
+
     % Set filename prefix
     save_filename_initial = ['misc_plots/worker_model_sens_workpercent_backwardsCT_',variablename];
-    
+
     % Set plot fontsize
     plot_fontsize = 26;
-    
+
     % Call function to produce plots
     propn_plot_type = false;
-    
+
     % Set legend variables
     if strcmp(variablename,'final_size')
         display_legend = true;
@@ -223,39 +223,39 @@ elseif strcmp(dataset,'workpercent_and_backwardsCT')==1
     legend_label = {'Working from home','Backward contact tracing: Infector identified'};
 elseif strcmp(dataset,'worker_patterns')==1
     %% Synch & asynch worker pattern comparison
-    
+
     % Specify input data
     input_data = {synch_input_data,asynch_input_data};
-    
+
     % Set plot style
     plot_style = 'violin';
     %plot_style = 'boxplot';
-    
+
     % Set colour for violin plots
     colour_vec = [0.4 0 0;
         0.2 0.8 0.8
         ];
-    
+
     % Set x-axis label
     xaxis_label = 'Days per week at the workplace';
-    
+
     % Set up xticks
     xticks_vals = 0:1:5;
     xticks_labels = {'0','1','2','3','4','5'};
-    
+
     % Set up xaxis limits
     xlim_vals = [-0.5 5.5];
     ylim_vals = [0 max(input_data{1}(:))*1.05];
-    
+
     % Set filename prefix
     save_filename_initial = ['worker_pattern_plots/worker_model_sens_worker_patterns_',variablename];
-    
+
     % Set plot fontsize
     plot_fontsize = 26;
-    
+
     % Call function to produce plots
     propn_plot_type = false;
-    
+
     % Set legend variables
     if strcmp(variablename,'final_size')
         display_legend = true;
@@ -272,8 +272,8 @@ if propn_plot_type == true
         yaxis_label = 'Relative proportion infected';
     elseif strcmp(variablename,'peak_inf')
         yaxis_label = 'Relative peak proportion new infections';
-    elseif strcmp(variablename,'total_isolation')    
-        yaxis_label = 'Relative total isolation-days';    
+    elseif strcmp(variablename,'total_isolation')
+        yaxis_label = 'Relative total isolation-days';
     elseif strcmp(variablename,'peak_isolation')
         yaxis_label = 'Relative peak proportion in isolation';
     elseif strcmp(variablename,'duration')
@@ -285,7 +285,7 @@ else
     elseif strcmp(variablename,'peak_inf')
         yaxis_label = 'Peak proportion new infections';
     elseif strcmp(variablename,'total_isolation')
-        yaxis_label = 'Total isolation-days';  
+        yaxis_label = 'Total isolation-days';
     elseif strcmp(variablename,'peak_isolation')
         yaxis_label = 'Peak proportion in isolation';
     elseif strcmp(variablename,'duration')
@@ -336,13 +336,13 @@ function generate_sensitivity_plot(input_data,...
         plot_fontsize,....
         dataset,...
         variablename)
-    
+
     if ispc==1
         scale = 1/0.75;
     else
         scale = 1;
     end
-    
+
     % Set up plot
     position = [10, 10, 1.5*550*scale, 1.5*450*scale];
     set(0, 'DefaultFigurePosition', position);
@@ -350,13 +350,13 @@ function generate_sensitivity_plot(input_data,...
     fig = figure();
     clf;
     set(fig,'Color', [1 1 1])
-    
+
     % Get number of batches of input data
     n_input_data_batches = numel(input_data);
-    
+
     % Iterate over input data batches
     for inf_itr = 1:n_input_data_batches
-        
+
         % Set violin plotting properties
         if (n_input_data_batches == 2) && (strcmp(dataset,'worker_patterns')==1)
             if inf_itr == 1
@@ -376,7 +376,7 @@ function generate_sensitivity_plot(input_data,...
             violin_width = 0.3;
             x_offset = 0;
         end
-        
+
         if strcmp(plot_style,'boxplot')
              % Generate boxplots
              h = boxplot(input_data{inf_itr},...
@@ -392,7 +392,7 @@ function generate_sensitivity_plot(input_data,...
                 % If all data points are equal, Violin call will error
                 % Plot a line instead
                     config_data = input_data{inf_itr}(:,config_itr);
-                unique_vals = unique(config_data);  
+                unique_vals = unique(config_data);
                 if numel(unique_vals) == 1  % Check if a unique value. If so plot at that point
                     unique_val = unique_vals(1);
                     plot([xticks_vals(config_itr)-0.3 xticks_vals(config_itr)+0.3],...
@@ -402,7 +402,7 @@ function generate_sensitivity_plot(input_data,...
                 else
                     if sum(isnan(config_data)) < numel(config_data) % For proportion plots, if baseline values are zero, causes proportional values to all be NaN
                         % Otherwise, create violin plot
-                        
+
                         % Plot violins
                         violins = Violin(config_data, xticks_vals(config_itr) + x_offset,...
                                             'Width',violin_width);
@@ -430,10 +430,10 @@ function generate_sensitivity_plot(input_data,...
             xticks(xticks_vals)
             xticklabels(xticks_labels)
         else
-           error('Incompatible plot type string passed to function.') 
+           error('Incompatible plot type string passed to function.')
         end
     end
-    
+
     % Set y-axis labels
     ylabel(yaxis_label)
     if strcmp(variablename,'final_size')
@@ -447,19 +447,19 @@ function generate_sensitivity_plot(input_data,...
     elseif (strcmp(variablename,'total_isolation')) && (strcmp(dataset,'adherence'))
         ytickformat('%.1f')
     end
-    
+
     % Set x-axis labels
     xlabel(xaxis_label)
-    
+
     % Set axis limits
     xlim(xlim_vals)
     ylim(ylim_vals)
-    
+
     %Specify general axis properties
     set(gca,'FontSize',floor(plot_fontsize))
     set(gca,'LineWidth',1)
     box on
-    
+
     % Add legend, if applicable
     if display_legend == true
         H = gobjects(n_input_data_batches,1);
@@ -470,13 +470,13 @@ function generate_sensitivity_plot(input_data,...
         leg = legend(H,...
                 'LineWidth',1.5,...
                 'FontSize',floor(plot_fontsize));
-        
+
             if (strcmp(dataset,'worker_patterns')==1)
                 set(leg,'Location','northwest')
             end
     end
-    
-    
+
+
     % Save figure to file
     if strcmp(plot_style,'boxplot')
         if propn_plot_type == true

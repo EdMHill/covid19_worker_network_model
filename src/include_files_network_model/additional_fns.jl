@@ -352,6 +352,36 @@ elseif runset=="synchronised_changedays_intervention"
                                             ton = 0,
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))] for i = 1:n_int_sets]
+elseif runset=="synchronised_changedays_intervention_full_adherence"
+n_configs = 1
+sameday = 3
+ton = 1
+toff = 0
+toff_intervention_options = [-1:4;]
+n_int_sets = length(toff_intervention_options)
+intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
+                            start_time = 15,
+                            sameday = 0,
+                            adherence = 1.0,
+                            toff = toff_intervention_options[i],
+                            ton = 0,
+                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                    CT_engagement=1.))] for i = 1:n_int_sets]
+elseif runset=="synchronised_changedays_intervention_low_adherence"
+n_configs = 1
+sameday = 3
+ton = 1
+toff = 0
+toff_intervention_options = [-1:4;]
+n_int_sets = length(toff_intervention_options)
+intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
+                            start_time = 15,
+                            sameday = 0,
+                            adherence = 0.1,
+                            toff = toff_intervention_options[i],
+                            ton = 0,
+                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                    CT_engagement=1.))] for i = 1:n_int_sets]
 elseif runset=="variable_changedays_intervention"
     n_configs = 1
     sameday = 3
@@ -366,6 +396,36 @@ elseif runset=="variable_changedays_intervention"
                                             ton = 0,
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))] for i = 1:n_int_sets]
+elseif runset=="variable_changedays_intervention_full_adherence"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    toff_intervention_options = [-1:4;]
+    n_int_sets = length(toff_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
+                                        start_time = 15,
+                                        sameday = 2,
+                                        adherence = 1.,
+                                        toff = toff_intervention_options[i],
+                                        ton = 0,
+                                        CT_parameters = CT_params(contact_tracing_active=true,
+                                        CT_engagement=1.))] for i = 1:n_int_sets]
+elseif runset=="variable_changedays_intervention_low_adherence"
+n_configs = 1
+sameday = 3
+ton = 1
+toff = 0
+toff_intervention_options = [-1:4;]
+n_int_sets = length(toff_intervention_options)
+intervention_list_config = [[intervention_struct(effects = ["worker_patterns","adherence","contact_tracing"],
+                                    start_time = 15,
+                                    sameday = 2,
+                                    adherence = 0.1,
+                                    toff = toff_intervention_options[i],
+                                    ton = 0,
+                                    CT_parameters = CT_params(contact_tracing_active=true,
+                                    CT_engagement=1.))] for i = 1:n_int_sets]
 elseif runset=="weeks_on_intervention"
     n_configs = 1
     sameday = 3
@@ -399,6 +459,58 @@ elseif runset=="workpercent_intervention"
     work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
     intervention_config2 = intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
                                             start_time = 15,
+                                            workpercent = work_percent_config_segment2,
+                                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                                    CT_engagement=1.))
+    # Concatenate the two sets of configs
+    push!(intervention_list_config,[intervention_config2])
+elseif runset=="workpercent_intervention_full_adherence"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [1:-0.1:0;]
+    n_int_sets = length(workpercent_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
+                                            start_time = 15,
+                                            adherence = 1.,
+                                            workpercent = workpercent_intervention_options[i]*ones(workertypes),
+                                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                                    CT_engagement=1.))
+                                            ] for i = 1:n_int_sets]
+
+    # Add scenario where proportion of each type of worker returning to work is not constant across all sectors
+    # work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
+    work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
+    intervention_config2 = intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
+                                            start_time = 15,
+                                            adherence = 1.,
+                                            workpercent = work_percent_config_segment2,
+                                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                                    CT_engagement=1.))
+    # Concatenate the two sets of configs
+    push!(intervention_list_config,[intervention_config2])
+elseif runset=="workpercent_intervention_low_adherence"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    workpercent_intervention_options = [1:-0.1:0;]
+    n_int_sets = length(workpercent_intervention_options)
+    intervention_list_config = [[intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
+                                            start_time = 15,
+                                            adherence = 0.1,
+                                            workpercent = workpercent_intervention_options[i]*ones(workertypes),
+                                            CT_parameters = CT_params(contact_tracing_active=true,
+                                                                    CT_engagement=1.))
+                                            ] for i = 1:n_int_sets]
+
+    # Add scenario where proportion of each type of worker returning to work is not constant across all sectors
+    # work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
+    work_percent_config_segment2 = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]
+    intervention_config2 = intervention_struct(effects = ["workpercent","adherence","contact_tracing"],
+                                            start_time = 15,
+                                            adherence = 0.1,
                                             workpercent = work_percent_config_segment2,
                                             CT_parameters = CT_params(contact_tracing_active=true,
                                                                     CT_engagement=1.))
@@ -453,6 +565,38 @@ elseif runset=="CS_intervention"
             # Set up intervention list
             intervention_list_config[set_idx] = [intervention_struct(effects = ["COVID_secure","adherence","contact_tracing"],
                                                     start_time = 15,
+                                                    CS_scale_transrisk_scalar = CS_scale,
+                                                    CS_team_size_intervention = CS_team_size_interv,
+                                                    CT_parameters = CT_params(contact_tracing_active=true,
+                                                                            CT_engagement=1.))]
+
+            # Increment set index
+            set_idx += 1
+        end
+    end
+elseif runset=="CS_intervention_full_isol"
+    n_configs = 1
+    sameday = 3
+    ton = 1
+    toff = 0
+    work_percent = 1.0
+    CS_team_size_options = [2, 5, 10]
+    CS_scale_transrisk_options = [0.25,0.5,0.75,1]
+    n_CS_team_size_ops = length(CS_team_size_options)
+    n_CS_scale_transrisk_ops = length(CS_scale_transrisk_options)
+    n_int_sets = n_CS_team_size_ops*n_CS_scale_transrisk_ops
+    intervention_list_config = Array{Array{intervention_struct,1},1}(undef, n_int_sets)
+    set_idx = 1
+
+    for CS_team_size_itr = 1:n_CS_team_size_ops
+        CS_team_size_interv = CS_team_size_options[CS_team_size_itr]
+        for CS_scale_transrisk_itr = 1:n_CS_scale_transrisk_ops
+            CS_scale = CS_scale_transrisk_options[CS_scale_transrisk_itr]
+
+            # Set up intervention list
+            intervention_list_config[set_idx] = [intervention_struct(effects = ["COVID_secure","adherence","contact_tracing"],
+                                                    start_time = 15,
+                                                    adherence = 1.,
                                                     CS_scale_transrisk_scalar = CS_scale,
                                                     CS_team_size_intervention = CS_team_size_interv,
                                                     CT_parameters = CT_params(contact_tracing_active=true,
@@ -1149,7 +1293,7 @@ function find_network_parameters(workertypes;workpercent::Array{Float64,1}=Array
             workplace_size_sd = [14., 57., 122., 109., 432., 305. ])       # sd for size of workplace for each worker group
     elseif workertypes==41
         if isempty(workpercent)
-            workpercent = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]            # proportion of each type of worker returning to work
+            workpercent = [0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.5, 0.8, 0.8, 0.5, 0.5, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.8, 0.3, 0.3, 0.3, 0.7, 0.5, 0.3, 0.3, 1.0, 1.0, 1.0, 1.0, 0.8, 0.8, 0.8, 0.7, 0.3, 0.5, 0.8, 0.8, 0.3]            # proportion of each type of worker returning to work
         end
         network_parameters = network_params(n_nodes = cmax,
             prob_workertype_contact = ones(workertypes)*0.002.*(10000/cmax),    # Scale relative to level used for 10,000 nodes

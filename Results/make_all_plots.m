@@ -2,32 +2,42 @@
 %% make final size plots
 make_violinplots('adherence','final_size')
 make_violinplots('workpercent','final_size')
-%make_violinplots('workpercent_and_backwardsCT','final_size')
+make_violinplots('workpercent_and_backwardsCT','final_size')
 make_violinplots('worker_patterns','final_size')
 
-%% make peak infections plots
-%make_violinplots('adherence','peak_inf')
+% make peak infections plots
+make_violinplots('adherence','peak_inf')
 make_violinplots('workpercent','peak_inf')
-%make_violinplots('workpercent_and_backwardsCT','peak_inf')
+make_violinplots('workpercent_and_backwardsCT','peak_inf')
 make_violinplots('worker_patterns','peak_inf')
 
-%% total self-isolating days
+% total self-isolating days
 make_violinplots('adherence','total_isolation')
 make_violinplots('workpercent','total_isolation')
-%make_violinplots('workpercent_and_backwardsCT','total_isolation')
+make_violinplots('workpercent_and_backwardsCT','total_isolation')
 make_violinplots('worker_patterns','total_isolation')
 
-%% peak fraction self-isolating
-make_violinplots('adherence','peak_isolation')
-make_violinplots('workpercent','peak_isolation')
-%make_violinplots('workpercent_and_backwardsCT','peak_isolation')
-make_violinplots('worker_patterns','peak_isolation')
+% % peak fraction self-isolating
+% %make_violinplots('adherence','peak_isolation')
+% make_violinplots('workpercent','peak_isolation')
+% %make_violinplots('workpercent_and_backwardsCT','peak_isolation')
+% %make_violinplots('worker_patterns','peak_isolation')
 
-%% outbreak duration
+% outbreak duration
 make_violinplots('adherence','duration')
 make_violinplots('workpercent','duration')
-%make_violinplots('workpercent_and_backwardsCT','duration')
+make_violinplots('workpercent_and_backwardsCT','duration')
 make_violinplots('worker_patterns','duration')
+
+%% Workpercent and worker pattern violin plots 
+%% 10% adherence and 100% adherence
+%variable_names = {'final_size','peak_inf','total_isolation','duration'};
+variable_names = {'peak_inf'};
+for ii = 1:numel(variable_names)
+    make_violinplots_with_adherence_sens('workpercent',variable_names{ii})
+    make_violinplots_with_adherence_sens('synch',variable_names{ii})
+    make_violinplots_with_adherence_sens('asynch',variable_names{ii})
+end
 
 %% Threshold event plots: Adherence
 variable_names = {'final_size','peak_inf','avg_isolation','duration','peak_isolation'};
@@ -53,8 +63,24 @@ make_temporal_grid('COVID_secure','isol_prevalence')
 make_temporal_grid('COVID_secure_no_isol','inf_prevalence')
 %% COVID-secure heatmap outputs
 variable_names = {'final_size','peak_inf','avg_isolation','peak_isolation','duration'};
+%variable_names = {'avg_isolation'};
 make_heatmaps('COVID_secure',variable_names)
 make_heatmaps('COVID_secure_no_isol',variable_names)
+
+%% COVID-secure grouped violin plots
+%variable_names = {'final_size','peak_inf','total_isolation','duration'};
+variable_names = {'total_isolation'};
+make_CS_violinplots('COVID_secure','absolute',variable_names)
+%make_CS_violinplots('COVID_secure','relative',variable_names)
+
+%variable_names = {'final_size','peak_inf','duration'};
+%make_CS_violinplots('COVID_secure_no_isol','relative',variable_names)
+
+%% COVID-secure violin plots with sensitivity to adherence
+variable_names = {'final_size','peak_inf','duration'};
+%variable_names = {'final_size'};
+make_CS_with_adherence_sens_violinplots('relative',variable_names)
+make_CS_with_adherence_sens_violinplots('absolute',variable_names)
 
 %% temporal plots (workpercent & worker patterns)
 clear variables
@@ -133,16 +159,16 @@ fig = figure();
 clf;
 set(fig,'Color', [1 1 1])
 fontsize=26;
-subplot(1,3,1); hold on; maxy(1) = make_temporal_plots({'adherence'},'inf_prevalence',1); xlabel('Time (days)'); ylabel('Propn infectious'); set(gca,'FontSize',fontsize); xlim([0,200]);
+subplot(1,3,1); hold on; maxy(1) = make_temporal_plots({'adherence'},'inf_prevalence',1); xlabel('Time (days)'); ylabel('Proportion infectious'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40])
 ytickformat('%.2f')
-subplot(1,3,2); hold on; maxy(2) = make_temporal_plots({'adherence'},'isol_prevalence',1); xlabel('Time (days)'); ylabel('Propn isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
+subplot(1,3,2); hold on; maxy(2) = make_temporal_plots({'adherence'},'isol_prevalence',1); xlabel('Time (days)'); ylabel('Proportion isolating'); set(gca,'FontSize',fontsize); xlim([0,200]);
 yticks([0 0.05 0.10 0.15 0.20 0.25 0.30])
 ytickformat('%.2f')
 subplot(1,3,3); hold on; maxy(3) = make_temporal_plots({'adherence'},'Rt',1); xlabel('Time (days)'); ylabel('R_t'); set(gca,'FontSize',fontsize); xlim([0,100]); plot([0,100],[1,1],'--','Linewidth',1.5,'Color',[0.5 0.5 0.5])
 yticks([0 1 2 3 4])
 subplot(1,3,1); ylim([0,maxy(1)]); subplot(1,3,2); ylim([0,maxy(2)]); subplot(1,3,3); ylim([0,maxy(3)]);
-export_fig('adherence_sens_plots/adherence_temporal_plots','-pdf','-r600')
+%export_fig('adherence_sens_plots/adherence_temporal_plots','-pdf','-r600')
 
 %% Stash of plots no longer used
 

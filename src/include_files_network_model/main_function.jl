@@ -665,8 +665,12 @@ function worker_pattern_network_run(RNGseed::Int64,
                         # - If they adhere, they isolate
                         # - Check household members. If they adhere (and not symptomatic themselves),
                         #       they enter household isolation tracker.
-                        if runset ∈ ["synchronised_changedays_intervention","variable_changedays_intervention","workpercent_intervention",
-                                    "CS_intervention","CS_intervention_no_isol","adherence_intervention"]
+                        if runset ∈ ["synchronised_changedays_intervention","variable_changedays_intervention",
+                                    "synchronised_changedays_intervention_full_adherence","variable_changedays_intervention_full_adherence",
+                                    "synchronised_changedays_intervention_low_adherence","variable_changedays_intervention_low_adherence",
+                                    "workpercent_intervention","workpercent_intervention_full_adherence","workpercent_intervention_low_adherence",
+                                    "CS_intervention","CS_intervention_no_isol","CS_intervention_full_isol",
+                                    "adherence_intervention"]
                             for node_itr = 1:cmax
                                 # Check symptomatic status of all individuals
                                 # Two conditions: Not asymptomatic AND is in symptomatic phase of infection (if symptoms displayed)

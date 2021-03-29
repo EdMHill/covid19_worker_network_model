@@ -19,9 +19,18 @@ workpercent_data = load('worker_model_output_workpercent_intervention_combined.m
 backwards_CT_data = load('worker_model_output_amount_backwards_CT_intervention_combined.mat');
 synch_data = load('worker_model_output_synchronised_changedays_intervention_combined.mat');
 asynch_data = load('worker_model_output_variable_changedays_intervention_combined.mat');
-CS_data = load('worker_model_output_CS_intervention_combined.mat');
 CS_data_no_isol = load('worker_model_output_CS_intervention_no_isol_combined.mat');
+CS_data = load('worker_model_output_CS_intervention_combined.mat');
+CS_data_full_isol = load('worker_model_output_CS_intervention_full_isol_combined.mat');
 
+workpercent_data_low_adherence = load('worker_model_output_workpercent_intervention_low_adherence_combined.mat');
+workpercent_data_full_adherence = load('worker_model_output_workpercent_intervention_full_adherence_combined.mat');
+
+synch_data_low_adherence = load('worker_model_output_synchronised_changedays_intervention_low_adherence_combined.mat');
+synch_data_full_adherence = load('worker_model_output_synchronised_changedays_intervention_full_adherence_combined.mat');
+
+asynch_data_low_adherence = load('worker_model_output_variable_changedays_intervention_low_adherence_combined.mat');
+asynch_data_full_adherence = load('worker_model_output_variable_changedays_intervention_full_adherence_combined.mat');
 %% Threshold event plots
 format bank
 [adherence_array,adherence_CI_lb,adherence_CI_ub] = threshold_event_vals(adherence_data,cmax,n_simns);
@@ -30,21 +39,21 @@ format bank
 [synch_array,synch_CI_lb,synch_CI_ub] = threshold_event_vals(synch_data,cmax,n_simns);
 [asynch_array,asynch_CI_lb,asynch_CI_ub] = threshold_event_vals(asynch_data,cmax,n_simns);
 
-% % Put into string format
-% central_vals = {synch_array,asynch_array};
-% lb_vals = {synch_CI_lb,asynch_CI_lb};
-% ub_vals = {synch_CI_ub,asynch_CI_ub};
-% n_cols = 6;
+% Put into string format
+central_vals = {synch_array,asynch_array};
+lb_vals = {synch_CI_lb,asynch_CI_lb};
+ub_vals = {synch_CI_ub,asynch_CI_ub};
+n_cols = 6;
 
 % central_vals = {adherence_array};
 % lb_vals = {adherence_CI_lb};
 % ub_vals = {adherence_CI_ub};
 % n_cols = 11;
 
-central_vals = {workpercent_array};
-lb_vals = {workpercent_CI_lb};
-ub_vals = {workpercent_CI_ub};
-n_cols = 12;
+% central_vals = {workpercent_array};
+% lb_vals = {workpercent_CI_lb};
+% ub_vals = {workpercent_CI_ub};
+% n_cols = 12;
 
 n_stats = numel(central_vals);
 n_rows = 5;
@@ -62,13 +71,115 @@ for stat_itr = 1:n_stats
     end
 end
 
-%% Violin plots
+%% Violin plots (70% adherence, all but COVID-secure strats)
 format long
-adherence_violins_array = violin_vals(adherence_data,cmax,n_simns)
-workpercent_violins_array = violin_vals(workpercent_data,cmax,n_simns)
-backwards_CT_violins_array = violin_vals(backwards_CT_data,cmax,n_simns)
-synch_violins_array = violin_vals(synch_data,cmax,n_simns)
-asynch_violins_array = violin_vals(asynch_data,cmax,n_simns)
+adherence_violins_array = violin_vals(adherence_data,cmax,n_simns);
+workpercent_violins_array = violin_vals(workpercent_data,cmax,n_simns);
+backwards_CT_violins_array = violin_vals(backwards_CT_data,cmax,n_simns);
+synch_violins_array = violin_vals(synch_data,cmax,n_simns);
+asynch_violins_array = violin_vals(asynch_data,cmax,n_simns);
+
+%% Violin plots (10% and 100% adherence runs)
+format long
+workpercent_low_adherence_violins_array = violin_vals(workpercent_data_low_adherence,cmax,n_simns);
+workpercent_full_adherence_violins_array = violin_vals(workpercent_data_full_adherence,cmax,n_simns);
+
+synch_low_adherence_violins_array = violin_vals(synch_data_low_adherence,cmax,n_simns);
+synch_full_adherence_violins_array = violin_vals(synch_data_full_adherence,cmax,n_simns);
+
+asynch_low_adherence_violins_array = violin_vals(asynch_data_low_adherence,cmax,n_simns);
+asynch_full_adherence_violins_array = violin_vals(asynch_data_full_adherence,cmax,n_simns);
+%% Violin plots: COVID-secure strats, relative vals
+format long
+dataset_ID_no_isol = 'COVID_secure_no_isol';
+dataset_ID_with_isol = 'COVID_secure';
+dataset_ID_full_isol = 'COVID_secure_full_isol';
+[no_isol_rel,no_isol_ref_data] = violin_vals_relative(dataset_ID_no_isol,CS_data_no_isol,adherence_data,cmax);
+[with_isol_rel,with_isol_ref_data] = violin_vals_relative(dataset_ID_with_isol,CS_data,adherence_data,cmax);
+[full_isol_rel,full_isol_ref_data] = violin_vals_relative(dataset_ID_full_isol,CS_data_full_isol,adherence_data,cmax);
+
+work_team_size_idxs = 5:8;
+team_size_fixed_output_array_outbreak_size = [no_isol_rel(1,work_team_size_idxs);...
+                               with_isol_rel(1,work_team_size_idxs);... 
+                               full_isol_rel(1,work_team_size_idxs)];
+
+team_size_fixed_output_array_peak = [no_isol_rel(2,work_team_size_idxs);...
+                               with_isol_rel(2,work_team_size_idxs);... 
+                               full_isol_rel(2,work_team_size_idxs)];
+                           
+team_size_fixed_output_array_duration = [no_isol_rel(3,work_team_size_idxs);...
+                               with_isol_rel(3,work_team_size_idxs);... 
+                               full_isol_rel(3,work_team_size_idxs)];
+
+risk_idxs = [2,6,10]; % [2,6,10], transmission risk of 50%
+risk_fixed_output_array_outbreak_size = [no_isol_rel(1,risk_idxs);...
+                               with_isol_rel(1,risk_idxs);... 
+                               full_isol_rel(1,risk_idxs)];
+
+risk_fixed_output_array_peak = [no_isol_rel(2,risk_idxs);...
+                               with_isol_rel(2,risk_idxs);... 
+                               full_isol_rel(2,risk_idxs)];
+                           
+risk_fixed_output_array_duration = [no_isol_rel(3,risk_idxs);...
+                               with_isol_rel(3,risk_idxs);... 
+                               full_isol_rel(3,risk_idxs)];
+
+%% Violin plots: COVID-secure strats, absolute vals
+format long
+no_isol_CS_violins_array = violin_vals(CS_data_no_isol,cmax,n_simns);
+with_isol_CS_violins_array = violin_vals(CS_data,cmax,n_simns);
+full_isol_CS_violins_array = violin_vals(CS_data_full_isol,cmax,n_simns);
+
+work_team_size_idxs = 5:8;
+team_size_fixed_abs_outbreak_size = [no_isol_CS_violins_array(1,work_team_size_idxs);...
+                               with_isol_CS_violins_array(1,work_team_size_idxs);... 
+                               full_isol_CS_violins_array(1,work_team_size_idxs)];
+
+team_size_fixed_abs_peak = [no_isol_CS_violins_array(2,work_team_size_idxs);...
+                               with_isol_CS_violins_array(2,work_team_size_idxs);... 
+                               full_isol_CS_violins_array(2,work_team_size_idxs)];
+                           
+team_size_fixed_abs_duration = [no_isol_CS_violins_array(4,work_team_size_idxs);...
+                               with_isol_CS_violins_array(4,work_team_size_idxs);... 
+                               full_isol_CS_violins_array(4,work_team_size_idxs)];
+
+risk_idxs = [2,6,10]; % [2,6,10], transmission risk of 50%
+risk_fixed_abs_outbreak_size = [no_isol_CS_violins_array(1,risk_idxs);...
+                               with_isol_CS_violins_array(1,risk_idxs);... 
+                               full_isol_CS_violins_array(1,risk_idxs)];
+
+risk_fixed_abs_peak = [no_isol_CS_violins_array(2,risk_idxs);...
+                               with_isol_CS_violins_array(2,risk_idxs);... 
+                               full_isol_CS_violins_array(2,risk_idxs)];
+                           
+risk_fixed_abs_duration = [no_isol_CS_violins_array(4,risk_idxs);...
+                               with_isol_CS_violins_array(4,risk_idxs);... 
+                               full_isol_CS_violins_array(4,risk_idxs)];
+                           
+% %% Violin plots: COVID-secure strats, with isol, absolute vals
+
+% format long
+% CS_violins_array_temp = violin_vals(CS_data,cmax,n_simns);
+% reshape(CS_violins_array_temp(1,:),4,3)' % Outbreak size
+% reshape(CS_violins_array_temp(2,:),4,3)' % peak infectious
+% reshape(CS_violins_array_temp(3,:),4,3)' % Isolation days
+% reshape(CS_violins_array_temp(4,:),4,3)' % Outbreak duration
+% 
+% %% Violin plots: COVID-secure strats, with isol, relative vals
+% format long
+% dataset_ID = 'COVID_secure';
+% CS_violins_array_rel = violin_vals_relative(dataset_ID,CS_data,adherence_data,cmax);
+% reshape(CS_violins_array_rel(1,:),4,3)' % Outbreak size
+% reshape(CS_violins_array_rel(2,:),4,3)' % peak infectious
+% reshape(CS_violins_array_rel(3,:),4,3)' % Outbreak duration
+
+%% Violin plots: COVID-secure strats, without isol, relative vals
+format long
+dataset_ID = 'COVID_secure_no_isol';
+CS_violins_array_rel = violin_vals_relative(dataset_ID,CS_data_no_isol,adherence_data,cmax);
+reshape(CS_violins_array_rel(1,:),4,3)' % Outbreak size
+reshape(CS_violins_array_rel(2,:),4,3)' % peak infectious
+reshape(CS_violins_array_rel(3,:),4,3)' % Outbreak duration
 
 %% Heatmaps
 format bank
@@ -178,7 +289,9 @@ function output_array = violin_vals(input_data,cmax,n_simns)
     final_size_propn = final_size_absolute/cmax;
 
     % Number of infections over duration of outbreak
-    peak_inf = squeeze(max(input_data.newinf_combined))/cmax;
+    peak_inf = squeeze(max(input_data.prevpresymp_combined +...
+                                    input_data.prevsymp_combined +...
+                                    input_data.prevasymp_combined))/cmax;
 
     % Time in isolation (average per person)
     total_isol = squeeze(sum(input_data.num_isolating_combined(1:end,:,:)));
@@ -201,7 +314,7 @@ function output_array = violin_vals(input_data,cmax,n_simns)
     prctile_vals = [50 25 75 5 95 2.5 97.5 0.5 99.5];
     
     % Initialise output array
-    n_stats = 5;
+    n_stats = 4;
     n_scens = size(input_data.numinf_combined,3);
     output_array = cell(n_stats,n_scens);
     for stat_itr = 1:n_stats
@@ -231,6 +344,121 @@ function output_array = violin_vals(input_data,cmax,n_simns)
             data_prctiles = round(data_prctiles);
         end
 
+        for scen_itr = 1:n_scens
+            output_array{stat_itr,scen_itr} = [num2str(data_prctiles(1,scen_itr),formatSpec),...
+                                                ' (',num2str(data_prctiles(6,scen_itr),formatSpec),',',num2str(data_prctiles(7,scen_itr),formatSpec),')'];
+        end
+    end
+end
+
+function [output_array,reference_data] = violin_vals_relative(dataset_ID,...
+                                                input_data,...
+                                                adherence_data,...
+                                                cmax)
+
+    %%% Get baseline data for comparison %%%
+    % Outbreak size (day 15 onwards)
+    adherence_outbreak_size_data = squeeze(adherence_data.numinf_combined(end,:,:) - adherence_data.numinf_combined(15,:,:));
+    
+    % Outbreak peak
+    adherence_peak_data = squeeze(max(adherence_data.prevpresymp_combined +...
+                                    adherence_data.prevsymp_combined +...
+                                    adherence_data.prevasymp_combined))/cmax;
+    
+    % Isolation days
+    % adherence_isol_data = squeeze(sum(adherence_data.num_isolating_combined(1:end,:,:)));
+    
+    % Outbreak duration
+    adherence_prev_data = adherence_data.prevpresymp_combined + adherence_data.prevasymp_combined + adherence_data.prevsymp_combined;
+    adherence_duration_data = zeros(size(squeeze(adherence_prev_data(1,:,:))));
+    for i = 1:length(adherence_data.numinf_combined(1,:,1))
+        for j = 1:length(adherence_data.numinf_combined(1,1,:))
+            adherence_duration_data(i,j) = find(adherence_prev_data(:,i,j)>0,1,'last') - 1;        
+        end
+    end
+    
+    if strcmp(dataset_ID,'COVID_secure')==1
+        baseline_col_idx = 8;
+        baseline_outbreak_size_no_CS = median(adherence_outbreak_size_data(:,baseline_col_idx))/cmax;
+        baseline_peak_no_CS = median(adherence_peak_data(:,baseline_col_idx));
+        %baseline_isol_no_CS = median(adherence_isol_data(:,baseline_col_idx));
+        baseline_duration_no_CS = median(adherence_duration_data(:,baseline_col_idx));
+    elseif strcmp(dataset_ID,'COVID_secure_no_isol')==1
+        baseline_col_idx = 1;
+        baseline_outbreak_size_no_CS = median(adherence_outbreak_size_data(:,baseline_col_idx))/cmax;
+        baseline_peak_no_CS = median(adherence_peak_data(:,baseline_col_idx));
+        %baseline_isol_no_CS = median(adherence_isol_data(:,baseline_col_idx));
+        baseline_duration_no_CS = median(adherence_duration_data(:,baseline_col_idx));
+    elseif strcmp(dataset_ID,'COVID_secure_full_isol')==1
+        baseline_col_idx = 11;
+        baseline_outbreak_size_no_CS = median(adherence_outbreak_size_data(:,baseline_col_idx))/cmax;
+        baseline_peak_no_CS = median(adherence_peak_data(:,baseline_col_idx));
+        %baseline_isol_no_CS = median(adherence_isol_data(:,baseline_col_idx));
+        baseline_duration_no_CS = median(adherence_duration_data(:,baseline_col_idx));    
+    end
+    
+    %Concatenate into output vector
+    reference_data = [baseline_outbreak_size_no_CS,...
+                        baseline_peak_no_CS,...
+                        baseline_duration_no_CS];
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %%% Get CS data for comparison %%%
+    % Number of infections over duration of outbreak
+    final_size_absolute = squeeze(input_data.numinf_combined(end,:,:) - input_data.numinf_combined(15,:,:));
+
+    % Propn of infections over duration of outbreak
+    final_size_propn = final_size_absolute/cmax;
+
+    % Number of infections over duration of outbreak
+    peak_inf = squeeze(max(input_data.prevpresymp_combined +...
+                                    input_data.prevsymp_combined +...
+                                    input_data.prevasymp_combined))/cmax;
+
+%     % Time in isolation (average per person)
+%     total_isol = squeeze(sum(input_data.num_isolating_combined(1:end,:,:)));
+
+    % Duration
+    prev_data = input_data.prevpresymp_combined + input_data.prevasymp_combined + input_data.prevsymp_combined;
+    duration_data = zeros(size(squeeze(prev_data(1,:,:))));
+    for i = 1:length(input_data.numinf_combined(1,:,1))
+        for j = 1:length(input_data.numinf_combined(1,1,:))
+            duration_data(i,j) = find(prev_data(:,i,j)>0,1,'last') - 1;        
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %%% Compute relative values %%%
+    final_size_propn_rel = final_size_propn/baseline_outbreak_size_no_CS;
+    peak_inf_rel = peak_inf/baseline_peak_no_CS;
+    duration_data_rel = duration_data/baseline_duration_no_CS;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    % Set percentile values
+    % Entry breakdown: 1 - median, 2&3 - 50% PI, 4&5 - 90% PI, 6&7 - 95%,
+    % 8&9 - 99%
+    prctile_vals = [50 25 75 5 95 2.5 97.5 0.5 99.5];
+    
+    % Initialise output array
+    n_stats = 3;
+    n_scens = size(input_data.numinf_combined,3);
+    output_array = cell(n_stats,n_scens);
+    for stat_itr = 1:n_stats
+        formatSpec = '%.2f';
+        if stat_itr == 1
+            summ_stat_data = final_size_propn_rel;
+        elseif stat_itr == 2
+            summ_stat_data = peak_inf_rel;
+        elseif stat_itr == 3
+            summ_stat_data = duration_data_rel;
+%         elseif stat_itr == 3
+%             summ_stat_data = total_isol_rel;
+%         elseif stat_itr == 5
+%             summ_stat_data = peak_isol_rel;
+        end
+        
+        % Get percentiles for current summary statistic
+        data_prctiles = prctile(summ_stat_data,prctile_vals,1);
         for scen_itr = 1:n_scens
             output_array{stat_itr,scen_itr} = [num2str(data_prctiles(1,scen_itr),formatSpec),...
                                                 ' (',num2str(data_prctiles(6,scen_itr),formatSpec),',',num2str(data_prctiles(7,scen_itr),formatSpec),')'];
@@ -269,7 +497,7 @@ end
 if sum(strcmp(variable_name,'avg_isolation') == 1)
         
     % Time in isolation (average per person)
-    offset_idx = 31;
+    offset_idx = 15;
     total_isol_CS_data = squeeze(sum(CS_data.num_isolating_combined(offset_idx:end,:,:)))/(cmax*365);
 
     % Check against the threshold criteria and store
