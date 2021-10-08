@@ -1,14 +1,14 @@
-"""
+#=
 Purpose:
 Define conditions and affects of closure/reopening interventions
 Motivated by a wish to assess impact of sector closures
-"""
+#-------------------------------------------------------------------------------
+=#
 
-
-"""
+#=
 Condition functions. Use time and/or disease state variable values
 For example, if incidence of symptomatic infection exceeds given level, apply restriction
-"""
+=#
 
 function condition_close_example(intervention_trigger_input_data::intervention_data_feeds,
                                         time::Int64,
@@ -52,10 +52,10 @@ end
 
 
 
-"""
+#=
 Affect functions
 For example, closing a particular sector
-"""
+=#
 
 # Close sectors
 function affect_close_example!(network_parameters::network_params)

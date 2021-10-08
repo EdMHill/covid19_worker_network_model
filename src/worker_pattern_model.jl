@@ -1,11 +1,10 @@
-"""
-Purpose:
-Toy network model to explore impact of working patterns on transmission in the workplace
-"""
+# Purpose:
+# Toy network model to explore impact of working patterns on transmission in the workplace
+#-------------------------------------------------------------------------------
 
-"""
-Set paths & load environment
-"""
+#-------------------------------------------------------------------------------
+# SET PATHS & LOAD ENVIRONMENTS
+#-------------------------------------------------------------------------------
 
 #Set paths
 cd(dirname(@__FILE__))
@@ -14,18 +13,18 @@ cd(dirname(@__FILE__))
 using Pkg
 Pkg.activate("../")
 
-"""
-Load packages
-"""
-#Required packages
+#-------------------------------------------------------------------------------
+# LOAD PACKAGES
+#-------------------------------------------------------------------------------
 using MAT, Distributions, CSV
 using LinearAlgebra, Random, DelimitedFiles, Parameters
 
 # using Profile  # For use with memory allocation checks
 
-"""
-Load supporting files
-"""
+#-------------------------------------------------------------------------------
+# LOAD SUPPORTING FILES
+#-------------------------------------------------------------------------------
+
 # Files containing other functions needed to run the model
 include("include_files_network_model/parametertypes.jl")
 include("include_files_network_model/contact_tracing_fns.jl")
@@ -36,9 +35,9 @@ include("include_files_network_model/intervention_condition_affect_fns.jl")
 include("include_files_network_model/seed_initial_states_fns.jl")
 include("include_files_network_model/main_function.jl")
 
-"""
-Set variables from ARGS
-"""
+#-------------------------------------------------------------------------------
+# SET VARIABLES FROM ARGS
+#-------------------------------------------------------------------------------
 args = ARGS
 
 # If running locally from REPL, will not have any input ARGS
@@ -107,9 +106,9 @@ runsets = eval(Meta.parse(args[8]))
 # Set proportion of nodes to be in recovered state
 recov_propn = 0.
 
-"""
-Set up incubation & infectivity distributions
-"""
+#-------------------------------------------------------------------------------
+# SET UP INCUBATION & INFECTIVITY DISTRIBUTIONS
+#-------------------------------------------------------------------------------
 
 # If needed, set up a different latent period distribution
 # Default: Erlang(6,0.88)
@@ -125,9 +124,9 @@ Set up incubation & infectivity distributions
 # dist_infectivity = ones(10) # if we don't want to have a distribution of infectiousness
 
 
-"""
-Set up adherence delay distribution
-"""
+#-------------------------------------------------------------------------------
+# SET UP ADHERENCE DELAY DISTRIBUTION
+#-------------------------------------------------------------------------------
 # Set a different distribution for delay in adhering in guidance
 # Will need to pass delay_adherence_pmf_alt into infection_params creation:
 #  e.g. infection_parameters = infection_params(...,
@@ -139,9 +138,9 @@ Set up adherence delay distribution
 #     error("delay_adherence_pmf_alt must sum to 1. Currently sums to $(sum(delay_adherence_pmf_alt))")
 # end
 
-"""
-Set up testing related distributions
-"""
+#-------------------------------------------------------------------------------
+# SET UP TESTING RELATED DISTRIBUTIONS
+#-------------------------------------------------------------------------------
 
 # If needed, set a different probability mass function for delay until test result received.
 # Will then need to pass CT_delay_until_test_result_pmf_alt into CT_params creation:
@@ -160,9 +159,10 @@ Set up testing related distributions
 #                                 test_false_negative_vec = test_false_negative_vec_alt)
 # test_false_negative_vec_alt = 0.2*ones(20)
 
-"""
-Specify use of any additional, trigger interventions
-"""
+#-------------------------------------------------------------------------------
+# SPECIFY USE OF ANY ADDITIONAL TRIGGER INTERVENTIONS
+#-------------------------------------------------------------------------------
+
 # Have as a 2D array input.
 # -> Row per intervention
 # -> Column 1 for the condition for itervention being triggered
@@ -175,9 +175,11 @@ Specify use of any additional, trigger interventions
     #  e.g. ...=  worker_pattern_network_run(...,
     #                                 intervention_fns = intervention_fns_alt)
 
-"""
-Specify household transmission risk by group
-"""
+
+#-------------------------------------------------------------------------------
+# SPECIFY HOUSEHOLD TRANSMISSION RISK BY GROUP
+#-------------------------------------------------------------------------------
+
 # # If needed, set a different distribution of transrisk_household_group from the default
 # # Will then need to pass transrisk_household_group_altinto infection_params creation:
 # #  e.g. infection_parameters = infection_params(...,

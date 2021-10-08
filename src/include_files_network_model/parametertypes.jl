@@ -1,4 +1,4 @@
-"""
+#=
 Purpose:
 Parameter types to be used with the network model
 
@@ -14,7 +14,8 @@ Parameter types to be used with the network model
 - intervention_data_feeds: The data streams that may be of use in implementing trigger-based interventions
 - node_states: Used for the status of each node
 - intervention_struct: Variable values to be used from a specified intervention start time
-"""
+#-------------------------------------------------------------------------------
+=#
 
 # Workplace parameter type to have information on
 # the work sector, being covid secure, whether workplace is open etc

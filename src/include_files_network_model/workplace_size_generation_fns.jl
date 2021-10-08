@@ -1,10 +1,10 @@
-"""
-Purpose:
+#=Purpose:
 Functions to generate workplace sizes for the target number of work sectors
 
 - workplace_size_sampled_from_empirical_pmf
 - workplace_size_gen_using_normal_dist (approximation using normal distribution)
-"""
+#-------------------------------------------------------------------------------
+=#
 
 function workplace_size_sampled_from_empirical_pmf(rng::MersenneTwister,
                                                         worker_grp_idx::Int64,

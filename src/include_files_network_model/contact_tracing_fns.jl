@@ -1,11 +1,13 @@
-"""
+#=
 Purpose:
 Stash functions that are used with the network model for modelling contact tracing
-"""
+#-------------------------------------------------------------------------------
+=#
 
-"""
-Lookup if homeday/workday contacts were active in contact tracing active window
-"""
+#-------------------------------------------------------------------------------
+# LOOKUP IF HOMEDAY/WORKDAY CONTACTS WERE ACTIVE IN CONTACT TRACING ACTIVE WINDOW
+#-------------------------------------------------------------------------------
+
 # Find relevant workday & homeday contacts
 # in time d days before symptoms up to current day.
 function lookup_homeday_workday_CT(worker_ID::Int64,
@@ -54,9 +56,10 @@ function lookup_homeday_workday_CT(worker_ID::Int64,
             workday_flag::Bool
 end
 
-"""
-Get portion of dynamic contacts to be recallable
-"""
+#-------------------------------------------------------------------------------
+# GET PORTION OF DYNAMIC CONTACTS TO BE RECALLABLE
+#-------------------------------------------------------------------------------
+
 # In time d days before symptoms up to current day.
 function recallable_dynamic_contacts(worker_ID::Int64,
                                         dynamic_contact_record::Array{Array{Int64,1},2},
@@ -125,9 +128,10 @@ function recallable_dynamic_contacts(worker_ID::Int64,
     return recallable_contacts::Array{Int64,1}
 end
 
-"""
-Check contacts made at work
-"""
+#-------------------------------------------------------------------------------
+# CHECK CONTACTS MADE AT WORK
+#-------------------------------------------------------------------------------
+
 # In time d days before symptoms up to current day.
 # Go over list of usual workday contacts. Check if they actually occurred,
 # or if contact was absent due to isolation/other workplace closure.
@@ -209,10 +213,9 @@ function get_worker_contacts(worker_ID::Int64,
     return workplace_contacts::Array{Int64,1}
 end
 
-"""
-Perform forward CT from an identified infector
-"""
-# Comment break
+#-------------------------------------------------------------------------------
+# PERFORM FORWARD CT FROM AN IDENTIFIED INFECTOR
+#-------------------------------------------------------------------------------
 function forwardCT_from_infector!(infector_ID::Int64,
                                 CT_vars::contact_tracing_vars,
                                 contacts::contacts_struct,

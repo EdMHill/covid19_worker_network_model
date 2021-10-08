@@ -1,4 +1,4 @@
-"""
+#=
 Purpose:
 Functions to produce the network layers
 
@@ -11,7 +11,8 @@ Functions to produce the network layers
 - generate_social_contacts_each_day         (Premake social contacts (from friendship group) made each day,
                                             to be loaded in ahead of simulation)
 - generate_random_contacts                  (premake social contacts outside friendship group)
-"""
+#-------------------------------------------------------------------------------
+=#
 
 ## Functions to produce the initial network layers ##
 
@@ -777,21 +778,21 @@ function generate_dynamic_worker_contacts(RNGseed::Int64,
 # Outputs:
 # dynamic_worker_contacts - Per node, a record of dynamic worker contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     dynamic_worker_contacts = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
-    """
-    Iterate over all nodes
-    For those returning to work in role with dynamic contacts,
-    assign dynamic contacts for each timestep
-    """
+    #=
+    ITERATE OVER ALL NODES
+    FOR THOSE RETURNING TO WORK IN ROLE WITH DYNAMIC CONTACTS,
+    ASSIGN DYNAMIC CONTACTS FOR EACH TIMESTEP
+    =#
     for node_itr = 1:cmax
         if worker_nodes[node_itr].returned_to_work==1 # Add dynamic links, if returned to work
             # Get dynamic worker group type for node_itr
@@ -886,20 +887,20 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
     nonworkday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
-    """
-    Configuration model
-    """
+    #---------------------------------------------------------------------------
+    # CONFIGURATION MODEL
+    #---------------------------------------------------------------------------
     n_nodes = cmax
 
     edges_per_node_workday = Distributions.rand(rng, social_workday_dd, n_nodes)
@@ -924,9 +925,9 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
     for time_itr = 1:endtime
         println(time_itr)
 
-        """
-        WORKDAY
-        """
+        #-----------------------------------------------------------------------
+        # WORKDAY
+        #-----------------------------------------------------------------------
         half_edges = cumsum(edges_per_node_workday)
 
         edges_remaining_per_node = copy(edges_per_node_workday)
@@ -1002,9 +1003,10 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             end
         end
 
-        """
-        NON-WORKDAY
-        """
+
+        #-----------------------------------------------------------------------
+        # NON-WORKDAY
+        #-----------------------------------------------------------------------
         half_edges = cumsum(edges_per_node_nonworkday)
 
         edges_remaining_per_node = copy(edges_per_node_nonworkday)
@@ -1099,22 +1101,23 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
     nonworkday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
     for time_itr = 1:endtime
         # println(time_itr)
-        """
-        WORKDAY
-        """
+
+        #-----------------------------------------------------------------------
+        # WORKDAY
+        #-----------------------------------------------------------------------
         # Initialise array to track who has already been contacted
         edges_unassigned = ones(Int64, cmax)
 
@@ -1209,9 +1212,10 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             edges_unassigned[node_id] = 0
         end
 
-        """
-        NON-WORKDAY
-        """
+
+        #-----------------------------------------------------------------------
+        # NON-WORKDAY
+        #-----------------------------------------------------------------------
         # Initialise array to track who has already been contacted
         edges_unassigned = ones(Int64, cmax)
 
@@ -1331,22 +1335,25 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
     time_itr = 1
     while time_itr <= endtime
         # println(time_itr)
-        """
-        WORKDAY
-        """
+
+        #-----------------------------------------------------------------------
+        # WORKDAY
+        #-----------------------------------------------------------------------
+
         # Initialise array to track who has already been contacted
         edges_unassigned = ones(Int64, cmax)
 
@@ -1463,14 +1470,15 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
     time_itr = 1
@@ -1550,14 +1558,14 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
     time_itr = 1
@@ -1617,9 +1625,10 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
 end
 
-"""
-Functions for use with Erdos-Renyi network construction
-"""
+#---------------------------------------------------------------------------
+# FUNCTIONS FOR USE WITH ERDOS-RENYI NETWORK CONSTRUCTION
+#---------------------------------------------------------------------------
+
 # ASSUMPTIONS:
 # Contacts are split into 3 groups: work, social and household
 # Work contacts occur within workplaces (common), between same workertypes (less common) and between any other worker (uncommon) on every work day
@@ -1934,21 +1943,22 @@ function generate_dynamic_worker_contacts(RNGseed::Int64,
 # Outputs:
 # dynamic_worker_contacts - Per node, a record of dynamic worker contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     dynamic_worker_contacts = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
-    """
-    Iterate over all nodes
-    For those returning to work in role with dynamic contacts,
-    assign dynamic contacts for each timestep
-    """
+    #=
+    ITERATE OVER ALL NODES
+    FOR THOSE RETURNING TO WORK IN ROLE WITH DYNAMIC CONTACTS,
+    ASSIGN DYNAMIC CONTACTS FOR EACH TIMESTEP
+    =#
     for node_itr = 1:cmax
         if worker_nodes[node_itr].returned_to_work==1 # Add dynamic links, if returned to work
             # Get dynamic worker group type for node_itr
@@ -2003,22 +2013,22 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - Per node, a record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise vector of vectors storing IDs of contacts for each node
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE VECTOR OF VECTORS STORING IDS OF CONTACTS FOR EACH NODE
+    #---------------------------------------------------------------------------
     workday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
     nonworkday_social_contacts_by_day = Array{Array{Int64,1},2}(undef,endtime,cmax)
 
-    """
-    Iterate over all nodes
-    For those potentially have social contacts,
-    assign a sample of those contacts for each timestep
-    """
+    #=
+    ITERATE OVER ALL NODES
+    FOR THOSE POTENTIALLY HAVE SOCIAL CONTACTS,
+    ASSIGN A SAMPLE OF THOSE CONTACTS FOR EACH TIMESTEP
+    =#
     for node_itr = 1:cmax
 
         # Add in social contacts if possible
@@ -2344,14 +2354,15 @@ function regenerate_possible_social_contacts(workday_social_contacts_by_day::Arr
 # workday_social_contacts_by_day, nonworkday_social_contacts_by_day
 #       - A now amended record of social contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Draw new collection of possible social contacts
-    """
+    #---------------------------------------------------------------------------
+    # DRAW NEW COLLECTION OF POSSIBLE SOCIAL CONTACTS
+    #---------------------------------------------------------------------------
+
     # Initialise vector of vectors storing IDs of contacts for each node in social
     # and household settings
     social_contacts = Array{Array{Int64,1},1}(undef,cmax)
@@ -2376,11 +2387,11 @@ function regenerate_possible_social_contacts(workday_social_contacts_by_day::Arr
         end
     end
 
-    """
-    Iterate over all nodes
-    For those potentially have social contacts,
-    assign a sample of those contacts for each timestep
-    """
+    #=
+    ITERATE OVER ALL NODES
+    FOR THOSE POTENTIALLY HAVE SOCIAL CONTACTS,
+    ASSIGN A SAMPLE OF THOSE CONTACTS FOR EACH TIMESTEP
+    =#
     for node_itr = 1:cmax
 
         # Add in social contacts if possible
@@ -2448,16 +2459,16 @@ function regenerate_dynamic_worker_contacts(dynamic_worker_contacts::Array{Array
 # Outputs:
 # dynamic_worker_contacts - The now amended record of dynamic worker contacts made on each day
 
-    """
-    Set the RNG
-    """
+    #---------------------------------------------------------------------------
+    #  SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Iterate over all nodes
-    For those returning to work in role with dynamic contacts,
-    assign dynamic contacts for each timestep
-    """
+    #=
+    ITERATE OVER ALL NODES
+    FOR THOSE RETURNING TO WORK IN ROLE WITH DYNAMIC CONTACTS,
+    ASSIGN DYNAMIC CONTACTS FOR EACH TIMESTEP
+    =#
     for node_itr = 1:cmax
         if worker_nodes[node_itr].returned_to_work==1 # Add dynamic links, if returned to work
             # Get dynamic worker group type for node_itr

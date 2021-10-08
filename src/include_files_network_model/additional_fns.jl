@@ -1,4 +1,4 @@
-"""
+#=
 Purpose:
 Houses functions required to run worker pattern network model
 
@@ -24,7 +24,8 @@ Functions to reinitialise states at start of each run
 Miscellaneous functions contained within this file include:
 - draw_sample_from_pmf!
 - set_infection_related_times!      (set times to infection etc.: returns inftime, symptime, lattime, hh_isolation and delay_adherence)
-"""
+#--------------------------------------------------------------------------
+=#
 
 function populate_atwork!(atwork::Array{Int64,2},
                             sameday::Int64,
@@ -1358,9 +1359,9 @@ function find_fitted_contact_dds(context::String, workertypes::Int64)
     end
 end
 
-"""
-Transmission related fns
-"""
+#--------------------------------------------------------------------------
+# TRANSMISSION RELATED FUNCTIONS
+#--------------------------------------------------------------------------
 
 function transmit_over!(transmission_risk::Float64,
                     timelat::Array{Int64,1},
@@ -1543,9 +1544,10 @@ function transmit_over_other_workplace!(transmission_risk::Float64,
     end
 end
 
-"""
-Functions to set up transmission rates within household, workplace and socially for each individual
-"""
+#-------------------------------------------------------------------------------
+# Functions to set up transmission rates within household,
+# workplace and socially for each individual
+#-------------------------------------------------------------------------------
 function assign_household_transmit_onegroup!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     household_contacts_per_node::Array{Int64,1},
@@ -1828,9 +1830,10 @@ end
 
 
 
-"""
-Functions to reinitialise states at start of each run
-"""
+#-------------------------------------------------------------------------------
+# Functions to reinitialise states at start of each run
+#-------------------------------------------------------------------------------
+
 # Node states, household inf delay & CT vars
 function reinitialise_node_states!(states::node_states)
     lmul!(0,states.timelat)
@@ -1921,9 +1924,9 @@ function reinitialise_CT_vars!(CT_vars::contact_tracing_vars,cmax::Int64, rng::M
     lmul!(0,CT_vars.Recall_infector)
 end
 
-"""
-Misc. fns
-"""
+#-------------------------------------------------------------------------------
+# Misc. fns
+#-------------------------------------------------------------------------------
 
 function draw_sample_from_pmf(csum_pmf::Array{Float64,1},
                                 rng::MersenneTwister;

@@ -1,4 +1,4 @@
-"""
+#=
 Purpose:
 Store functions used to seed nodes in non-susceptible states at beginning of
 simulation replicates
@@ -9,12 +9,13 @@ Fns to select nodes to begin in given non-susceptible state
 Fns to get number of nodes to be seeded in each non-susceptible state
 - set_ten_initial_infected
 - seed_states_with_uncertainty
-"""
+#-------------------------------------------------------------------------------
+=#
 
+#-------------------------------------------------------------------------------
+# FUNCTIONS TO SELECT NODES TO BEGIN IN GIVEN NON-SUSCEPTIBLE STATE
+#-------------------------------------------------------------------------------
 
-"""
-Fns to select nodes to begin in given non-susceptible state
-"""
 # select from the entire population
 function choose_from_all_popn(rng::MersenneTwister,
                                     n_nodes::Int64,
@@ -196,9 +197,9 @@ function choose_from_all_popn(rng::MersenneTwister,
     return nothing
 end
 
-"""
-Fns to get number of nodes to be seeded in each non-susceptible state
-"""
+#-------------------------------------------------------------------------------
+# FUNCTIONS TO GET NUMBER OF NODES SEEDED IN EACH NON-SUSCEPTIBLE STATE
+#-------------------------------------------------------------------------------
 
 # Standard function setup
 # Inputs

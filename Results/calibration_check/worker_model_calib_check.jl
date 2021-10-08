@@ -1,7 +1,6 @@
-"""
-Purpose:
-Plot outputs from worker model calibration runs
-"""
+#-------------------------------------------------------------------------------
+# Purpose: Plot outputs from worker model calibration runs
+#-------------------------------------------------------------------------------
 
 #Set paths
 cd(dirname(@__FILE__))
@@ -24,9 +23,9 @@ svty_variable_ops = Dict("RNGseed" => [100, 200, 300],
                             "No control simulations" => [1000]
                             )
 
-"""
-Iterate over sensitivity configs
-"""
+#-------------------------------------------------------------------------------
+# ITERATE OVER SENSITIVITY CONFIGS
+#-------------------------------------------------------------------------------
 # In turn, produce plots for each batch of runs
 for svty_itr = 1:length(svty_variables)
 
@@ -69,9 +68,7 @@ for svty_itr = 1:length(svty_variables)
     println("n_timesteps: $n_timesteps; n_replicates: $n_replicates")
     Rt_final_timepoint = n_timesteps
 
-    """
-    Construct plots for each configuration
-    """
+    # Construct plots for each configuration
     for var_itr = 1:n_vars
 
         # Set default moving average width for Rt

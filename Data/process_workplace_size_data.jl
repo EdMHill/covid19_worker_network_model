@@ -1,36 +1,38 @@
-"""
+#=
 Purpose:
 Process data from the ONS 'UK business: activity, size and location' dataset
 Produce breakdowns of the fraction of workplaces within specified employee size ranges
 Separate estimates produced for different work sectors
-"""
+=#
+#-------------------------------------------------------------------------------
 
-"""
-Set paths & load environment
-"""
+
+#-------------------------------------------------------------------------------
+# SET PATHS & LOAD ENVIRONMENT
+#-------------------------------------------------------------------------------
+
 #Set paths
 cd(dirname(@__FILE__))
 
 #Load environment
 using Pkg
-Pkg.activate("../../")
+Pkg.activate("../")
 
-"""
-Load packages
-"""
-#Required packages
+#-------------------------------------------------------------------------------
+# LOAD PACKAGES
+#-------------------------------------------------------------------------------
 using XLSX
 using DelimitedFiles
 
-"""
-Load the required data
-"""
+#-------------------------------------------------------------------------------
+# LOAD DATA
+#-------------------------------------------------------------------------------
 work_division_data = XLSX.readdata("ukbusinessworkbook2020.xlsx", "Table 3", "B8:H95")
 work_classes_data = XLSX.readdata("ukbusinessworkbook2020.xlsx", "Table 4", "B7:H621")
 
-"""
-Set up mappings to the 41 work sectors
-"""
+#-------------------------------------------------------------------------------
+# SET UP MAPPINGS TO THE 41 WORK SECTORS
+#-------------------------------------------------------------------------------
 n_bins = size(work_division_data,2)
 work_sector_data = zeros(Int64,41,n_bins)
 
@@ -61,13 +63,14 @@ work_sector_data[39,:] = sum(work_classes_data[608:608,:], dims=1)
 work_sector_data[40,:] = sum(work_classes_data[609:609,:], dims=1)
 work_sector_data[41,:] = sum(work_classes_data[[607;collect(610:615)],:], dims=1)
 
-"""
-Produce CDF values
-"""
+#-------------------------------------------------------------------------------
+# PRODUCE CDF VALUES
+#-------------------------------------------------------------------------------
+
 work_sector_data_cdfs = cumsum(work_sector_data, dims=2)./sum(work_sector_data, dims=2)
 
-"""
-Save array to file
-"""
+#-------------------------------------------------------------------------------
+# SAVE ARRAY TO FILE
+#-------------------------------------------------------------------------------
 #Take tranpose to give row by workplace size and column by work sector
 writedlm("../../Data/worker_model/work_sector_proportions_by_size.csv",work_sector_data_cdfs')

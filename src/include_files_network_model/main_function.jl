@@ -1,6 +1,6 @@
-"""
-Main function
-"""
+#-------------------------------------------------------------------------------
+# MAIN FUNCTION
+#-------------------------------------------------------------------------------
 
 # Run outbreak on network
 function worker_pattern_network_run(RNGseed::Int64,
@@ -77,9 +77,10 @@ function worker_pattern_network_run(RNGseed::Int64,
 
 ##
 
-     """
-     Unpack required variables
-     """
+    #---------------------------------------------------------------------------
+    # UNPACK REQUIRED VARIABLES
+    #---------------------------------------------------------------------------
+
     # if contact_tracing_active==true
         @unpack CT_engagement, CT_delay_until_test_result_pmf, CT_days_before_symptom_included, test_detection_prob_vec,
             CT_caused_isol_limit, dynamic_contacts_recalled_propn, social_contacts_recalled_propn, prob_backwards_CT,
@@ -101,14 +102,14 @@ function worker_pattern_network_run(RNGseed::Int64,
     @unpack dynamic_conts_mean, dynamic_conts_sd, CS_active_flag = network_parameters
     @unpack workertypes = workplace_generation_parameters
 
-    """
-    Set the random number generator
-    """
+    #---------------------------------------------------------------------------
+    # SET THE RNG
+    #---------------------------------------------------------------------------
     rng = MersenneTwister(RNGseed)
 
-    """
-    Initialise workplaces and workers
-    """
+    #---------------------------------------------------------------------------
+    # INTIALISE WORKPLACES AND WORKERS
+    #---------------------------------------------------------------------------
 
     # generate_workplaces_and_allocate_workers in network_generation_fns.jl
     # households [nodes x workers x properties]: dim1--nodes, dim2--array containing workers, dim3--tuple of worker properties
@@ -136,9 +137,10 @@ function worker_pattern_network_run(RNGseed::Int64,
 
     println("cmax inside: $cmax")
 
-    """
-    Generate contacts within workplaces & households
-    """
+    #---------------------------------------------------------------------------
+    # GENERATE CONTACTS WITHIN WORKPLACES & HOUSEHOLDS
+    #---------------------------------------------------------------------------
+
     # Generate contact network within workplaces, in network_generation_fns.jl
     @time contacts::contacts_struct,
         social_contacts::Array{Array{Int64,1},1},
@@ -167,9 +169,10 @@ function worker_pattern_network_run(RNGseed::Int64,
         return fig
     end
 
-    """
-    Generate social contacts (workdays and non-workdays)
-    """
+    #---------------------------------------------------------------------------
+    # GENERATE SOCIAL CONTACTS (WORKDAYS & NON-WORKDAYS)
+    #---------------------------------------------------------------------------
+
     # generate_social_contacts_each_day in network_generation_fns.jl
     # Set up social contacts made on work days for each given day
     # & set up social contacts made on non-work days for each given day
@@ -246,9 +249,9 @@ function worker_pattern_network_run(RNGseed::Int64,
     contacts.workday_social_contacts_by_day = workday_social_contacts_by_day
     contacts.nonworkday_social_contacts_by_day = nonworkday_social_contacts_by_day
 
-    """
-    Generate dynamic contacts
-    """
+    #---------------------------------------------------------------------------
+    # GENERATE DYNAMIC CONTACTS
+    #---------------------------------------------------------------------------
     # Set up dynamic worker contacts, in network_generation_fns.jl
 
     if network_parameters.network_generation_method == "ER"
@@ -272,9 +275,9 @@ function worker_pattern_network_run(RNGseed::Int64,
 
     contacts.dynamic_worker_contacts = dynamic_worker_contacts
 
-    """
-    Generate random dynamic contacts
-    """
+    #---------------------------------------------------------------------------
+    # GENERATE RANDOM DYNAMIC CONTACTS
+    #---------------------------------------------------------------------------
     dynamic_random_contacts = generate_random_contacts(RNGseed,
                                                         cmax,
                                                         endtime,
@@ -331,9 +334,9 @@ function worker_pattern_network_run(RNGseed::Int64,
     end
 
 
-    """
-    Generate transmission risks
-    """
+    #---------------------------------------------------------------------------
+    # GENERATE TRANSMISSION RISKS
+    #---------------------------------------------------------------------------
     # Relevant functions are listed in "include_files_network_model/additional_fns.jl"
     assign_household_transrisk_fn(RNGseed,
                                         network_parameters,
@@ -363,9 +366,9 @@ function worker_pattern_network_run(RNGseed::Int64,
                                 transrisk_random_mean,
                                 transrisk_random_sd)
 
-    """
-    Initialise storage arrays
-    """
+    #---------------------------------------------------------------------------
+    # INITIALISE STORAGE ARRAYS
+    #---------------------------------------------------------------------------
 
     # Initialise output structure
     output = sim_outputs(endtime=endtime,countfinal=countfinal,cmax=cmax,
@@ -396,9 +399,11 @@ function worker_pattern_network_run(RNGseed::Int64,
     end
     csum_delay_household_inf = cumsum(delay_household_infection_pmf)
 
-    """
-    If required, initialise contract tracing related variables
-    """
+
+    #---------------------------------------------------------------------------
+    # INITIALISE CONTACT TRACING RELATED VARIABLES (IF REQUIRED)
+    #---------------------------------------------------------------------------
+
     # If contact tracing in use, create variables
     # if contact_tracing_active == true
 
@@ -415,9 +420,11 @@ function worker_pattern_network_run(RNGseed::Int64,
     #     CT_vars = contact_tracing_vars()
     # end
 
-    """
-    If required, initialise workplace closure variables
-    """
+
+    #---------------------------------------------------------------------------
+    # INITIALISE WORKPLACE CLOSURE VARIABLES (IF REQUIRED)
+    #---------------------------------------------------------------------------
+
     workplace_memory = Array{Array{Int64,2},1}(undef, workertypes) # initialise the memory for each workplace
 
     # if workplace_closure_active
@@ -436,9 +443,11 @@ function worker_pattern_network_run(RNGseed::Int64,
         end
     # end
 
-    """
-    If required, initialise triggered intervention variables
-    """
+
+    #---------------------------------------------------------------------------
+    # INITIALISE TRIGGERED INTERVENTION VARIABLES (IF REQUIRED)
+    #---------------------------------------------------------------------------
+
     # Check if any interventions were specified
     if isassigned(intervention_fns)
         # Number of intervention sets provided is number of rows of intervention_fns
@@ -453,9 +462,12 @@ function worker_pattern_network_run(RNGseed::Int64,
         infection_parameters_preintervention = deepcopy(infection_parameters)
         network_parameters_preintervention = deepcopy(network_parameters)
     end
-    """
-    Run different intervention sets
-    """
+
+
+    #---------------------------------------------------------------------------
+    # RUN DIFFERENT INTERVENTION SETS
+    #---------------------------------------------------------------------------
+
     # Find number of intervention sets
     n_intervention_sets = length(intervention_list_configs)
 
@@ -471,20 +483,18 @@ function worker_pattern_network_run(RNGseed::Int64,
             intervention_times = [intervention_list[i].start_time for i=1:n_interventions]
         end
 
-        """
-        Run replicates
-        """
+        #-----------------------------------------------------------------------
+        # RUN REPLICATES
+        #-----------------------------------------------------------------------
         # Perform countfinal number of replicates
         for count=1:countfinal
 
-            """
-            Set the RNG
-            """
+            # Set the RNG
             rng = MersenneTwister(RNGseed+count)
 
-            """
-            Initialisation phase
-            """
+            #-------------------------------------------------------------------
+            # INITIALISATION PHASE
+            #-------------------------------------------------------------------
 
             # Re-initiailise node related arrays
             lmul!(0,dayon)
@@ -523,15 +533,18 @@ function worker_pattern_network_run(RNGseed::Int64,
             lmul!(0,time_to_symps)
 
 
-            """
-            Set course of infection times
-            """
+            #-------------------------------------------------------------------
+            # SET COURSE OF INFECTION TIMES
+            #-------------------------------------------------------------------
+
             # set times to infection etc.: returns inftime, symptime, lattime, hh_isolation and delay_adherence
             set_infection_related_times!(time_to_symps,states,isolation,adherence,csum_delay_adherence,d_incub,cmax,rng)
 
-            """
-            Seed non-susceptible disease states
-            """
+
+            #-------------------------------------------------------------------
+            # SEED NON-SUSCEPTIBLE DISEASE STATES
+            #-------------------------------------------------------------------
+
             # Draw asymptomatic probability for current replicate
             probasymp = rand(rng,probasymp_dist)
 
@@ -551,9 +564,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                                                             infected_by,
                                                             recov_propn)
 
-           """
-           Update output time series with initial conditions
-           """
+
+           #-------------------------------------------------------------------
+           # UPDATE OUTPUT TIME SERIES WITH INITIAL CONDITIONS
+           #-------------------------------------------------------------------
+
            # Update time series for latent & infecteds after assigning initial
            # infecteds
            output.numlat[1,count,intervention_set_itr] = n_initial_latent
@@ -565,9 +580,11 @@ function worker_pattern_network_run(RNGseed::Int64,
            output.prevsymp[1,count,intervention_set_itr] = n_initial_symp
            output.prevrec[1,count,intervention_set_itr] = n_initial_recovereds
 
-           """
-           Reset contact tracing variables
-           """
+
+            #-------------------------------------------------------------------
+            # RESET CONTACT TRACING VARIABLES
+            #-------------------------------------------------------------------
+
             # If required, set up and/or reinitialise contact tracing related variables
             # if contact_tracing_active == true
                 reinitialise_CT_vars!(CT_vars, cmax, rng, CT_parameters, states.delay_adherence,csum_test_result_delay,max_test_result_delay)
@@ -580,24 +597,21 @@ function worker_pattern_network_run(RNGseed::Int64,
            # (having not participated in CT before)
            infector_trace_count = [0]
 
-           """
-           Generate random number arrays
-           """
+           #--------------------------------------------------------------------
+           # GENERATE RANDOM NUMBER ARRAYS
+           #--------------------------------------------------------------------
            r_symp_test = rand(rng,cmax,endtime)
            r_backwards_CT = rand(rng,cmax,endtime)
 
-            """
-            Run single replicate
-            """
+            #-------------------------------------------------------------------
+            # RUN SINGLE REPLICATE
+            #-------------------------------------------------------------------
             for time=1:endtime
 
                 # Initial timepoint is for initial conditions
                 # Set row to accessed in output arrays for this timestep
                 output_time_idx = time + 1
 
-                 """
-                 Reinitialise variables at start of timestep
-                 """
                 # Reinitialise timestep specific values
                 lmul!(0,states.rep_inf_this_timestep)
 
@@ -613,9 +627,9 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 # end
 
-                """
-                Implement any interventions
-                """
+                #---------------------------------------------------------------
+                # IMPLEMENT ANY INTERVENTIONS
+                #---------------------------------------------------------------
                 if n_interventions > 0
                     if time ∈ intervention_times
                         intervention_id = findfirst(intervention_times.==time)
@@ -746,23 +760,23 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 end
 
-                """
-                Assign outputs
-                """
+                #---------------------------------------------------------------
+                # ASSIGN OUTPUTS
+                #---------------------------------------------------------------
                 # Assign counts in each disease state to array
                 output.numlat[output_time_idx,count,intervention_set_itr] = output.numlat[output_time_idx-1,count,intervention_set_itr]
                 output.numinf[output_time_idx,count,intervention_set_itr] = output.numinf[output_time_idx-1,count,intervention_set_itr]
                 output.numrep[output_time_idx,count,intervention_set_itr] = output.numrep[output_time_idx-1,count,intervention_set_itr]
 
-                """
-                Increment counters
-                """
-                # Increment counters if node is currently in that state.
+                #---------------------------------------------------------------
+                # INCREMENT COUNTERS
+                #---------------------------------------------------------------
                 increment_counters!(states) # in additional_fns.jl
 
-                """
-                Increment infection process
-                """
+                #---------------------------------------------------------------
+                # INCREMENT INFECTION PROCESS
+                #---------------------------------------------------------------
+
                # If come to the end of latent time, move to infectious time etc
                for node_itr = 1:cmax
                     # if the node has reached the end of latent infection
@@ -1002,9 +1016,10 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 end
 
-                """
-                Get daily isolation & atwork status of nodes
-                """
+                #---------------------------------------------------------------
+                # GET DAILY ISOLATION & ATWORK STATUS OF NODES
+                #---------------------------------------------------------------
+
                 # record whether nodes are in isolation
                 for node_itr = 1:cmax
                     # Now record whether node is in isolation on current day
@@ -1033,7 +1048,7 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 end
 
-                """
+                #=
                 Transmit infections
 
                 Structure:
@@ -1043,7 +1058,8 @@ function worker_pattern_network_run(RNGseed::Int64,
                     -- Work contacts (with checks based on covid-secure status)
                     -- Dynamic contacts
                 - Not at work
-                """
+                =#
+
                 # Iterate over nodes that may be able to transmit infection
                 for node_itr = 1:cmax
                     if ((states.timeinf[node_itr]>0) | (states.timesymp[node_itr]>0))
@@ -1207,9 +1223,10 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 end
 
-                """
-                Perform contact tracing
-                """
+                #---------------------------------------------------------------
+                # INCREMENT COUNTERS PERFORM CONTACT TRACING
+                #---------------------------------------------------------------
+
                 # If in use, enact contact tracing from index cases reported today
                 if contact_tracing_active == true
 
@@ -1335,9 +1352,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                         end
                 end
 
-                """
-                Assign prevalence & isolation outputs
-                """
+
+                #---------------------------------------------------------------
+                # ASSIGN PREVALENCE & ISOLATION OUTPUTS
+                #---------------------------------------------------------------
+
                 # For this timestep, get number isolating
                 # and if they are latent infected or infectious on current timestep
                 for node_itr=1:cmax
@@ -1398,9 +1417,11 @@ function worker_pattern_network_run(RNGseed::Int64,
                     end
                 end
 
-                """
-                Reactive workplace closure check
-                """
+
+                #---------------------------------------------------------------
+                # REACTIVE WORKPLACE CLOSURE CHECK
+                #---------------------------------------------------------------
+
                 # close workplaces with too many infections
                 if workplace_closure_active==true
                     for worktypeID = 1:workertypes
@@ -1437,9 +1458,10 @@ function worker_pattern_network_run(RNGseed::Int64,
 
                 end
 
-                """
-                Run interventions
-                """
+                #---------------------------------------------------------------
+                # RUN INTERVENTIONS
+                #---------------------------------------------------------------
+
                 # Check if any interventions are triggered
                 # Update statuses as needed
                 if isassigned(intervention_fns) # Check if any intervetion were specified
