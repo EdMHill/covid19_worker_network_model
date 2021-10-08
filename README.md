@@ -2,6 +2,8 @@
 
 This repository contains files for performing computational simulations of a network model framework to explore SARS-CoV-2 transmission amongst the workforce.
 
+[![DOI](https://zenodo.org/badge/309151563.svg)](https://zenodo.org/badge/latestdoi/309151563)
+
 The code was developed for the analysis presented in the scientific paper "A network modelling approach to assess nonpharmaceutical disease controls in a worker population: An application to SARS-CoV-2" by Edward M. Hill, Benjamin D. Atkins, Matt J. Keeling, Louise Dyson and Michael J. Tildesley.
 
 Publication details: Hill et al. (2021) A network modelling approach to assess non-pharmaceutical disease controls in a worker population: An application to SARS-CoV-2. *PLOS Computational Biology* 17(6): e1009058. doi: 10.1371/journal.pcbi.1009058. URL: https://doi.org/10.1371/journal.pcbi.1009058.
