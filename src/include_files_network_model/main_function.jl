@@ -25,7 +25,7 @@ Inputs: `RNGseed` - Sets the random number generator,
         `assign_household_transrisk_fn` - Specify assignment of individuals to household groups with differing household transmission risk, \n
 For parameters within the parameter structures, see "include_files_network_model/parametertypes.jl" \n
 Outputs: `output` - SimulationOutputs structure \n
-Location: main_function.jl
+Location: main\\_function.jl
 """
 function worker_pattern_network_run(RNGseed::Int64,
                                         cmax::Int64,

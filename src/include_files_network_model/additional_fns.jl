@@ -38,7 +38,7 @@ Inputs: `atwork` - cmax x endtime array indicating work schedule of each node,
         `toff`,
         `rng` - random number generator \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function populate_atwork!(atwork::Array{Int64,2},
                             sameday::Int64,
@@ -176,7 +176,7 @@ Increase value of time in infection state variables, called each timestep.
 
 Inputs: `states` - node_states structure containing disease states of each node \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function increment_counters!(states::node_states)
 
@@ -206,7 +206,7 @@ end
 
 Load configuration variables according to previously defined configuration. New configurations must define n_configs > 0.
 
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function load_configs(runset::String,workertypes::Int64,cmax::Int64,
                         RNGseed::Int64
@@ -1287,7 +1287,7 @@ Inputs: `workertypes` - number of sectors,
         `workpercent` - proportion of each work sector that attends the workplace \n
 Outputs: `network_params` - network_params structure,
          `workplace_generation_params` - WorkplaceGenerationParameters structure \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function find_network_parameters(workertypes;workpercent::Array{Float64,1}=Array{Float64,1}[])
 
@@ -1377,7 +1377,7 @@ Only works for 41 sectors (default).
 Inputs: `context` - context for contact degree distribution,
         `workertypes` - number of sectors \n
 Outputs: `workplace_degree_distribution` or `workplace_dynamic_degree_distribution` - relevant degree distribution (array of distributions) \n
-Location: configuration_fns.jl
+Location: additional\\_fns.jl
 """
 function find_fitted_contact_dds(context::String, workertypes::Int64)
 
@@ -1440,7 +1440,7 @@ Inputs: `transmission_risk` - relevant transmission probability for current node
         `social_contact_scaling` - (optional) scaling on social contacts (contacts can be 'deactivated' to reduce number of contacts),
         `random_contact_scaling` - (optional) scaling on random contacts (contacts can be 'deactivated' to reduce number of contacts) \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function transmit_over!(transmission_risk::Float64,
                     timelat::Array{Int64,1},
@@ -1548,7 +1548,7 @@ Inputs: `transmission_risk` - relevant transmission probability for current node
         `atwork` - flag if nodes are at work (according to work schedule),
         `network_parameters` - Quantities to construct the contacts & stores the node properties \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function transmit_over_other_workplace!(transmission_risk::Float64,
                                             infected_by::Array{Int64,1},
@@ -1633,7 +1633,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_household_group_mean` - mean probability of transmission within household (length must be 1),
         `transrisk_household_group_sd` - SD of probability of transmission within household (length must be 1) \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_household_transmit_onegroup!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1688,7 +1688,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_household_group_mean` - mean probability of transmission within household, depending on household size,
         `transrisk_household_group_sd` - SD of probability of transmission within household, depending on household size \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_household_transmit_household_size!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1806,7 +1806,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_static_work_mean` - mean probability of transmission at workplace (static), depending on sector,
         `transrisk_static_work_sd` - SD of probability of transmission at workplace (static), depending on sector \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_workplace_static_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1855,7 +1855,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_dynamic_work_mean` - mean probability of transmission at workplace (dynamic), depending on sector,
         `transrisk_dynamic_work_sd` - SD of probability of transmission at workplace (dynamic), depending on sector \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_workplace_dynamic_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1908,7 +1908,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_social_mean` - mean probability of social transmission,
         `transrisk_social_sd` - SD of probability of social transmission \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_social_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1941,7 +1941,7 @@ Inputs: `RNGseed` - random number generator seed,
         `transrisk_random_mean` - mean probability of random transmission,
         `transrisk_random_sd` - SD of probability of random transmission \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function assign_random_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
@@ -1980,7 +1980,7 @@ Initialises objects in node_states structure ready for replicate.
 
 Inputs: `... parameter structures ...` \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function reinitialise_node_states!(states::node_states)
     lmul!(0,states.timelat)
@@ -2003,7 +2003,7 @@ Reinitialise daily_record_atworkplace and daily_record_inisol.
 
 Inputs: `contacts` - contacts_struct structure \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function reinitialise_daily_record_arrays!(contacts::contacts_struct)
     lmul!(0,contacts.daily_record_atworkplace)
@@ -2018,7 +2018,7 @@ Only called if workplace parameters have been changed via intervention.
 
 Inputs: `workplace_info` - array{array} of workplace_params structures \n
 Outputs: None \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function reinitialise_workplace_params!(workplace_info::Array{Array{workplace_params,1},1})
 
@@ -2044,7 +2044,7 @@ end
 
 Reinitialise contact tracing variables
 
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function reinitialise_CT_vars!(CT_vars::contact_tracing_vars,cmax::Int64, rng::MersenneTwister,
     CT_parameters::CT_params, delay_adherence::Array{Int64,1},
@@ -2111,7 +2111,7 @@ Inputs: `csum_pmf` - specified discrete CDF to sample from,
         `rng` - random number generator,
         `idx_offset` - links bin index to desired quantity value \n
 Outputs: `val_to_update` - sampled quantity value \n
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function draw_sample_from_pmf(csum_pmf::Array{Float64,1},
                                 rng::MersenneTwister;
@@ -2157,7 +2157,7 @@ end
 Randomly initialise infection related values for each node
 (time to symptoms, length of latent period, delay to adherence, adhere yes/no)
 
-Location: additional_fns.jl
+Location: additional\\_fns.jl
 """
 function set_infection_related_times!(time_to_symps::Array{Int64,1},states::node_states,
     isolation::Int64,adherence::Float64,csum_delay_adherence::Array{Float64,1},

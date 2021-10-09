@@ -18,7 +18,7 @@ Parameter types to be used with the network model
 =#
 
 """
-   workplace_params()
+    workplace_params
 
 Structure assigned to each workplace, containing information on whether the workplace is open
 and if COVID-secure measures are in place or not.
@@ -31,7 +31,7 @@ Location: parametertypes.jl
 end
 
 """
-   worker_params()
+    worker_params
 
 Structure allocated to each node, containing information on workplace and household membership,
 working-from-home vs returned-to-work status and transmission risk in each setting.
@@ -51,7 +51,7 @@ Location: parametertypes.jl
 end
 
 """
-   CT_params()
+    CT_params
 
 Structure containing parameters relating to contact tracing.
 
@@ -108,7 +108,7 @@ Location: parametertypes.jl
 end
 
 """
-   contacts_struct()
+    contacts_struct
 
 Structure containing storage objects for contact layers.
 
@@ -152,7 +152,7 @@ Location: parametertypes.jl
 end
 
 """
-   contact_tracing_vars()
+    contact_tracing_vars
 
 Structure containing storage objects required for performing contact tracing.
 Objects have zero length unless contact tracing is activated.
@@ -195,7 +195,7 @@ Location: parametertypes.jl
 end
 
 """
-   infection_params()
+    infection_params
 
 Structure containing parameters relating to the infection process.
 
@@ -285,7 +285,7 @@ Location: parametertypes.jl
 end
 
 """
-   network_params()
+    network_params
 
 Structure containing parameters required to generate the network.
 
@@ -386,7 +386,7 @@ Location: parametertypes.jl
 end
 
 """
-   workplace_generation_params()
+    workplace_generation_params
 
 Structure containing parameters required for workplace generation.
 
@@ -403,7 +403,7 @@ Location: parametertypes.jl
 end
 
 """
-   sim_outputs()
+    sim_outputs
 
 Structure containing storage objects for outputs to be saved from simulations.
 
@@ -456,7 +456,7 @@ Location: parametertypes.jl
 end
 
 """
-   intervention_data_feeds()
+    intervention_data_feeds
 
 Structure keeping track of variables used to trigger an intervention (triggered interventions not yet complete)
 
@@ -471,7 +471,7 @@ Location: parametertypes.jl
 end
 
 """
-   node_states()
+    node_states
 
 Structure containing storage objects to track the status of each node, including working, adherence, isolation and infection status.
 These objects are reinitialised every replicate (or timestep where stated)
@@ -501,7 +501,7 @@ Location: parametertypes.jl
 end
 
 """
-   intervention_struct()
+    intervention_struct
 
 Structure containing all variables that can be changed via intervention during a replicate.
 These changes are applied at 'start_time' for every replicate, then reverted at the end of each replicate,

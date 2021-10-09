@@ -8,23 +8,31 @@ Stash functions that are used with the network model for modelling contact traci
 # LOOKUP IF HOMEDAY/WORKDAY CONTACTS WERE ACTIVE IN CONTACT TRACING ACTIVE WINDOW
 #-------------------------------------------------------------------------------
 
-# Find relevant workday & homeday contacts
-# in time d days before symptoms up to current day.
+"""
+    recallable_dynamic_contacts(worker_ID::Int64,
+                                relevant_prev_days_for_CT::Int64,
+                                atwork::Array{Int64,2},
+                                time::Int64)
+
+Find relevant workday & homeday contacts in time 'd' days before symptoms up to current day.
+
+Inputs:
+- `worker_ID`: Identification of worker
+- relevant_prev_days_for_CT: Amount of days to be looked back over for CT purposes
+- atwork: Binary array. Row per worker with entries (0) homeday, (1) workday
+- time: Current timestep of the simulation
+
+Outputs:
+- homeday_flag::Bool - True if worker had a homeday at any point during relevant_prev_days_for_CT
+- workday_flag::Bool- True if worker had a workday at any point during relevant_prev_days_for_CT
+
+Location: contact\\_tracing\\_fns.jl
+"""
 function lookup_homeday_workday_CT(worker_ID::Int64,
                                     relevant_prev_days_for_CT::Int64,
                                     atwork::Array{Int64,2},
                                     time::Int64)
     # Take in contacts and worker schedule. Check if relevant
-
-# Inputs:
-# worker_ID
-# relevant_prev_days_for_CT - Amount of days to be looked back over for CT purposes
-# atwork - Binary array. Row per worker with entries (0) homeday, (1) workday
-# time - Current timestep of the simulation
-
-# Outputs:
-# homeday_flag::Bool - True if worker had a homeday at any point during relevant_prev_days_for_CT
-# workday_flag::Bool- True if worker had a workday at any point during relevant_prev_days_for_CT
 
 
     prev_day_increment = 1 # Initialise counter to access previous days in atwork array
@@ -70,7 +78,7 @@ Inputs: `worker_ID` - ID of node being contact traced,
         `prev_day_val` - number of days prior to current time that time_to_check is,
         `rng` - random number generator \n
 Outputs: `recallable_contacts` - array of node IDs that have been recalled as contacts \n
-Location: contact_tracing_fns.jl
+Location: contact\\_tracing\\_fns.jl
 """
 function recallable_dynamic_contacts(worker_ID::Int64,
                                         dynamic_contact_record::Array{Array{Int64,1},2},
@@ -142,7 +150,7 @@ Inputs: `worker_ID` - ID of node being contact traced,
         `network_params` - NetworkParameters structure,
         `other_workplace_flag` - boolean flagging if tracing contacts in same or different workplace \n
 Outputs: `workplace_contacts` - array of node IDs that have been confirmed as contacts \n
-Location: contact_tracing_fns.jl
+Location: contact\\_tracing\\_fns.jl
 """
 function get_worker_contacts(worker_ID::Int64,
                                 possible_worker_contacts::Array{Int64,1},
@@ -223,7 +231,7 @@ Inputs: `infector_ID` - ID of infector of contact traced node,
         `count` - number of current replicate,
         `rng` - random number generator \n
 Outputs: None \n
-Location: contact_tracing_fns.jl
+Location: contact\\_tracing\\_fns.jl
 """
 function forwardCT_from_infector!(infector_ID::Int64,
                                 CT_vars::contact_tracing_vars,
@@ -263,6 +271,16 @@ function forwardCT_from_infector!(infector_ID::Int64,
     end
 end
 
+"""
+    trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
+                contacts::contacts_struct,CT_parameters::CT_params,
+                network_parameters::network_params,rng)
+
+Perform contact tracing from an index node.
+
+Outputs: None \n
+Location: contact\\_tracing\\_fns.jl
+"""
 function trace_node!(node_itr::Int64,time::Int64,CT_vars::contact_tracing_vars,
     contacts::contacts_struct,
     CT_parameters::CT_params,network_parameters::network_params,rng)

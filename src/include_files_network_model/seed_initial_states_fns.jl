@@ -30,7 +30,7 @@ Inputs: `rng` - random number generator,
         `n_initial_rec` - number of nodes to be in recovered state initially,
         `initialise_start_disease_state_flag` - boolean flagging if individuals start at time 0 of each state (true) or if time spent in state is randomly sampled (false) \n
 Outputs: None \n
-Location: seed_initial_states_fns.jl
+Location: seed\\_initial\\_states\\_fns.jl
 """
 function choose_from_all_popn(rng::MersenneTwister,
                                     n_nodes::Int64,
@@ -241,7 +241,7 @@ Outputs: `n_initial_latent` - number of nodes to be in latent state initially,
          `n_initial_asymp` - number of nodes to be in asymptomatic state initially,
          `n_initial_symp` - number of nodes to be in symptomatic state initially,
          `n_initial_rec` - number of nodes to be in recovered state initially \n
-Location: seed_initial_states_fns.jl
+Location: seed\\_initial\\_states\\_fns.jl
 """
 function set_ten_initial_infected(rng::MersenneTwister,
                                     n_nodes::Int64,
@@ -290,7 +290,7 @@ Outputs: `n_initial_latent` - number of nodes to be in latent state initially,
          `n_initial_asymp` - number of nodes to be in asymptomatic state initially,
          `n_initial_symp` - number of nodes to be in symptomatic state initially,
          `n_initial_rec` - number of nodes to be in recovered state initially \n
-Location: seed_initial_states_fns.jl
+Location: seed\\_initial\\_states\\_fns.jl
 """
 function seed_states_with_uncertainty(rng::MersenneTwister,
                                     n_nodes::Int64,

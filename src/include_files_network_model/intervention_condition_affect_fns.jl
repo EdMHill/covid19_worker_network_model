@@ -6,7 +6,7 @@ Motivated by a wish to assess impact of sector closures
 =#
 
 """
-   condition_close_example(args)
+    condition_close_example(args)
 
 Example of triggered intervention condition function. Intervention is triggered when daily incidence
 exceeds 1% of the population.
@@ -15,7 +15,7 @@ Inputs: `intervention_trigger_input_data` - InterventionDataFeeds structure stor
          `time` - current time in simulation,
          `network_parameters` - Parameter structure for network variables \n
 Outputs: `output_bool` - boolean indicating if condition has been met or not \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function condition_close_example(intervention_trigger_input_data::intervention_data_feeds,
                                         time::Int64,
@@ -36,7 +36,7 @@ function condition_close_example(intervention_trigger_input_data::intervention_d
 end
 
 """
-   condition_open_example(args)
+    condition_open_example(args)
 
 Example of triggered intervention condition function. Intervention is triggered when daily incidence
 falls below 0.1% of the population.
@@ -45,7 +45,7 @@ Inputs: `intervention_trigger_input_data` - InterventionDataFeeds structure stor
          `time` - current time in simulation,
          `network_parameters` - Parameter structure for network variables \n
 Outputs: `output_bool` - boolean indicating if condition has been met or not \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function condition_open_example(intervention_trigger_input_data::intervention_data_feeds,
                                         time::Int64,
@@ -70,13 +70,13 @@ end
 
 
 """
-   affect_close_example(network_params::NetworkParameters)
+    affect_close_example(network_params::NetworkParameters)
 
 Example of triggered intervention affect function. When triggered, sectors 9 and 39 are closed.
 
 Inputs:  `network_params` - NetworkParameters structure \n
 Outputs: None \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function affect_close_example!(network_parameters::network_params)
 
@@ -115,13 +115,13 @@ function affect_close_example!(network_parameters::network_params)
 end
 
 """
-   affect_open_example(network_params::NetworkParameters)
+    affect_open_example(network_params::NetworkParameters)
 
 Example of triggered intervention affect function. When triggered, sectors 9 and 39 are opened.
 
 Inputs:  `network_params` - NetworkParameters structure \n
 Outputs: None \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function affect_open_example!(network_parameters::network_params)
 
@@ -160,13 +160,13 @@ function affect_open_example!(network_parameters::network_params)
 end
 
 """
-   affect_intervention!(args)
+    affect_intervention!(args)
 
 Implement changes to parameter structures according to given InterventionVariables structure, from current time until end.
 
 Changes are applied in two stages: i) parameters ('settings') are changed, then ii) relevant network components are regenerated if necessary.
 
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function affect_intervention!(intervention::intervention_struct,
                                  rng::MersenneTwister,
@@ -292,7 +292,7 @@ function affect_intervention!(intervention::intervention_struct,
 end
 
 """
-   redefine_covid_secure!(args)
+    redefine_covid_secure!(args)
 
 Apply COVID-secure flag to every workplace (true/false) and, if necessary, construct COVID-secure workplace contact network.
 
@@ -303,7 +303,7 @@ previously generated (same contacts are kept between replicates, but not configu
 Inputs:  `rng` - random number generator,
          `... parameter structures ...` \n
 Outputs: None \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function redefine_COVID_secure!(rng::MersenneTwister,
                                  cmax::Int64,
@@ -349,7 +349,7 @@ function redefine_COVID_secure!(rng::MersenneTwister,
 end
 
 """
-   redefine_returned_to_work!(args)
+    redefine_returned_to_work!(args)
 
 Redefine each node's returned to work status, according to new 'workpercent'.
 
@@ -358,7 +358,7 @@ the 'returned_to_work_hierarchy', which remains constant during a simulation, bu
 
 Inputs:  `... parameter structures ...` \n
 Outputs: None \n
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function redefine_returned_to_work!(rng::MersenneTwister,
                                     cmax::Int64,
@@ -418,11 +418,11 @@ function redefine_returned_to_work!(rng::MersenneTwister,
 end
 
 """
-   redefine_contact_tracing!(args)
+    redefine_contact_tracing!(args)
 
 Amend contact tracing variables
 
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function redefine_contact_tracing!(rng::MersenneTwister,
                                     cmax::Int64,
@@ -460,11 +460,11 @@ function redefine_contact_tracing!(rng::MersenneTwister,
 end
 
 """
-   redefine_transmission_risks!(args)
+    redefine_transmission_risks!(args)
 
 Amend infection_parameters variables
 
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function redefine_transmission_risks!(RNGseed::Int64,
                                        intervention::intervention_struct,
@@ -513,11 +513,11 @@ function redefine_transmission_risks!(RNGseed::Int64,
 end
 
 """
-   redefine_adherence!(args)
+    redefine_adherence!(args)
 
 Amend adherence variables
 
-Location: intervention_condition_affect_fns.jl
+Location: intervention\\_condition\\_affect\\_fns.jl
 """
 function redefine_adherence!(rng::MersenneTwister,
                               cmax::Int64,

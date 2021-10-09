@@ -15,7 +15,7 @@ Inputs: `rng` - random number generator,
         `worker_grp_idx` - current sector number,
         `workplace_generation_params` - WorkplaceGenerationParameters structure \n
 Outputs: `workplace_size` - size of one workplace \n
-Location: workplace_size_generation_fns.jl
+Location: workplace\\_size\\_generation\\_fns.jl
 """
 function workplace_size_sampled_from_empirical_pmf(rng::MersenneTwister,
                                                         worker_grp_idx::Int64,
@@ -60,7 +60,7 @@ Inputs: `rng` - random number generator,
         `worker_grp_idx` - current sector number,
         `workplace_generation_params` - WorkplaceGenerationParameters structure \n
 Outputs: `workplace_size` - size of one workplace \n
-Location: workplace_size_generation_fns.jl
+Location: workplace\\_size\\_generation\\_fns.jl
 """
 function workplace_size_gen_using_normal_dist(rng::MersenneTwister,
                                                     worker_grp_idx::Int64,

@@ -29,11 +29,11 @@ The following information is stored in NetworkParameters structure during this p
 
 Inputs: `... parameter structures ...`,
         `rng` - random number generator \n
-Outputs:`worker_nodes`,
+Outputs: `worker_nodes`,
         `workplace_sizes`,
         `workplace_info`,
         `nodes_by_workplace` \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_workplaces_and_allocate_workers(cmax::Int64,
                                             workplace_generation_parameters::workplace_generation_params,
@@ -159,7 +159,7 @@ Outputs:
 - `n_households`: Total number of households in the system
 - Outputs with _CS appended. Corresponds to contacts made when workplace is Covid-secure.
 
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_contacts(cmax::Int64,
                             endtime::Int64,
@@ -401,7 +401,7 @@ Inputs: `nodes_by_workplace` - array{array{array}} of node IDs grouped by sector
         `network_params` - NetworkParameters structure,
         `rng` - random number generator \n
 Outputs: None \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function CS_workplace_generation!(worker_nodes::Array{worker_params,1},
                                     nodes_by_workplace::Array{Array{Array{Int64,1},1},1},
@@ -477,7 +477,7 @@ Inputs: `external_contact_prob` - probability that contact is made outside of wo
         `network_params` - NetworkParameters structure,
         `rng` - random number generator \n
 Outputs: None \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function configuration_model!(worker_nodes::Array{worker_params,1},
                                 external_contact_prob::Float64,
@@ -605,7 +605,7 @@ Inputs: `n_nodes` - number of nodes in network,
         `max_contacts_social` - maximum number of social contactgs allowed per node,
         `rng` - random number generator \n
 Outputs: None \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function configuration_model!(external_contact_prob::Float64,
                                 degree_distribution::Distribution,
@@ -712,7 +712,7 @@ Inputs: `n_nodes` - number of nodes in network,
         `network_params` - NetworkParameters structure,
         `rng` - random number generator \n
 Outputs: None \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function configuration_model!(n_nodes::Int64,
                                 friend_of_friend_prob::Float64,
@@ -805,7 +805,7 @@ Inputs: `worker_nodes` - array of WorkerParameters structures containing worker 
         `work_contacts_other_workplace_per_node` - array of number of contacts with other workplace per node,
         `rng` - random number generator \n
 Outputs: None \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function ER_model!(worker_nodes, cmax, workplace_sizes,
                     dd_within_workplace, prob_workertype_contact, prob_anyworker_contact,
@@ -889,7 +889,7 @@ Inputs: `rng` - random number generator,
         `dynamic_work_dd` - desired degree distribution for each sector,
         `max_contacts_work_dynamic` - maximum number of dynamic work contacts allowed \n
 Outputs: `dynamic_worker_contacts` - 2D array{array} of contacted node IDs, for each day x each node \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_dynamic_worker_contacts(RNGseed::Int64,
                                             cmax::Int64,
@@ -957,7 +957,7 @@ Inputs: `contacts` - all contacts occurring for each node each day,
         `node_id1` - ID of current node,
         `fof` - array of node IDs of 'friends-of-friends' \n
 Outputs: `fof` - array of node IDs of 'friends-of-friends' \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function find_fof(contacts::Array{Array{Int64,1},1},social_contacts_of_node::Array{Int64,1},
     edges_remaining_per_node::Array{Float64,1},node_id1::Int64,fof::Array{Int64,1})
@@ -1016,7 +1016,7 @@ Inputs:
 Outputs:
 - `workday_social_contacts_by_day`, `nonworkday_social_contacts_by_day`: Per node, a record of social contacts made on each day
 
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                     RNGseed::Int64,
@@ -1238,7 +1238,7 @@ Inputs: `rng` - random number generator,
         `social_nonworkday_dd` - desired degree distribution of social contacts on non-workdays,
 Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
          `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
@@ -1624,7 +1624,7 @@ Inputs: `rng` - random number generator,
         `dynamic_time_frame` - number of days to repeat contacts for \n
 Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
          `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
@@ -1719,7 +1719,7 @@ Inputs: `rng` - random number generator,
         `dynamic_time_frame` - number of days to repeat contacts for \n
 Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
          `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
@@ -1823,7 +1823,7 @@ end
 
 Generates workplace contacts using erdos-renyi algorithm.
 
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_contacts_ER_within_workplace(cmax::Int64,endtime::Int64,network_parameters::network_params,RNGseed::Int64)
 
@@ -2128,7 +2128,7 @@ Inputs: `rng` - random number generator,
         `dynamic_conts_mean` - mean number of dynamic contacts per day,
         `dynamic_conts_sd` - SD of number of dynamic contacts per day \n
 Outputs: `dynamic_worker_contacts` - 2D array{array} of dynamic work contacts made per day per node \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_dynamic_worker_contacts(RNGseed::Int64,
                                             cmax::Int64,
@@ -2211,7 +2211,7 @@ Inputs: `rng` - random number generator,
         `n_social_mean_workday` - mean number of social contacts per non-workday \n
 Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
          `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
@@ -2305,7 +2305,7 @@ Inputs: `rng` - random number generator,
         `endtime` - length of simulation,
         `prob_random_contact` - fixed probability of each contact occurring \n
 Outputs: `random_contacts_by_day` - 2D array{array} of random contacts made per day per node \n
-Location: network_generation_fns.jl
+Location: network\\_generation\\_fns.jl
 """
 function generate_random_contacts(RNGseed::Int64,
                                     cmax::Int64,
