@@ -2,7 +2,31 @@
 # MAIN FUNCTION
 #-------------------------------------------------------------------------------
 
-# Run outbreak on network
+"""
+    worker_pattern_network_run(args)
+
+Generates a network for a single configuration and runs countfinal number of replicates of each intervention set.
+
+Inputs: `RNGseed` - Sets the random number generator,
+        `cmax`::Int64 - Number of nodes,
+        `ton`::Int64, `toff`::Int64 - Work pattern vars. Days on and days off, for sameday==3 ton weeks on followed by toff weeks off,
+        `infection_parameters`::infection_params - Parameter structure for infection params,
+        `sameday`::Int64 - Flag.  If sameday=0, all workers are at work on the same set of consecutive days. If sameday=1, workers go to work on a random set of consecutive days. If sameday=3, workers go to work on the same number of days, but scattered randomly throughout the week,
+        `seed_initial_states_fn`::Function - Sets amount of nodes to be seeded as latent/asymp/symp/recovered,
+        `countfinal`::Int64, `endtime`::Int64 - Simulation replicates & timesteps for each replicate,
+        `endtime`::Int64 - Number of timesteps each simulation replicate to be performed for,
+        `contact_tracing_active`::Bool - Set if contact tracing is active or not (Bool type variable),
+        `CT_parameters`::CT_params - Parameter structure for contact tracing params,
+        `network_parameters`::network_params - Parameter structure for network params,
+        `workplace_generation_parameters`::workplace_generation_params - Parameter structure for workplace generation params,
+        `workplace_closure_active`::Bool - Whether workplace closures are in operation or not,
+        `intervention_list_configs` - Specify use of any additional, trigger interventions,
+        `runset`::String - Name of the scenario being run. Used to bring interventions into effect for specified scenarios,
+        `assign_household_transrisk_fn` - Specify assignment of individuals to household groups with differing household transmission risk, \n
+For parameters within the parameter structures, see "include_files_network_model/parametertypes.jl" \n
+Outputs: `output` - SimulationOutputs structure \n
+Location: main_function.jl
+"""
 function worker_pattern_network_run(RNGseed::Int64,
                                         cmax::Int64,
                                         ton::Int64,
@@ -30,26 +54,6 @@ function worker_pattern_network_run(RNGseed::Int64,
                                         include_dd::Bool = false,
                                         include_dd_dynamic_work::Bool = false,
                                         include_dd_dynamic_social::Bool = false)
-
-# Inputs:
-# RNGseed - Sets the random number generator
-# cmax::Int64 - Number of nodes
-# ton::Int64, toff::Int64 - Work pattern vars. Days on and days off, for sameday==3 ton weeks on followed by toff weeks off
-# infection_parameters::infection_params - Parameter structure for infection params
-# sameday::Int64 - Flag.  If sameday=0, all workers are at work on the same set of consecutive days. If sameday=1, workers go to work on a random set of consecutive days. If sameday=3, workers go to work on the same number of days, but scattered randomly throughout the week.
-# seed_initial_states_fn::Function - Sets amount of nodes to be seeded as latent/asymp/symp/recovered.
-# countfinal::Int64, endtime::Int64 - % Simulation replicates & timesteps for each replicate
-# endtime::Int64 - Number of timesteps each simulation replicate to be performed for
-# contact_tracing_active::Bool - Set if contact tracing is active or not (Bool type variable)
-# CT_parameters::CT_params - Parameter structure for contact tracing params
-# network_parameters::network_params - Parameter structure for network params
-# workplace_generation_parameters::workplace_generation_params - Parameter structure for workplace generation params
-# workplace_closure_active::Bool - Whether workplace closures are in operation or not
-# intervention_list_configs - Specify use of any additional, trigger interventions
-# runset::String - Name of the scenario being run. Used to bring interventions into effect for specified scenarios.
-# assign_household_transrisk_fn - Specify assignment of individuals to household groups with differing household transmission risk
-
-# For parameters within the parameter structures, see "include_files_network_model/parametertypes.jl"
 
 ##  OUTLINE OF THE CODE STRUCTURE
 # - Unpack required variables

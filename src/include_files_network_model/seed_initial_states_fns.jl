@@ -16,7 +16,22 @@ Fns to get number of nodes to be seeded in each non-susceptible state
 # FUNCTIONS TO SELECT NODES TO BEGIN IN GIVEN NON-SUSCEPTIBLE STATE
 #-------------------------------------------------------------------------------
 
-# select from the entire population
+"""
+    choose_from_all_popn(args)
+
+Randomly chooses initial infection status of each node, according to specified number required in each compartment.
+
+Inputs: `rng` - random number generator,
+        `n_nodes` - number of nodes in the network,
+        `... parameter structures ...`,
+        `n_initial_latent` - number of nodes to be in latent state initially,
+        `n_initial_asymp` - number of nodes to be in asymptomatic state initially,
+        `n_initial_symp` - number of nodes to be in symptomatic state initially,
+        `n_initial_rec` - number of nodes to be in recovered state initially,
+        `initialise_start_disease_state_flag` - boolean flagging if individuals start at time 0 of each state (true) or if time spent in state is randomly sampled (false) \n
+Outputs: None \n
+Location: seed_initial_states_fns.jl
+"""
 function choose_from_all_popn(rng::MersenneTwister,
                                     n_nodes::Int64,
                                     states::node_states,
@@ -213,7 +228,21 @@ end
 # n_initial_latent, n_initial_asymp, n_initial_symp, n_initial_rec
 #   -  Numbers to be seeded in the named disease state
 
-# Set up with 9 asymps & 1 symp
+"""
+    set_ten_initial_infected(args)
+
+Initialises 1 symptomatic and 9 asymptomatic initially infected nodes.
+
+Inputs: `rng` - random number generator,
+        `n_nodes` - number of nodes in the network,
+        `... parameter structures ...`,
+        `recov_propn` - proportion of nodes to be in recovered state initially \n
+Outputs: `n_initial_latent` - number of nodes to be in latent state initially,
+         `n_initial_asymp` - number of nodes to be in asymptomatic state initially,
+         `n_initial_symp` - number of nodes to be in symptomatic state initially,
+         `n_initial_rec` - number of nodes to be in recovered state initially \n
+Location: seed_initial_states_fns.jl
+"""
 function set_ten_initial_infected(rng::MersenneTwister,
                                     n_nodes::Int64,
                                     states::node_states,
@@ -248,7 +277,21 @@ function set_ten_initial_infected(rng::MersenneTwister,
         n_initial_rec::Int64
 end
 
-# Example to generate counts from distributions
+"""
+    seed_states_with_uncertainty(args)
+
+Randomly initialises symptomatic vs asymptomatic infection status of 10 initially infected nodes according to a distribution.
+
+Inputs: `rng` - random number generator,
+        `n_nodes` - number of nodes in the network,
+        `... parameter structures ...`,
+        `recov_propn` - proportion of nodes to be in recovered state initially \n
+Outputs: `n_initial_latent` - number of nodes to be in latent state initially,
+         `n_initial_asymp` - number of nodes to be in asymptomatic state initially,
+         `n_initial_symp` - number of nodes to be in symptomatic state initially,
+         `n_initial_rec` - number of nodes to be in recovered state initially \n
+Location: seed_initial_states_fns.jl
+"""
 function seed_states_with_uncertainty(rng::MersenneTwister,
                                     n_nodes::Int64,
                                     states::node_states,

@@ -16,7 +16,25 @@ Functions to produce the network layers
 
 ## Functions to produce the initial network layers ##
 
-# Initialise vectors determining how many workers there are per node and which workplace each worker belongs to
+"""
+    generate_workplaces_and_allocate_workers!(args)
+
+Randomly generate workplace sizes and assign each node to a workplace.
+
+The following information is stored in NetworkParameters structure during this process:
+- `worker_nodes`: array of workplace_params structures containing info on each node
+- `workplace_sizes`: array{array} of workplace sizes, by sector and workplace number
+- `workplace_info`: array{array} of workplace_params structures, by sector and workplace number
+- `nodes_by_workplace`: array{array{array}} of node IDs, sorted into workplaces by sector and workplace number
+
+Inputs: `... parameter structures ...`,
+        `rng` - random number generator \n
+Outputs:`worker_nodes`,
+        `workplace_sizes`,
+        `workplace_info`,
+        `nodes_by_workplace` \n
+Location: network_generation_fns.jl
+"""
 function generate_workplaces_and_allocate_workers(cmax::Int64,
                                             workplace_generation_parameters::workplace_generation_params,
                                             RNGseed::Int64, rng::MersenneTwister, CS_active_flag::Bool)
@@ -117,7 +135,32 @@ function generate_workplaces_and_allocate_workers(cmax::Int64,
             nodes_by_workplace::Array{Array{Array{Int64,1},1},1}
 end
 
+"""
+    generate_contacts(args)
 
+Generate static contact networks for households, workplaces and social groups, according to configuration options and network parameters.
+
+Inputs:
+- `cmax`: Number of workers in the system
+- `endtime`: Number of timesteps per simulation
+- `network_parameters`: Network parameters structure
+- `worker nodes`: array containing worker info
+- `prob_workertype_contact`: probability of making contact with others in worktype (DIFFERENT WORKPLACE)
+- `prob_anyworker_contact`: probability of making contact with others in DIFFERENT WORKTYPE
+- `prob_social_contact`: probability of making a contact socially
+- `dd_within_workplace`: mean degree of workers within workplace
+- `household_size_distribution`: distribution of household sizes
+- `RNGseed`: Value to seed the random number generator
+
+Outputs:
+- `work_contacts_same_workplace`, `work_contacts_other_workplace`, `household_contacts`, `social_contacts`: Vector of vectors with IDs of contacts
+- `work_contacts_same_workplace_per_node`, `work_contacts_other_workplace_per_node`,
+      `household_contacts_per_node`, `social_contacts_per_node`: Total number of regular contacts within each setting
+- `n_households`: Total number of households in the system
+- Outputs with _CS appended. Corresponds to contacts made when workplace is Covid-secure.
+
+Location: network_generation_fns.jl
+"""
 function generate_contacts(cmax::Int64,
                             endtime::Int64,
                             network_parameters::network_params,
@@ -125,27 +168,6 @@ function generate_contacts(cmax::Int64,
                             nodes_by_workplace::Array{Array{Array{Int64,1},1},1},
                             RNGseed::Int64,
                             rng::MersenneTwister)
-
-    # Inputs:
-    # cmax - Number of workers in the system
-    # endtime - Number of timesteps per simulation
-    # network_parameters
-    #   worker nodes - array containing worker info
-    #   prob_workertype_contact - probability of making contact with others in worktype (DIFFERENT WORKPLACE)
-    #   prob_anyworker_contact - probability of making contact with others in DIFFERENT WORKTYPE
-    #   prob_social_contact - probability of making a contact socially
-    #   dd_within_workplace - mean degree of workers within workplace
-    #   household_size_distribution - distribution of household sizes
-    #   RNGseed:Int64 - Value to seed the random number generator
-
-# Outputs:
-    # work_contacts_same_workplace, work_contacts_other_workplace, household_contacts, social_contacts
-    #           - Vector of vectors with IDs of contacts
-    # work_contacts_same_workplace_per_node, work_contacts_other_workplace_per_node,
-    #       household_contacts_per_node, social_contacts_per_node - Total number of regular contacts within each setting
-    # n_households - Total number of households in the system
-    # Outputs with _CS appended. Corresponds to contacts made when workplace is Covid-secure.
-
 
     @unpack worker_nodes, workplace_sizes,prob_workertype_contact,prob_anyworker_contact,
         prob_social_contact,dd_within_workplace, household_size_distribution,
@@ -366,7 +388,21 @@ function generate_contacts(cmax::Int64,
 end
 
 
-#### Covid-secure workplace generation ####
+"""
+    CS_workplace_generation!(args)
+
+Generate workplace contact layer under COVID-secure restrictions.
+
+Workplaces are split into fully connected, mutually exclusive groups of specified size.
+
+Inputs: `nodes_by_workplace` - array{array{array}} of node IDs grouped by sector and workplace,
+        `work_contacts_same_workplace_CS` - array{array} of contact IDs per node,
+        `work_contacts_same_workplace_per_node_CS` - array of number of contacts per node,
+        `network_params` - NetworkParameters structure,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: network_generation_fns.jl
+"""
 function CS_workplace_generation!(worker_nodes::Array{worker_params,1},
                                     nodes_by_workplace::Array{Array{Array{Int64,1},1},1},
                                     work_contacts_same_workplace_CS::Array{Array{Int64,1},1},
@@ -421,7 +457,28 @@ end
 
 
 
-#### Workplace version ####
+"""
+    configuration_model!(args)
+
+Generate STATIC WORKPLACE contact layer using configuration model style algorithm.
+
+Contacts are generated according to a specified degree distribution, occurring within
+the same workplace or with another workplace (in the same sector) according to a specified probability.
+Repeat contacts and self-contacts are not allowed.
+
+Inputs: `external_contact_prob` - probability that contact is made outside of workplace,
+        `degree_distribution` - desired degree distribution of contacts,
+        `nodes_within_cluster` - array of node IDs belonging to cluster (e.g. workplace),
+        `nodes_outside_cluster` - array of node IDs not belonging to cluster, but able to make contacts, (e.g. other workplaces in sector),
+        `work_contacts_same_workplace` - array{array} of contact IDs within same workplace per node,
+        `work_contacts_other_workplace` - array{array} of contact IDs with other workplace per node,
+        `work_contacts_same_workplace_per_node` - array of number of contacts within same workplace per node,
+        `work_contacts_other_workplace_per_node` - array of number of contacts with other workplace per node,
+        `network_params` - NetworkParameters structure,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: network_generation_fns.jl
+"""
 function configuration_model!(worker_nodes::Array{worker_params,1},
                                 external_contact_prob::Float64,
                                 degree_distribution::Distribution,
@@ -531,7 +588,25 @@ function configuration_model!(worker_nodes::Array{worker_params,1},
 
 end
 
-#### Social version ####
+"""
+    configuration_model!(args)
+
+Generate STATIC SOCIAL contact layer NOT using "friends-of-friends" configuration model style algorithm.
+
+Contacts are generated according to a specified degree distribution, occurring with a 'friend-of-friend'
+or any other node according to a specified probability. Repeat contacts and self-contacts are not allowed.
+
+Inputs: `n_nodes` - number of nodes in network,
+        `degree_distribution` - desired degree distribution of contacts,
+        `nodes_within_cluster`,
+        `nodes_outside_cluster`,
+        `social_contacts` - array{array} of social contact IDs per node,
+        `social_contacts_per_node` - array of number of social contacts per node,
+        `max_contacts_social` - maximum number of social contactgs allowed per node,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: network_generation_fns.jl
+"""
 function configuration_model!(external_contact_prob::Float64,
                                 degree_distribution::Distribution,
                                 nodes_within_cluster::Array{Int64,1},
@@ -620,7 +695,25 @@ function configuration_model!(external_contact_prob::Float64,
 end
 
 
-#### Social version (friends-of-friends model) ####
+"""
+    configuration_model!(args)
+
+Generate STATIC SOCIAL contact layer using "friends-of-friends" configuration model style algorithm.
+
+Contacts are generated according to a specified degree distribution, occurring with a 'friend-of-friend'
+or any other node according to a specified probability. Repeat contacts and self-contacts are not allowed.
+
+Inputs: `n_nodes` - number of nodes in network,
+        `friend_of_friend_prob` - probability that contact is made with friend-of-friend,
+        `degree_distribution` - desired degree distribution of contacts,
+        `social_contacts` - array{array} of social contact IDs per node,
+        `social_contacts_per_node` - array of number of social contacts per node,
+        `max_contacts_social` - maximum number of social contactgs allowed per node,
+        `network_params` - NetworkParameters structure,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: network_generation_fns.jl
+"""
 function configuration_model!(n_nodes::Int64,
                                 friend_of_friend_prob::Float64,
                                 degree_distribution::Distribution,
@@ -691,7 +784,29 @@ function configuration_model!(n_nodes::Int64,
 
 end
 
+"""
+    ER_model!(args)
 
+Generate STATIC WORKPLACE contact layer using ER style algorithm.
+
+Contacts are generated according to a specified mean degree. Every unique contact pair is tested,
+and accepted with a probability defined by the specified mean degree. This can be different for
+contacts within the same workplace and different workplaces.
+
+Inputs: `worker_nodes` - array of WorkerParameters structures containing worker info,
+        `cmax` - number of nodes in network,
+        `workplace_sizes` - array{array} of workplace sizes, grouped by sector,
+        `dd_within_workplace` - desired mean degree within workplaces, per sector,
+        `prob_workertype_contact` - probability of contacts with different workplaces, same sector (per sector),
+        `prob_anyworker_contact` - probability of contacts with different workplaces, different sector (single value),
+        `work_contacts_same_workplace` - array{array} of contact IDs within same workplace per node,
+        `work_contacts_other_workplace` - array{array} of contact IDs with other workplace per node,
+        `work_contacts_same_workplace_per_node` - array of number of contacts within same workplace per node,
+        `work_contacts_other_workplace_per_node` - array of number of contacts with other workplace per node,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: network_generation_fns.jl
+"""
 function ER_model!(worker_nodes, cmax, workplace_sizes,
                     dd_within_workplace, prob_workertype_contact, prob_anyworker_contact,
                     work_contacts_same_workplace::Array{Array{Int64,1},1},
@@ -760,23 +875,28 @@ end
 
 
 
-# Premake dynamic worker contacts,
-# to be loaded in ahead of simulation
+"""
+    generate_dynamic_worker_contacts_configuration(args)
+
+Generates daily dynamic workplace contacts, from day 1 to endtime, according to specified sector-specific degree distributions and upper limit (default = 100).
+
+Contacts are generated by iterating through each node and generating a random number of contacts from the appropriate distribution. Contacts can be made with any other node, except oneself.
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `endtime` - length of simulation,
+        `worker_nodes` - array of WorkerParameters structures containing worker info,
+        `dynamic_work_dd` - desired degree distribution for each sector,
+        `max_contacts_work_dynamic` - maximum number of dynamic work contacts allowed \n
+Outputs: `dynamic_worker_contacts` - 2D array{array} of contacted node IDs, for each day x each node \n
+Location: network_generation_fns.jl
+"""
 function generate_dynamic_worker_contacts(RNGseed::Int64,
                                             cmax::Int64,
                                             endtime::Int64,
                                             worker_nodes::Array{worker_params,1},
                                             dynamic_work_dd::Array{Distribution,1},
                                             max_contacts_work_dynamic::Int64)
-# Inputs:
-# RNGseed - Seed the random number generator
-# cmax - Number of nodes in the system
-# endtime - Number of timesteps simulation will run for
-# worker nodes - array with entry per worker
-# dynamic_conts_mean, dynamic_conts_sd - Distribution properties for dynamic worker contacts
-
-# Outputs:
-# dynamic_worker_contacts - Per node, a record of dynamic worker contacts made on each day
 
     #---------------------------------------------------------------------------
     # SET THE RNG
@@ -826,6 +946,19 @@ function generate_dynamic_worker_contacts(RNGseed::Int64,
 
 end
 
+"""
+    find_fof(args)
+
+Find and return all contacts of a given node's contacts (e.g. 'friends-of-friends')
+
+Inputs: `contacts` - all contacts occurring for each node each day,
+        `social_contacts_of_node` - contacts of given node to find contacts of,
+        `edges_remaining_per_node` - edges remaining per node, according to desired degree distribution,
+        `node_id1` - ID of current node,
+        `fof` - array of node IDs of 'friends-of-friends' \n
+Outputs: `fof` - array of node IDs of 'friends-of-friends' \n
+Location: network_generation_fns.jl
+"""
 function find_fof(contacts::Array{Array{Int64,1},1},social_contacts_of_node::Array{Int64,1},
     edges_remaining_per_node::Array{Float64,1},node_id1::Int64,fof::Array{Int64,1})
 
@@ -863,9 +996,28 @@ function find_fof(contacts::Array{Array{Int64,1},1},social_contacts_of_node::Arr
 end
 
 
-# Premake daily social contacts,
-# to be loaded in ahead of simulation
-# CONFIGURATION MODEL VERSION
+"""
+    generate_social_contacts_each_day!(args)
+
+Calls appropriate function to generate daily, dynamic social contacts, from starttime to endtime, for both work and non-work days.
+
+Daily contacts are stored in the contact structure, under:
+- `workday_social_contacts_by_day`: 2D array{array} of node IDs, for daily workday contacts per day x node
+- `nonworkday_social_contacts_by_day`: 2D array{array} of node IDs, for daily non-workday contacts per day x node
+
+Inputs:
+- `RNGseed`: Seed the random number generator
+- `cmax`: Number of nodes in the system
+- `endtime`: Number of timesteps simulation will run for
+- `social_contacts`: array of arrays containing all possible social contacts for each individual
+- `social_contacts_per_node`: Total amount of social contacts each individual has (entry per individual)
+- `n_social_mean_workday`, `n_social_mean_nonworkday`: Distribution properties (mean value of Poisson) for social worker contacts
+
+Outputs:
+- `workday_social_contacts_by_day`, `nonworkday_social_contacts_by_day`: Per node, a record of social contacts made on each day
+
+Location: network_generation_fns.jl
+"""
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                     RNGseed::Int64,
                                             cmax::Int64,
@@ -875,17 +1027,6 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
                                             social_workday_dd::Distribution,
                                             social_nonworkday_dd::Distribution,
                                             cluster_social_contacts::Bool)
-# Inputs:
-# RNGseed - Seed the random number generator
-# cmax - Number of nodes in the system
-# endtime - Number of timesteps simulation will run for
-# social_contacts - array of arrays containing all possible social contacts for each individual
-# social_contacts_per_node - Total amount of social contacts each individual has (entry per individual)
-# n_social_mean_workday, n_social_mean_nonworkday - Distribution properties (mean value of Poisson) for social worker contacts
-
-# Outputs:
-# workday_social_contacts_by_day, nonworkday_social_contacts_by_day
-#       - Per node, a record of social contacts made on each day
 
     #---------------------------------------------------------------------------
     # SET THE RNG
@@ -1082,7 +1223,23 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
 end
 
-### Cluster version ###
+"""
+    generate_social_contacts_each_day(args)
+
+Generate daily, dynamic social contacts, from starttime to endtime, for both work and non-work days, according to specified degree distribution.
+
+For each day, randomly cluster friend groups into fully connected subgroups, with sizes drawn from specified degree distribution. Each node is a member of one subgroup per day.
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `endtime` - length of simulation,
+        `social_contacts` - array{array} of fixed social contacts per node,
+        `social_workday_dd` - desired degree distribution of social contacts on workdays,
+        `social_nonworkday_dd` - desired degree distribution of social contacts on non-workdays,
+Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
+         `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
+Location: network_generation_fns.jl
+"""
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
                                             cmax::Int64,
@@ -1451,7 +1608,24 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
 end
 
 
-#### Toy model for rule of 6 analysis
+"""
+    generate_social_contacts_each_day_groups(args)
+
+Generate daily, dynamic social contacts, from starttime to endtime, for both work and non-work days, according to specified group size.
+
+Each day, all nodes (no social group structure) are split into a random number of groups of fixed size. Days can be repeated.
+Used for rule of 6 analysis
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `endtime` - length of simulation,
+        `n_groups_per_day_distribution` - distribution of number of meeting groups per day,
+        `group_limit` - number of people in each group,
+        `dynamic_time_frame` - number of days to repeat contacts for \n
+Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
+         `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
+Location: network_generation_fns.jl
+"""
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
                                             cmax::Int64,
@@ -1459,17 +1633,6 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
                                             n_groups_per_day_distribution::Distribution,
                                             group_limit::Int64,
                                             dynamic_time_frame::Int64)
-# Inputs:
-# RNGseed - Seed the random number generator
-# cmax - Number of nodes in the system
-# endtime - Number of timesteps simulation will run for
-# social_contacts - array of arrays containing all possible social contacts for each individual
-# n_social_mean_workday, n_social_mean_nonworkday - Distribution properties (mean value of Poisson) for social worker contacts
-
-# Outputs:
-# workday_social_contacts_by_day, nonworkday_social_contacts_by_day
-#       - Per node, a record of social contacts made on each day
-
 
     #---------------------------------------------------------------------------
     # SET THE RNG
@@ -1539,7 +1702,25 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
 end
 
+"""
+    generate_social_contacts_each_day(args)
 
+Generate daily, dynamic social contacts, from starttime to endtime, for both work and non-work days, according to specified daily degree.
+
+Each day, all nodes (no social group structure) are split into groups according to a fixed group size and fixed number of daily contacts. Days can be repeated.
+Used for rule of 6 analysis
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `starttime` - time from which to generate daily social contacts,
+        `endtime` - length of simulation,
+        `contacts_per_day` - number of social contacts made per day,
+        `group_limit` - number of people in each group,
+        `dynamic_time_frame` - number of days to repeat contacts for \n
+Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
+         `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
+Location: network_generation_fns.jl
+"""
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
                                             cmax::Int64,
@@ -1636,6 +1817,14 @@ end
 # Social contacts can be made with anyone, but are NOT static - instead take a subset each day (can be a larger subset on weekends)
 # Household contacts are within a house and occur everyday
 # During '3 days off', workers are NOT working (i.e. more sociable)
+
+"""
+    generate_contacts_ER_within_workplace(args)
+
+Generates workplace contacts using erdos-renyi algorithm.
+
+Location: network_generation_fns.jl
+"""
 function generate_contacts_ER_within_workplace(cmax::Int64,endtime::Int64,network_parameters::network_params,RNGseed::Int64)
 
    # Inputs:
@@ -1925,8 +2114,22 @@ function generate_contacts_ER_within_workplace(cmax::Int64,endtime::Int64,networ
    end
 end
 
-# Premake dynamic worker contacts,
-# to be loaded in ahead of simulation
+"""
+    generate_dynamic_worker_contacts(args)
+
+Generates daily dynamic workplace contacts, from day 1 to endtime, according to sector-specific Normal distribution.
+
+Contacts are generated by iterating through each node and generating a random number of contacts from the appropriate distribution. Contacts can be made with any other node, except oneself.
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `endtime` - length of simulation,
+        `worker_nodes` - array of WorkerParameters structures containing worker info,
+        `dynamic_conts_mean` - mean number of dynamic contacts per day,
+        `dynamic_conts_sd` - SD of number of dynamic contacts per day \n
+Outputs: `dynamic_worker_contacts` - 2D array{array} of dynamic work contacts made per day per node \n
+Location: network_generation_fns.jl
+"""
 function generate_dynamic_worker_contacts(RNGseed::Int64,
                                             cmax::Int64,
                                             endtime::Int64,
@@ -1991,8 +2194,25 @@ function generate_dynamic_worker_contacts(RNGseed::Int64,
 
 end
 
-# Premake dynamic worker contacts,
-# to be loaded in ahead of simulation
+"""
+    generate_social_contacts_each_day_ER(args)
+
+Generate daily, dynamic social contacts, from starttime to endtime, for both work and non-work days, according to specified mean degree.
+
+For each node each day, a Poisson distributed number of contacts are generated from their friend group, with repetition.
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `starttime` - time from which to generate daily social contacts,
+        `endtime` - length of simulation,
+        `social_contacts` - array{array} of social contacts per node,
+        `social_contacts_per_node` - array of number of social contacts per node,
+        `n_social_mean_workday` - mean number of social contacts per workday,
+        `n_social_mean_workday` - mean number of social contacts per non-workday \n
+Outputs: `workday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (workday),
+         `nonworkday_social_contacts_by_day` - 2D array{array} of social contacts made per day per node (non-workday) \n
+Location: network_generation_fns.jl
+"""
 function generate_social_contacts_each_day(rng::MersenneTwister,
                                             RNGseed::Int64,
                                             cmax::Int64,
@@ -2075,7 +2295,18 @@ function generate_social_contacts_each_day(rng::MersenneTwister,
             nonworkday_social_contacts_by_day::Array{Array{Int64,1},2}
 end
 
+"""
+    generate_random_contacts(args)
 
+Generates daily random contacts, from day 1 to endtime, according to fixed probability of contact occurring between any two nodes (Erdos-Reyni).
+
+Inputs: `rng` - random number generator,
+        `cmax` - number of nodes in network,
+        `endtime` - length of simulation,
+        `prob_random_contact` - fixed probability of each contact occurring \n
+Outputs: `random_contacts_by_day` - 2D array{array} of random contacts made per day per node \n
+Location: network_generation_fns.jl
+"""
 function generate_random_contacts(RNGseed::Int64,
                                     cmax::Int64,
                                     endtime::Int64,

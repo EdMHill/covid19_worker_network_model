@@ -56,11 +56,22 @@ function lookup_homeday_workday_CT(worker_ID::Int64,
             workday_flag::Bool
 end
 
-#-------------------------------------------------------------------------------
-# GET PORTION OF DYNAMIC CONTACTS TO BE RECALLABLE
-#-------------------------------------------------------------------------------
+"""
+    recallable_dynamic_contacts(args)
 
-# In time d days before symptoms up to current day.
+For a single specified node, collect expected dynamic contacts for a specified day and check if they occurred and are recallable.
+
+Inputs: `worker_ID` - ID of node being contact traced,
+        `dynamic_contact_record` - IDs of dynamic contacts for all nodes on all days,
+        `dynamic_contacts_recalled_propn` - array defining proportion of contacts recalled x days ago,
+        `daily_record_inisol` - indicates isolation status of each node each day,
+        `daily_record_atworkplace` - indicates at workplace status of each node each day
+        `time_to_check` - time that contacts to be checked took place,
+        `prev_day_val` - number of days prior to current time that time_to_check is,
+        `rng` - random number generator \n
+Outputs: `recallable_contacts` - array of node IDs that have been recalled as contacts \n
+Location: contact_tracing_fns.jl
+"""
 function recallable_dynamic_contacts(worker_ID::Int64,
                                         dynamic_contact_record::Array{Array{Int64,1},2},
                                         dynamic_contacts_recalled_propn::Array{Float64,1},
@@ -70,18 +81,6 @@ function recallable_dynamic_contacts(worker_ID::Int64,
                                         prev_day_val::Int64,
                                         rng::MersenneTwister
                                         )
-# Inputs:
-# worker_ID
-# dynamic_contact_record - IDs of those dynamic contacts by each worker (column) at each timestep (row)
-# dynamic_contacts_recalled_propn::Array{Float64,1} - Set up recall of dynamic contacts probability (Proportion of contacts remembered x days ago)
-# daily_record_inisol - For each node, records per timestep whether in isolation
-# daily_record_atworkplace - For each node, records per timestep whether at workplace
-# time_to_check - Timestep of the simulation to be checked.
-# prev_day_val - Number of days previous to be looked at
-# rng - The random number generator in use
-
-# Outputs:
-# recallable_contacts - IDs of individuals (contacted by dynamic contact) to be retained
 
     # Get proportion of dynamic contacts from prev_day_val days ago to be retained
     if prev_day_val > length(dynamic_contacts_recalled_propn)
@@ -128,13 +127,23 @@ function recallable_dynamic_contacts(worker_ID::Int64,
     return recallable_contacts::Array{Int64,1}
 end
 
-#-------------------------------------------------------------------------------
-# CHECK CONTACTS MADE AT WORK
-#-------------------------------------------------------------------------------
+"""
+    get_worker_contacts(args)
 
-# In time d days before symptoms up to current day.
-# Go over list of usual workday contacts. Check if they actually occurred,
-# or if contact was absent due to isolation/other workplace closure.
+For a single specified node, go over usual workday contacts and check if they actually occurred on a given day.
+
+Inputs: `worker_ID` - ID of node being contact traced,
+        `possible_worker_contacts` - IDs of usual workplace contacts, to be checked,
+        `daily_record_inisol` - indicates isolation status of each node each day,
+        `daily_record_atworkplace` - indicates at workplace status of each node each day
+        `time_to_check` - time that contacts to be checked took place,
+        `prev_day_val` - number of days prior to current time that time_to_check is,
+        `rng` - random number generator,
+        `network_params` - NetworkParameters structure,
+        `other_workplace_flag` - boolean flagging if tracing contacts in same or different workplace \n
+Outputs: `workplace_contacts` - array of node IDs that have been confirmed as contacts \n
+Location: contact_tracing_fns.jl
+"""
 function get_worker_contacts(worker_ID::Int64,
                                 possible_worker_contacts::Array{Int64,1},
                                 daily_record_inisol::Array{Int64,2},
@@ -145,18 +154,6 @@ function get_worker_contacts(worker_ID::Int64,
                                 network_parameters::network_params;
                                 other_workplace_flag::Bool = false
                                 )
-# Inputs:
-# worker_ID
-# worker_contact_record - IDs of usual workplace contacts. Will check if actually occurred
-# daily_record_inisol - For each node, records per timestep whether in isolation
-# daily_record_atworkplace - For each node, records per timestep whether at workplace
-# time_to_check - Timestep of the simulation to be checked.
-# prev_day_val - Number of days previous to be looked at
-# rng - The random number generator in use
-
-# Outputs:
-# workplace_contacts - IDs of individuals to be retained for CT
-
 
     # Unpack parameters required
     if other_workplace_flag == true
@@ -213,9 +210,21 @@ function get_worker_contacts(worker_ID::Int64,
     return workplace_contacts::Array{Int64,1}
 end
 
-#-------------------------------------------------------------------------------
-# PERFORM FORWARD CT FROM AN IDENTIFIED INFECTOR
-#-------------------------------------------------------------------------------
+"""
+    forwardCT_from_infector!(args)
+
+Perform forward contact-tracing from an identified infector, if infector reports symptoms and engages with contact-tracing.
+
+Inputs: `infector_ID` - ID of infector of contact traced node,
+        `... parameter structures ...`,
+        `engage_with_CT` - array indicating whether each node engages with contact-tracing,
+        `atwork` - work schedule for each node,
+        `time` - current time in simulation,
+        `count` - number of current replicate,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: contact_tracing_fns.jl
+"""
 function forwardCT_from_infector!(infector_ID::Int64,
                                 CT_vars::contact_tracing_vars,
                                 contacts::contacts_struct,
@@ -224,7 +233,7 @@ function forwardCT_from_infector!(infector_ID::Int64,
                                 atwork::Array{Int64,2},
                                 time::Int64,
                                 count::Int64,
-                                 hh_isolation::Array{Int64,1},
+                                hh_isolation::Array{Int64,1},
                                 network_parameters::network_params,
                                 rng::MersenneTwister,
                                 infector_trace_count::Array{Int64,1})

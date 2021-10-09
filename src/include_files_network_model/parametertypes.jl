@@ -17,16 +17,27 @@ Parameter types to be used with the network model
 #-------------------------------------------------------------------------------
 =#
 
-# Workplace parameter type to have information on
-# the work sector, being covid secure, whether workplace is open etc
+"""
+   workplace_params()
+
+Structure assigned to each workplace, containing information on whether the workplace is open
+and if COVID-secure measures are in place or not.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct workplace_params
    covid_secure::Bool = false    # If true, workplace is covid secure. Can alter transmission risk & contacts
    workplace_open::Bool = true   # For imposing workplace closures, can set flag to false
 end
 
-# Worker parameter type to have information on return to work status,
-# the work sector, and workplace.
-# Can add other fields as required
+"""
+   worker_params()
+
+Structure allocated to each node, containing information on workplace and household membership,
+working-from-home vs returned-to-work status and transmission risk in each setting.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct worker_params
    returned_to_work::Int64                # Flag variable. If 1, worker returns to workplace as designated by atwork schedule.
    sector_ID::Int64                       # The worktype/sector the worker has been allocated to
@@ -39,6 +50,13 @@ end
    transrisk_random::Float64 = 0.
 end
 
+"""
+   CT_params()
+
+Structure containing parameters relating to contact tracing.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct CT_params
 # used for parameters relating to contact tracing
 
@@ -89,6 +107,13 @@ end
    time_WC::Int64 = 14 # how many days to close workplaces for
 end
 
+"""
+   contacts_struct()
+
+Structure containing storage objects for contact layers.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct contacts_struct
 # used for contact structures, that are also used outside of contact tracing
 
@@ -126,6 +151,14 @@ end
 
 end
 
+"""
+   contact_tracing_vars()
+
+Structure containing storage objects required for performing contact tracing.
+Objects have zero length unless contact tracing is activated.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct contact_tracing_vars
 # only needed for contact tracing
 
@@ -161,6 +194,13 @@ end
    CT_delay_until_test_result::Array{Int64,1} = zeros(Int64,cmax)
 end
 
+"""
+   infection_params()
+
+Structure containing parameters relating to the infection process.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct infection_params
 # used for parameters relating to the infection process
 # NOTE THAT MANY OF THESE ARE RESET IN THE CONFIGURATION
@@ -244,6 +284,13 @@ end
    recov_propn = 0.1
 end
 
+"""
+   network_params()
+
+Structure containing parameters required to generate the network.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct network_params
 # used for parameters relating to the network generation
 
@@ -338,6 +385,13 @@ end
 
 end
 
+"""
+   workplace_generation_params()
+
+Structure containing parameters required for workplace generation.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct workplace_generation_params
 # used for parameters relating to workplace generation
    workertypes::Int64 = 4
@@ -348,6 +402,13 @@ end
    workplace_size_gen_fn::Function = workplace_size_sampled_from_empirical_pmf
 end
 
+"""
+   sim_outputs()
+
+Structure containing storage objects for outputs to be saved from simulations.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct sim_outputs
 # used for outputs to be saved from the simulations
    endtime::Int64 = 0
@@ -394,6 +455,13 @@ end
    mean_init_generation_time::Array{Float64,2} = zeros(Float64,countfinal,n_intervention_sets) # mean initial generation time
 end
 
+"""
+   intervention_data_feeds()
+
+Structure keeping track of variables used to trigger an intervention (triggered interventions not yet complete)
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct intervention_data_feeds
    rep_inf_this_timestep::Array{Int64,1} = Array{Float64,1}[] #Indicator of whether a node reports symptomatic infection during current timestep
    numlat::Int64 = 0
@@ -402,6 +470,14 @@ end
    newinf::Int64 = 0
 end
 
+"""
+   node_states()
+
+Structure containing storage objects to track the status of each node, including working, adherence, isolation and infection status.
+These objects are reinitialised every replicate (or timestep where stated)
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct node_states
 # used for the status of each node
    cmax::Int64 = 0
@@ -424,6 +500,19 @@ end
    CT_isolation_array::Array{Int64,2} = zeros(Int64,cmax,endtime+1) # Isolation by contact tracing. Daily record for each student
 end
 
+"""
+   intervention_struct()
+
+Structure containing all variables that can be changed via intervention during a replicate.
+These changes are applied at 'start_time' for every replicate, then reverted at the end of each replicate,
+or at 'reset_time' if defined.
+Each variable name corresponds to a counterpart within other structures, with an extra leading dimension:
+e.g. an integer variable in the NetworkParameters structure will be represented here as an array{Int64,1}.
+This allows every variable to remain undefined. Only those variables that are defined here will be altered
+via intervention. For explanations of each variable, see the corresponding variable in relevant parameter structure.
+
+Location: parametertypes.jl
+"""
 @with_kw mutable struct intervention_struct
    effects::Array{String,1} = ["none"]
    start_time::Int64 = 0

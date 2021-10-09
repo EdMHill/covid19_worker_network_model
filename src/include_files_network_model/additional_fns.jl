@@ -27,6 +27,19 @@ Miscellaneous functions contained within this file include:
 #--------------------------------------------------------------------------
 =#
 
+"""
+    populate_atwork!(args)
+
+Randomly initialises 'atwork' status of nodes (stored in node_states structure) according to configuration options.
+
+Inputs: `atwork` - cmax x endtime array indicating work schedule of each node,
+        `sameday`,
+        `ton`,
+        `toff`,
+        `rng` - random number generator \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function populate_atwork!(atwork::Array{Int64,2},
                             sameday::Int64,
                             ton::Int64,
@@ -156,6 +169,15 @@ cmax,endtime = size(atwork)
     return nothing
 end
 
+"""
+    increment_counters!(states::NodeStates)
+
+Increase value of time in infection state variables, called each timestep.
+
+Inputs: `states` - node_states structure containing disease states of each node \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function increment_counters!(states::node_states)
 
 @unpack timelat, timeinf, timesymp = states
@@ -178,6 +200,14 @@ function increment_counters!(states::node_states)
     return nothing
 end
 
+"""
+    load_configs(runset::String,workertypes::Int64,cmax::Int64,
+                            RNGseed::Int64)
+
+Load configuration variables according to previously defined configuration. New configurations must define n_configs > 0.
+
+Location: additional_fns.jl
+"""
 function load_configs(runset::String,workertypes::Int64,cmax::Int64,
                         RNGseed::Int64
                         )
@@ -1248,6 +1278,17 @@ end
     dynamic_time_frame_config, group_limit_config, max_contacts_social_config   #### NEW CONFIGS ADDED HERE
 end
 
+"""
+    find_network_parameters(workertypes::Int64, workpercent::Array{Float64,1})
+
+Load default network parameters according to number of sectors and nodes required.
+
+Inputs: `workertypes` - number of sectors,
+        `workpercent` - proportion of each work sector that attends the workplace \n
+Outputs: `network_params` - network_params structure,
+         `workplace_generation_params` - WorkplaceGenerationParameters structure \n
+Location: additional_fns.jl
+"""
 function find_network_parameters(workertypes;workpercent::Array{Float64,1}=Array{Float64,1}[])
 
     if workertypes==2
@@ -1327,6 +1368,17 @@ function find_network_parameters(workertypes;workpercent::Array{Float64,1}=Array
     return network_parameters, workplace_generation_parameters
 end
 
+"""
+    find_fitted_contact_dds(context::String, workertypes::Int64)
+
+Load default static and dynamic workplace contact degree distributions, for each sector.
+Only works for 41 sectors (default).
+
+Inputs: `context` - context for contact degree distribution,
+        `workertypes` - number of sectors \n
+Outputs: `workplace_degree_distribution` or `workplace_dynamic_degree_distribution` - relevant degree distribution (array of distributions) \n
+Location: configuration_fns.jl
+"""
 function find_fitted_contact_dds(context::String, workertypes::Int64)
 
     if context == "workplace_fixed"
@@ -1363,6 +1415,33 @@ end
 # TRANSMISSION RELATED FUNCTIONS
 #--------------------------------------------------------------------------
 
+"""
+    transmit_over!(args)
+
+For a single node and specified contacts, check transmission potential and randomly transmit infection.
+
+Can be applied to all transmission settings apart from contacts from another workplace.
+
+Inputs: `transmission_risk` - relevant transmission probability for current node and context,
+        `timelat` - Time spent in latent state per node. If zero, then node is susceptible,
+        `infected_by`- Record of ID of infectors of each node,
+        `... parameter structures ...`,
+        `probasymp` - probability that new infections will be asymptomatic,
+        `rng` - random number generator,
+        `time` - current time in simulation,
+        `count` - number of current replicate,
+        `intervention_set_itr` - number of current intervention set,
+        `infecting_by` - ID of node that is infecting others,
+        `contacts_to_check` - array of node IDs that may be infected,
+        `dynamic_contact` - (optional) flag if contact is dynamic or not,
+        `inisol` - (optional) flag if nodes are in isolation,
+        `atwork` - (optional) flag if nodes are at work (according to work schedule),
+        `transmission_setting` - (optional) current transmission context (e.g. social),
+        `social_contact_scaling` - (optional) scaling on social contacts (contacts can be 'deactivated' to reduce number of contacts),
+        `random_contact_scaling` - (optional) scaling on random contacts (contacts can be 'deactivated' to reduce number of contacts) \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function transmit_over!(transmission_risk::Float64,
                     timelat::Array{Int64,1},
                     infected_by::Array{Int64,1},
@@ -1381,22 +1460,6 @@ function transmit_over!(transmission_risk::Float64,
                     transmission_setting::String = "undefined",
                     social_contact_scaling::Float64 = -1.,
                     random_contact_scaling::Float64 = -1.)
-    # Inputs:
-    # transmission_risk::Float64 - Probability of transmission given contact made
-    # timelat::Array{Int64,1} - Time spent in latent state per node. If zero, then node is susceptible.
-    # infected_by::Array{Int64,1} - Record of ID of infectors of each node
-    # output::sim_outputs - record of outputs from the simulations
-    # states::node_states - status of each node
-    # probasymp::Float64 - Asymptomatic probability
-    # rng::MersenneTwister - The random number generator
-    # time::Int64 - Current timestep
-    # count::Int64 - Replicate ID
-    # infecting_by::Int64 - Node ID of node transmitting infection
-    # contacts_to_check::Int64 - list of nodes IDs to receive infection
-    # dynamic_contact::Int64 - Flag for if this infection is over a dynamic contact link
-    # inisol::Array{Int64,2} - Flag if nodes are in isolation
-    # atwork::Array{Int64,2} - Flag if nodes are at work
-    # transmission_setting::String - Specify where potential tranmission event took place. Used to increment output.transmission_setting.
 
     for contact_itr = 1:length(contacts_to_check) # Iterate over each contact
         infecting_to = contacts_to_check[contact_itr]
@@ -1463,6 +1526,30 @@ function transmit_over!(transmission_risk::Float64,
     end
 end
 
+"""
+    transmit_over_other_workplace!(args)
+
+For a single node and specified contacts, check transmission potential and randomly transmit infection.
+
+Only applied to transmission between contacts from another workplace.
+
+Inputs: `transmission_risk` - relevant transmission probability for current node and context,
+        `infected_by` - Record of ID of infectors of each node,
+        `output`- record of outputs from the simulations,
+        `states` - status of each node,
+        `probasymp` - probability that new infections will be asymptomatic,
+        `rng` - random number generator,
+        `time` - current time in simulation,
+        `count` - number of current replicate,
+        `intervention_set_itr` - number of current intervention set,
+        `infecting_by` - ID of node that is infecting others,
+        `contacts_to_check` - array of node IDs that may be infected,
+        `inisol` - flag if nodes are in isolation,
+        `atwork` - flag if nodes are at work (according to work schedule),
+        `network_parameters` - Quantities to construct the contacts & stores the node properties \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function transmit_over_other_workplace!(transmission_risk::Float64,
                                             infected_by::Array{Int64,1},
                                             output::sim_outputs,
@@ -1477,20 +1564,6 @@ function transmit_over_other_workplace!(transmission_risk::Float64,
                                             inisol::Array{Int64,2},
                                             atwork::Array{Int64,2},
                                             network_parameters::network_params)
-    # Inputs:
-    # transmission_risk::Float64 - Probability of transmission given contact made
-    # infected_by::Array{Int64,1} - Record of ID of infectors of each node
-    # output::sim_outputs - record of outputs from the simulations
-    # states::node_states - status of each node
-    # probasymp::Float64 - Asymptomatic probability
-    # rng::MersenneTwister - The random number generator
-    # time::Int64 - Current timestep
-    # count::Int64 - Replicate ID
-    # infecting_by::Int64 - Node ID of node transmitting infection
-    # contacts_to_check::Int64 - list of nodes IDs to receive infection
-    # inisol::Array{Int64,2} - Flag if nodes are in isolation
-    # atwork::Array{Int64,2} - Flag if nodes are at work
-    # network_parameters::network_params - Quantities to construct the contacts & stores the node properties
 
     for contact_itr = 1:length(contacts_to_check) # Iterate over each contact
         infecting_to = contacts_to_check[contact_itr]
@@ -1548,16 +1621,25 @@ end
 # Functions to set up transmission rates within household,
 # workplace and socially for each individual
 #-------------------------------------------------------------------------------
+"""
+    assign_household_transmit_onegroup!(args)
+
+Allocate transmission risk within household setting for each node, based on single specified normal distribution.
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
+
+Inputs: `RNGseed` - random number generator seed,
+        `... parameter structures ...`,
+        `household_contacts_per_node` - number of household contacts per node,
+        `transrisk_household_group_mean` - mean probability of transmission within household (length must be 1),
+        `transrisk_household_group_sd` - SD of probability of transmission within household (length must be 1) \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_household_transmit_onegroup!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     household_contacts_per_node::Array{Int64,1},
                                     transrisk_household_group_mean::Array{Float64,1},
                                     transrisk_household_group_sd::Array{Float64,1})
-# Inputs:
-# RNGseed::Int64 - Set the number to seed the random number generator
-# network_parameters::network_params - Quantities to construct the contacts & stores the node properties
-# household_contacts_per_node::Array{Int64,1} - As described
-# transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
 
     # Unpack parameters
     @unpack n_nodes, worker_nodes = network_parameters
@@ -1592,17 +1674,27 @@ function assign_household_transmit_onegroup!(RNGseed::Int64,
     return nothing
 end
 
-# Household risk based on household size
+"""
+    assign_household_transmit_household_size!(args)
+
+Allocate transmission risk within household setting for each node, based on specified normal distributions for different household sizes.
+
+Must specify 4 sets of mean/SD, for households of size 2, 3, 4 and 5+. Households of size 1 have no transmission risk.
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
+
+Inputs: `RNGseed` - random number generator seed,
+        `... parameter structures ...`,
+        `household_contacts_per_node` - number of household contacts per node,
+        `transrisk_household_group_mean` - mean probability of transmission within household, depending on household size,
+        `transrisk_household_group_sd` - SD of probability of transmission within household, depending on household size \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_household_transmit_household_size!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     household_contacts_per_node::Array{Int64,1},
                                     transrisk_household_group_mean::Array{Float64,1},
                                     transrisk_household_group_sd::Array{Float64,1})
-# Inputs:
-# RNGseed::Int64 - Set the number to seed the random number generator
-# network_parameters::network_params - Quantities to construct the contacts & stores the node properties
-# household_contacts_per_node::Array{Int64,1} - As described
-# transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
 
     # Unpack parameters
     @unpack n_nodes, worker_nodes = network_parameters
@@ -1653,64 +1745,74 @@ function assign_household_transmit_household_size!(RNGseed::Int64,
     return nothing
 end
 
-function assign_household_transmit_multigrouptest!(RNGseed::Int64,
-                                    network_parameters::network_params,
-                                    household_contacts_per_node::Array{Int64,1},
-                                    transrisk_household_group_mean::Array{Float64,1},
-                                    transrisk_household_group_sd::Array{Float64,1})
-# Inputs:
-# RNGseed::Int64 - Set the number to seed the random number generator
-# network_parameters::network_params - Quantities to construct the contacts & stores the node properties
-# household_contacts_per_node::Array{Int64,1} - As described
-# transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
+# function assign_household_transmit_multigrouptest!(RNGseed::Int64,
+#                                     network_parameters::network_params,
+#                                     household_contacts_per_node::Array{Int64,1},
+#                                     transrisk_household_group_mean::Array{Float64,1},
+#                                     transrisk_household_group_sd::Array{Float64,1})
+# # Inputs:
+# # RNGseed::Int64 - Set the number to seed the random number generator
+# # network_parameters::network_params - Quantities to construct the contacts & stores the node properties
+# # household_contacts_per_node::Array{Int64,1} - As described
+# # transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
+#
+#     # Unpack parameters
+#     @unpack n_nodes, worker_nodes = network_parameters
+#
+#     # Set the random number generator
+#     rng = MersenneTwister(RNGseed)
+#
+#     # Get number of household groups in use
+#     n_transrisk_household_group = length(transrisk_household_group)
+#
+#     # Throw error if more than one group
+#     if (n_transrisk_household_group_mean != 1)
+#         error("Should only be a single household group SAR mean estimate, but have found there to be $(n_transrisk_household_group_mean). Please rectify.")
+#     end
+#
+#     # Throw error if more than one group
+#     if (n_transrisk_household_group_sd != 1)
+#         error("Should only be a single household group SAR standard deviation, but have found there to be $(n_transrisk_household_group_sd). Please rectify.")
+#     end
+#
+#
+#     # Construct normal distribution to sample from
+#     norm_dists = Normal.(transrisk_household_group_mean,transrisk_household_group_sd)
+#
+#     # Iterate over each individual
+#     for node_itr = 1:n_nodes
+#         if household_contacts_per_node[node_itr] == 0
+#             worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[1])
+#         elseif household_contacts_per_node[node_itr] == 1
+#             worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[2])
+#         else
+#             worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[3])
+#         end
+#     end
+#
+#     return nothing
+# end
 
-    # Unpack parameters
-    @unpack n_nodes, worker_nodes = network_parameters
+"""
+    assign_workplace_static_transmit!(args)
 
-    # Set the random number generator
-    rng = MersenneTwister(RNGseed)
+Allocate transmission risk within static work setting for each node, based on specified normal distributions for different work sectors.
 
-    # Get number of household groups in use
-    n_transrisk_household_group = length(transrisk_household_group)
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
 
-    # Throw error if more than one group
-    if (n_transrisk_household_group_mean != 1)
-        error("Should only be a single household group SAR mean estimate, but have found there to be $(n_transrisk_household_group_mean). Please rectify.")
-    end
-
-    # Throw error if more than one group
-    if (n_transrisk_household_group_sd != 1)
-        error("Should only be a single household group SAR standard deviation, but have found there to be $(n_transrisk_household_group_sd). Please rectify.")
-    end
-
-
-    # Construct normal distribution to sample from
-    norm_dists = Normal.(transrisk_household_group_mean,transrisk_household_group_sd)
-
-    # Iterate over each individual
-    for node_itr = 1:n_nodes
-        if household_contacts_per_node[node_itr] == 0
-            worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[1])
-        elseif household_contacts_per_node[node_itr] == 1
-            worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[2])
-        else
-            worker_nodes[node_itr].transrisk_household = rand(rng,norm_dists[3])
-        end
-    end
-
-    return nothing
-end
-
+Inputs: `RNGseed` - random number generator seed,
+        `network_parameters` - Quantities to construct the contacts & stores the node properties,
+        `workertypes` - Number of worker types,
+        `transrisk_static_work_mean` - mean probability of transmission at workplace (static), depending on sector,
+        `transrisk_static_work_sd` - SD of probability of transmission at workplace (static), depending on sector \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_workplace_static_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     workertypes::Int64,
                                     transrisk_static_work_mean::Array{Float64,1},
                                     transrisk_static_work_sd::Array{Float64,1})
-# Inputs:
-# RNGseed::Int64 - Set the number to seed the random number generator
-# network_parameters::network_params - Quantities to construct the contacts & stores the node properties
-# household_contacts_per_node::Array{Int64,1} - As described
-# transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
 
     # Unpack parameters
     @unpack n_nodes, worker_nodes = network_parameters
@@ -1740,6 +1842,21 @@ function assign_workplace_static_transmit!(RNGseed::Int64,
     return nothing
 end
 
+"""
+    assign_workplace_dynamic_transmit!(args)
+
+Allocate transmission risk within dynamic work setting for each node, based on specified normal distributions for different work sectors.
+
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
+
+Inputs: `RNGseed` - random number generator seed,
+        `network_parameters` - Quantities to construct the contacts & stores the node properties,
+        `workertypes` - Number of worker types,
+        `transrisk_dynamic_work_mean` - mean probability of transmission at workplace (dynamic), depending on sector,
+        `transrisk_dynamic_work_sd` - SD of probability of transmission at workplace (dynamic), depending on sector \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_workplace_dynamic_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     workertypes::Int64,
@@ -1779,16 +1896,24 @@ function assign_workplace_dynamic_transmit!(RNGseed::Int64,
     return nothing
 end
 
+"""
+    assign_social_transmit!(args)
 
+Allocate transmission risk within social setting for each node, based on single specified normal distribution.
+
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
+
+Inputs: `RNGseed` - random number generator seed,
+        `network_parameters` - Quantities to construct the contacts & stores the node properties,
+        `transrisk_social_mean` - mean probability of social transmission,
+        `transrisk_social_sd` - SD of probability of social transmission \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_social_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     transrisk_social_mean::Float64,
                                     transrisk_social_sd::Float64)
-# Inputs:
-# RNGseed::Int64 - Set the number to seed the random number generator
-# network_parameters::network_params - Quantities to construct the contacts & stores the node properties
-# household_contacts_per_node::Array{Int64,1} - As described
-# transrisk_household_group_mean/sd::Array{Float64,1} -  probability of transmission within a household, can differ per household group
 
     # Unpack parameters
     @unpack n_nodes, worker_nodes = network_parameters
@@ -1804,6 +1929,20 @@ function assign_social_transmit!(RNGseed::Int64,
     return nothing
 end
 
+"""
+    assign_random_transmit!(args)
+
+Allocate transmission risk within random setting for each node, based on single specified normal distribution.
+
+Transmission risks are stored in 'worker_nodes' objects, within network_params structure.
+
+Inputs: `RNGseed` - random number generator seed,
+        `network_parameters` - Quantities to construct the contacts & stores the node properties,
+        `transrisk_random_mean` - mean probability of random transmission,
+        `transrisk_random_sd` - SD of probability of random transmission \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function assign_random_transmit!(RNGseed::Int64,
                                     network_parameters::network_params,
                                     transrisk_random_mean::Float64,
@@ -1834,7 +1973,15 @@ end
 # Functions to reinitialise states at start of each run
 #-------------------------------------------------------------------------------
 
-# Node states, household inf delay & CT vars
+"""
+    reinitialise_node_states!(args)
+
+Initialises objects in node_states structure ready for replicate.
+
+Inputs: `... parameter structures ...` \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function reinitialise_node_states!(states::node_states)
     lmul!(0,states.timelat)
     lmul!(0,states.timeinf)
@@ -1849,11 +1996,30 @@ function reinitialise_node_states!(states::node_states)
     lmul!(0,states.CT_isolation_array)
 end
 
+"""
+    reinitialise_daily_record_arrays!(args)
+
+Reinitialise daily_record_atworkplace and daily_record_inisol.
+
+Inputs: `contacts` - contacts_struct structure \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function reinitialise_daily_record_arrays!(contacts::contacts_struct)
     lmul!(0,contacts.daily_record_atworkplace)
     lmul!(0,contacts.daily_record_inisol)
 end
 
+"""
+    reinitialise_workplace_params!(args)
+
+Reinitialise workplace open and COVID-secure flags to configuration defaults.
+Only called if workplace parameters have been changed via intervention.
+
+Inputs: `workplace_info` - array{array} of workplace_params structures \n
+Outputs: None \n
+Location: additional_fns.jl
+"""
 function reinitialise_workplace_params!(workplace_info::Array{Array{workplace_params,1},1})
 
     # Get number of sectors in use
@@ -1873,6 +2039,13 @@ function reinitialise_workplace_params!(workplace_info::Array{Array{workplace_pa
     return nothing
 end
 
+"""
+    reinitialise_CT_vars!(args)
+
+Reinitialise contact tracing variables
+
+Location: additional_fns.jl
+"""
 function reinitialise_CT_vars!(CT_vars::contact_tracing_vars,cmax::Int64, rng::MersenneTwister,
     CT_parameters::CT_params, delay_adherence::Array{Int64,1},
     csum_test_result_delay::Array{Float64,1},max_test_result_delay::Int64)
@@ -1928,14 +2101,21 @@ end
 # Misc. fns
 #-------------------------------------------------------------------------------
 
+"""
+    draw_sample_from_pmf(args)
+
+Randomly draw sample from specified discrete probability distribution.
+Used to randomly set infection, adherence and testing waiting times.
+
+Inputs: `csum_pmf` - specified discrete CDF to sample from,
+        `rng` - random number generator,
+        `idx_offset` - links bin index to desired quantity value \n
+Outputs: `val_to_update` - sampled quantity value \n
+Location: additional_fns.jl
+"""
 function draw_sample_from_pmf(csum_pmf::Array{Float64,1},
                                 rng::MersenneTwister;
                                 idx_offset::Int64 = 0)
-# Inputs:
-# val_to_update::Int64 - Entry sampled value will be assigned to
-# csum_pmf::Array{Float64,1} - Cumulative summed probability mass function. Used to draw value from.
-# rng::MersenneTwister - The random number generator
-# idx_offset::Int64 = 0 - Links bin index to the quantity value
 
     # Get number of elements in the pmf
     n_bins = length(csum_pmf)
@@ -1971,6 +2151,14 @@ function draw_sample_from_pmf(csum_pmf::Array{Float64,1},
     return val_to_update::Int64
 end
 
+"""
+    set_infection_related_times!(args)
+
+Randomly initialise infection related values for each node
+(time to symptoms, length of latent period, delay to adherence, adhere yes/no)
+
+Location: additional_fns.jl
+"""
 function set_infection_related_times!(time_to_symps::Array{Int64,1},states::node_states,
     isolation::Int64,adherence::Float64,csum_delay_adherence::Array{Float64,1},
     d_incub::Distribution,cmax::Int64,rng::MersenneTwister)

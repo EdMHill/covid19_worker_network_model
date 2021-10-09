@@ -6,15 +6,20 @@ Functions to generate workplace sizes for the target number of work sectors
 #-------------------------------------------------------------------------------
 =#
 
+"""
+    workplace_size_sampled_from_empirical_pmf(args)
+
+Generate single workplace size according to a discrete CDF that is loaded in.
+
+Inputs: `rng` - random number generator,
+        `worker_grp_idx` - current sector number,
+        `workplace_generation_params` - WorkplaceGenerationParameters structure \n
+Outputs: `workplace_size` - size of one workplace \n
+Location: workplace_size_generation_fns.jl
+"""
 function workplace_size_sampled_from_empirical_pmf(rng::MersenneTwister,
                                                         worker_grp_idx::Int64,
                                                         workplace_generation_parameters::workplace_generation_params)
-# Inputs
-# rng::MersenneTwister - Random number generator
-# workertypes::Int64 - The number of work types/work sectors in use
-# worker_grp_idx::Int64 - Identifies the work sector to generate the workplace size for
-
-# Output: workplace_size::Int64 - As named
 
     # Get data from spreadsheet/load from parameter type
     work_size_cdf_array = readdlm("../Data/work_sector_proportions_by_size.csv")
@@ -46,16 +51,20 @@ function workplace_size_sampled_from_empirical_pmf(rng::MersenneTwister,
     return workplace_size::Int64
 end
 
+"""
+    workplace_size_sampled_from_empirical_pmf(args)
 
+Generate single workplace size according to a normal distribution with specified mean and SD.
+
+Inputs: `rng` - random number generator,
+        `worker_grp_idx` - current sector number,
+        `workplace_generation_params` - WorkplaceGenerationParameters structure \n
+Outputs: `workplace_size` - size of one workplace \n
+Location: workplace_size_generation_fns.jl
+"""
 function workplace_size_gen_using_normal_dist(rng::MersenneTwister,
                                                     worker_grp_idx::Int64,
                                                     workplace_generation_parameters::workplace_generation_params)
-# Inputs
-# rng::MersenneTwister - Random number generator
-# workertypes::Int64 - The number of work types/work sectors in use
-# worker_grp_idx::Int64 - Identifies the work sector to generate the workplace size for
-
-# Output: workplace_size::Int64 - As named
 
     @unpack workplace_size_mean, workplace_size_sd = workplace_generation_parameters
     workplace_size = ceil(Int64,abs(randn(rng)*workplace_size_sd[worker_grp_idx]+workplace_size_mean[worker_grp_idx]))
